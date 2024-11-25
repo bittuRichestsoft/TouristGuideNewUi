@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "252090393159",
+    "project_id": "siestaglobal-68814",
+    "storage_bucket": "siestaglobal-68814.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:252090393159:android:721b5241dd8bb2427d4762",
+        "android_client_info": {
+          "package_name": "com.app.siesta"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUGZqrN3QWR7iyEIsKjzTfj7PDdmvOphs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:252090393159:android:b712861862d780f37d4762",
+        "android_client_info": {
+          "package_name": "com.app.siestaglobal"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAUGZqrN3QWR7iyEIsKjzTfj7PDdmvOphs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
