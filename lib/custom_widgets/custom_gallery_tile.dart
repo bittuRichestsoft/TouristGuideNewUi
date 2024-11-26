@@ -32,7 +32,8 @@ class _CustomGeneralTileState extends State<CustomGeneralTile> {
 
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(context, AppRoutes.generalDetailPage);
+        Navigator.pushNamed(context, AppRoutes.generalDetailPage,
+            arguments: {"tileType": widget.tileType ?? ""});
       },
       child: Container(
         decoration: BoxDecoration(

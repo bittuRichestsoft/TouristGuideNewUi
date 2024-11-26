@@ -90,6 +90,9 @@ class SvgImages {
   String icPreviewProfile = "assets/svgFiles/icPreviewProfile.svg";
   String icEditProfile = "assets/svgFiles/icEditProfile.svg";
   String icShare = "assets/svgFiles/icShare.svg";
+  String icUploadImage = "assets/svgFiles/icUploadImage.svg";
+  String icCar = "assets/svgFiles/icCar.svg";
+  String icFilter = "assets/svgFiles/icFilter.svg";
 
   //////////
 }

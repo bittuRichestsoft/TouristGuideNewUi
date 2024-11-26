@@ -1,3 +1,4 @@
+import 'package:Siesta/app_constants/app_routes.dart';
 import 'package:Siesta/app_constants/app_strings.dart';
 import 'package:Siesta/custom_widgets/custom_experience_tile.dart';
 import 'package:Siesta/custom_widgets/custom_gallery_tile.dart';
@@ -173,7 +174,10 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
           context: context,
           text: "Create Experience",
           iconPath: AppImages().svgImages.icAdd,
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, AppRoutes.createGeneralPage,
+                arguments: {"type": "experience"});
+          },
         ),
         UiSpacer.verticalSpace(context: context, space: 0.01),
 
@@ -182,7 +186,10 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
           context: context,
           text: "Create General",
           iconPath: AppImages().svgImages.icAdd,
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, AppRoutes.createGeneralPage,
+                arguments: {"type": "general"});
+          },
         ),
         UiSpacer.verticalSpace(context: context, space: 0.01),
 
@@ -191,7 +198,10 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
           context: context,
           text: "Create Gallery",
           iconPath: AppImages().svgImages.icAdd,
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, AppRoutes.createGeneralPage,
+                arguments: {"type": "gallery"});
+          },
         ),
         UiSpacer.verticalSpace(context: context, space: 0.01),
 

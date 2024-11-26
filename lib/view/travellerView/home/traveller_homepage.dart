@@ -6,11 +6,12 @@ import 'package:Siesta/app_constants/app_strings.dart';
 import 'package:Siesta/common_widgets/common_textview.dart';
 import 'package:Siesta/view/notification_screen/notification_page.dart';
 import 'package:Siesta/view/travellerView/bookings/booking_page.dart';
-import 'package:Siesta/view/travellerView/find_guide/find_guide_page.dart';
 import 'package:Siesta/view/travellerView/home/drawer_page.dart';
 import 'package:Siesta/view/travellerView/message_screen/message_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
+import '../find_guide/find_guide_screen_new.dart';
 import '../itinerary/itineary_page.dart';
 
 // ignore: must_be_immutable
@@ -32,7 +33,8 @@ class TravellerHomePage extends StatefulWidget {
 
 String fromWhere = "";
 List<Widget> _widgetOptions = <Widget>[
-  const FindGuidePage(),
+  // const FindGuidePage(),
+  const FindGuideScreenNew(),
   const BookingPage(),
   MessagePage(fromWhere: fromWhere),
   ItineraryPage(fromWhere: ""),
@@ -41,7 +43,8 @@ setWidgetOptions() {
   if (fromWhere == "chat_with_guide") {
     _widgetOptions.clear();
     _widgetOptions = [
-      const FindGuidePage(),
+      // const FindGuidePage(),
+      const FindGuideScreenNew(),
       const BookingPage(),
       MessagePage(fromWhere: fromWhere),
       ItineraryPage(fromWhere: ""),
@@ -49,7 +52,8 @@ setWidgetOptions() {
   } else {
     _widgetOptions.clear();
     _widgetOptions = [
-      const FindGuidePage(),
+      // const FindGuidePage(),
+      const FindGuideScreenNew(),
       const BookingPage(),
       MessagePage(fromWhere: ""),
       ItineraryPage(fromWhere: ""),
@@ -69,7 +73,7 @@ class _TravellerHomePageState extends State<TravellerHomePage> {
     setState(() {
       selectedTab = widget.tabIndex;
       if (selectedTab == 0) {
-        titleText = AppStrings().home;
+        titleText = AppStrings().findExperience;
       } else if (selectedTab == 1) {
         titleText = AppStrings().mybookings;
       } else if (selectedTab == 2) {
@@ -165,7 +169,8 @@ class _TravellerHomePageState extends State<TravellerHomePage> {
             height: screenWidth * AppSizes().widgetSize.bottomBarIconHeight,
             fit: BoxFit.fill,
           ),
-          label: AppStrings().findGuide,
+          // label: AppStrings().findGuide,
+          label: AppStrings().findExperience,
         ),
         BottomNavigationBarItem(
           icon: Image.asset(

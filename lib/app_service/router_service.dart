@@ -10,14 +10,16 @@ import 'package:Siesta/view/touristGuideView/guide_transaction_history/guidetran
 import 'package:Siesta/view/touristGuideView/guide_transaction_history/withdraw_request_screen.dart';
 import 'package:Siesta/view/touristGuideView/home/guide_home_page.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/banking_detail.dart';
+import 'package:Siesta/view/touristGuideView/tourist_profile_view/create_general_page.dart';
+import 'package:Siesta/view/touristGuideView/tourist_profile_view/experience_detail_page.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/gallery_page.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/general_detail_page.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/review_page.dart';
 import 'package:Siesta/view/travellerView/about_us/about_us_page.dart';
 import 'package:Siesta/view/travellerView/bookTrip/book_your_trip_page.dart';
 import 'package:Siesta/view/travellerView/create_profile/create_traveller_profile.dart';
+import 'package:Siesta/view/travellerView/find_guide/find_guide_screen_new.dart';
 import 'package:Siesta/view/travellerView/find_guide/guide_detail_page.dart';
-import 'package:Siesta/view/travellerView/find_tourist_guide/find_tourist_guide_screen.dart';
 import 'package:Siesta/view/travellerView/home/traveller_homepage.dart';
 import 'package:Siesta/view/travellerView/itinerary/itinerary_detail_page.dart';
 import 'package:Siesta/view/travellerView/message_screen/message_chat_page.dart';
@@ -168,11 +170,22 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => CommonWebViewPage(from: settings.arguments));
 
-    case AppRoutes.findTouristGuide:
-      return MaterialPageRoute(builder: (context) => FindTouristGuideScreen());
+    case AppRoutes.findGuideScreenNew:
+      return MaterialPageRoute(builder: (context) => FindGuideScreenNew());
+
+    case AppRoutes.experienceDetailPage:
+      return MaterialPageRoute(builder: (context) => ExperienceDetailPage());
 
     case AppRoutes.generalDetailPage:
-      return MaterialPageRoute(builder: (context) => GeneralDetailPage());
+      return MaterialPageRoute(
+          builder: (context) => GeneralDetailPage(
+              argData: settings.arguments as Map<String, dynamic>));
+
+    case AppRoutes.createGeneralPage:
+      return MaterialPageRoute(
+          builder: (context) => CreateGeneralPage(
+                argData: settings.arguments as Map<String, dynamic>,
+              ));
 
     default:
       return MaterialPageRoute(builder: (context) => const LoginPage());

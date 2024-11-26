@@ -32,6 +32,8 @@ class AppRoutes {
   static const String touristBankingDetails = "TouristBankingDetails";
   static const String travellerHomeMessagePage = "travellerHomeMessagePage";
 
-  static const String findTouristGuide = "findTouristGuide";
+  static const String findGuideScreenNew = "findGuideScreenNew";
   static const String generalDetailPage = "generalDetailPage";
+  static const String experienceDetailPage = "experienceDetailPage";
+  static const String createGeneralPage = "createGeneralPage";
 }

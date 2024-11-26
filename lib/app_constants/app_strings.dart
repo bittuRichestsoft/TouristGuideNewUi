@@ -83,6 +83,7 @@ class AppStrings {
   String createProfileContent = "Create your profile to see next adventures.";
   String home = "Home";
   String findGuide = "Find Guide";
+  String findExperience = "Find Experience";
   String bookings = "Bookings";
   String mybookings = "My Booking";
   String bookingsHistory = "Booking History";
@@ -289,7 +290,15 @@ class AppStrings {
   String guideNote =
       "Note: Enhance your experience with us! Please update your profile information by filling out our quick profile update form. Once completed, you'll be redirected to your dashboard, where you can unlock all the exciting features and benefits of our platform.";
 
-  static String generalPlannerDetails = "General Planner Details";
-
   static String bankNote = "for direct deposit of your earnings";
+
+  static String generalPlannerDetails = "General Planner Details";
+  static String galleryDetails = "Gallery Details";
+  static String specialExperience = "Special Experience";
+  static String createGeneral = "Create General";
+  static String createGallery = "Create Gallery";
+  static String createExperience = "Create Experience";
+  static String editGeneral = "Edit General";
+  static String editGallery = "Edit Gallery";
+  static String editExperience = "Edit Experience";
 }

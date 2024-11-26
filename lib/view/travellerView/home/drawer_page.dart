@@ -33,7 +33,6 @@ class _DrawerPageState extends State<DrawerPage> {
     AppStrings().aboutUs,
     AppStrings().logout,
     // AppStrings().deleteAcc
-    "Find Traveller Guides",
   ];
   List<String> iconPath = [
     AppImages().pngImages.icSearch,
@@ -46,7 +45,6 @@ class _DrawerPageState extends State<DrawerPage> {
     AppImages().pngImages.icAbout,
     AppImages().pngImages.icLogout,
     //  AppImages().pngImages.icDelete,
-    AppImages().pngImages.icSearch,
   ];
   String email = "";
   String username = "";
@@ -249,12 +247,6 @@ class _DrawerPageState extends State<DrawerPage> {
                 headingText: AppStrings().logout,
                 okayText: AppStrings().logoutYes,
                 subContent: AppStrings().logoutHeading));
-        break;
-      case 9:
-        Navigator.pushNamed(
-          context,
-          AppRoutes.findTouristGuide,
-        );
         break;
 
       /* case 9:

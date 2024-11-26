@@ -1,20 +1,18 @@
-import 'dart:io';
-
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
+import 'package:Siesta/custom_widgets/custom_video_thumbnail.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:video_thumbnail/video_thumbnail.dart';
 
 import '../../../app_constants/app_color.dart';
 import '../../../app_constants/app_images.dart';
+import '../../../app_constants/app_routes.dart';
 import '../../../app_constants/app_strings.dart';
-import '../../../common_widgets/common_imageview.dart';
 import '../../../common_widgets/common_textview.dart';
 
 class GeneralDetailPage extends StatefulWidget {
-  const GeneralDetailPage({super.key});
+  const GeneralDetailPage({super.key, required this.argData});
+  final Map<String, dynamic> argData;
 
   @override
   State<GeneralDetailPage> createState() => _GeneralDetailPageState();
@@ -29,6 +27,16 @@ class _GeneralDetailPageState extends State<GeneralDetailPage> {
     AppImages().dummyImage,
     AppImages().dummyImage,
   ];
+
+  String tileType = "gallery";
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    tileType = widget.argData["tileType"];
+    debugPrint("Tile Type : $tileType");
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +57,21 @@ class _GeneralDetailPageState extends State<GeneralDetailPage> {
           },
         ),
         title: TextView.headingWhiteText(
-            text: AppStrings.generalPlannerDetails, context: context),
+            text: widget.argData["tileType"] == "gallery"
+                ? AppStrings.galleryDetails
+                : AppStrings.generalPlannerDetails,
+            context: context),
+        actions: [
+          IconButton(
+              onPressed: () {
+                Navigator.pushNamed(context, AppRoutes.createGeneralPage,
+                    arguments: {"type": tileType, "screenType": "edit"});
+              },
+              icon: Icon(
+                Icons.edit,
+                size: 20,
+              ))
+        ],
       ),
 
       // body
@@ -59,7 +81,9 @@ class _GeneralDetailPageState extends State<GeneralDetailPage> {
         children: [
           TextView.headingText(
             context: context,
-            text: "General Planner",
+            text: widget.argData["tileType"] == "gallery"
+                ? "Gallery"
+                : "General Planner",
             color: AppColor.blackColor,
             fontSize: screenHeight * 0.026,
           ),
@@ -144,11 +168,17 @@ class _GeneralDetailPageState extends State<GeneralDetailPage> {
 
         return ClipRRect(
           borderRadius: BorderRadius.circular(10),
-          child: CommonImageView.rectangleNetworkImage(
+          child: SizedBox(
+            height: screenHeight * getHeight(index),
+            width: screenWidth * getWidth(index),
+            child: CustomVideoThumbnail(),
+          )
+          /*CommonImageView.rectangleNetworkImage(
             imgUrl: mediaList[index],
             height: screenHeight * getHeight(index),
             width: screenWidth * getWidth(index),
-          ),
+          )*/
+          ,
         );
       }).toList(),
     );
@@ -193,11 +223,11 @@ class _GeneralDetailPageState extends State<GeneralDetailPage> {
         }
       case 2:
         {
-          return 0.43;
+          return 0.435;
         }
       case 3:
         {
-          return 0.43;
+          return 0.435;
         }
       case 4:
         {
@@ -206,19 +236,5 @@ class _GeneralDetailPageState extends State<GeneralDetailPage> {
     }
 
     return double.infinity;
-  }
-
-  Future<Widget> thumbnailVideo() async {
-    final fileName = await VideoThumbnail.thumbnailFile(
-      video:
-          "https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4",
-      thumbnailPath: (await getTemporaryDirectory()).path,
-      imageFormat: ImageFormat.WEBP,
-      maxHeight:
-          64, // specify the height of the thumbnail, let the width auto-scaled to keep the source aspect ratio
-      quality: 75,
-    );
-
-    return fileName == null ? SizedBox() : Image.file(File(fileName));
   }
 }
