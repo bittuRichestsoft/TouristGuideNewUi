@@ -27,6 +27,7 @@ import 'package:Siesta/view/travellerView/transactions/transaction_history_trave
 import 'package:Siesta/view/web_view_pages/common_web_view.dart';
 import 'package:flutter/material.dart';
 
+import '../view/touristGuideView/edit_guide_profile/edit_guide_profile_page.dart';
 import '../view/travellerView/itinerary/itineary_page.dart';
 import '../view/travellerView/profile/profile_page.dart';
 
@@ -186,6 +187,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
           builder: (context) => CreateGeneralPage(
                 argData: settings.arguments as Map<String, dynamic>,
               ));
+
+    case AppRoutes.editGuideProfilePage:
+      return MaterialPageRoute(builder: (context) => EditGuideProfilePage());
 
     default:
       return MaterialPageRoute(builder: (context) => const LoginPage());

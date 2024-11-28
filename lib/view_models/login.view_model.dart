@@ -28,13 +28,15 @@ import '../app_constants/app_strings.dart';
 import '../view/wait_list_screen.dart';
 
 class LoginViewModel extends BaseViewModel {
-  TextEditingController emailController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  TextEditingController emailController =
+      TextEditingController(text: "test2@yopmail.com");
+  TextEditingController passwordController =
+      TextEditingController(text: "Test@123");
   TextEditingController captchaController = TextEditingController();
   final AuthRequest _authRequest = AuthRequest();
   BuildContext? viewContext;
   bool isLoginButtonEnable = false;
-  bool isVerified = false;
+  bool isVerified = true;
   int? firstNumber;
   int? secNumber;
 
@@ -54,10 +56,11 @@ class LoginViewModel extends BaseViewModel {
   //LOGIN
   void processLogin(viewContext) async {
     setBusy(true);
-    generateRandomNumber();
+    // generateRandomNumber();
     notifyListeners();
     if (await GlobalUtility.isConnected()) {
-      captchaDialog(viewContext);
+      // captchaDialog(viewContext);
+      loginApi(viewContext);
     } else {
       GlobalUtility.showToast(viewContext, AppStrings().INTERNET);
     }
@@ -161,8 +164,7 @@ class LoginViewModel extends BaseViewModel {
             successDialog("home-traveller", viewContext, message,
                 loginResponse.data!.waitingList!);
           }
-        }
-        else {
+        } else {
           LoginResponse loginResponse =
               loginResponseFromJson(apiResponse.body.toString());
           PreferenceUtil().setUserData(

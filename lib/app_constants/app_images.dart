@@ -94,5 +94,7 @@ class SvgImages {
   String icCar = "assets/svgFiles/icCar.svg";
   String icFilter = "assets/svgFiles/icFilter.svg";
 
+  String icCameraOutline = "assets/svgFiles/icCameraOutline.svg";
+
   //////////
 }

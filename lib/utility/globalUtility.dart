@@ -3,13 +3,13 @@
 import 'package:Siesta/app_constants/app_color.dart';
 import 'package:Siesta/app_constants/app_routes.dart';
 import 'package:Siesta/common_widgets/common_loader_dialog.dart';
+import 'package:Siesta/utility/preference_util.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animated_dialog/flutter_animated_dialog.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:Siesta/utility/preference_util.dart';
 
 class GlobalUtility {
   static isConnected() async {
@@ -174,6 +174,13 @@ class GlobalUtility {
         return const CommonLoaderDialog();
       },
     );
+  }
+
+  void closeLoaderDialog(BuildContext context) {
+    if (ModalRoute.of(context)?.isCurrent != true) {
+      debugPrint("Dialog closed");
+      Navigator.of(context).pop();
+    }
   }
 
   showLoader(BuildContext context) {

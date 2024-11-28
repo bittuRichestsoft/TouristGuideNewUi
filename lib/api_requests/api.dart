@@ -113,6 +113,8 @@ class Api {
   // static String privacyPolicy = "${Api.baseUrl}app/privacy";
   static String aboutUs = "${Api.baseUrl}about-us";
   static String waitingList = "${Api.baseUrl}waiting-list";
+
+  static String getActivities = "guide/get-activities";
 }
 
 /// -- ---- --- ---- --- STATUS MEAN --- ---- - - - -- ---- - -- ---

@@ -301,4 +301,8 @@ class AppStrings {
   static String editGeneral = "Edit General";
   static String editGallery = "Edit Gallery";
   static String editExperience = "Edit Experience";
+
+  static String editProfile = "Edit Profile";
+
+  static String someErrorOccurred = "Some error occurred";
 }

@@ -1,6 +1,7 @@
 // ignore_for_file: unnecessary_null_comparison, invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
 
 import 'dart:io';
+
 import 'package:Siesta/app_constants/app_color.dart';
 import 'package:Siesta/app_constants/app_fonts.dart';
 import 'package:Siesta/app_constants/app_images.dart';
@@ -11,13 +12,10 @@ import 'package:Siesta/common_widgets/common_button.dart';
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
 import 'package:Siesta/utility/globalUtility.dart';
 import 'package:Siesta/utility/preference_util.dart';
-import 'package:Siesta/view_models/edit_profile.view_model.dart';
-import 'package:csc_picker/csc_picker.dart';
+import 'package:Siesta/view_models/create_profile.view_model.dart';
 import 'package:flutter/material.dart';
-import 'package:stacked/stacked.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:country_picker/country_picker.dart';
+import 'package:stacked/stacked.dart';
 
 class CreateTravellerProfile extends StatefulWidget {
   const CreateTravellerProfile({Key? key}) : super(key: key);
@@ -50,8 +48,8 @@ class _CreateTravellerProfileState extends State<CreateTravellerProfile> {
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
     screenHeight = MediaQuery.of(context).size.height;
-    return ViewModelBuilder<EditProfileViewModel>.reactive(
-        viewModelBuilder: () => EditProfileViewModel(),
+    return ViewModelBuilder<CreateProfileViewModel>.reactive(
+        viewModelBuilder: () => CreateProfileViewModel(),
         builder: (context, model, child) {
           return Scaffold(
             backgroundColor: AppColor.whiteColor,
@@ -126,7 +124,7 @@ class _CreateTravellerProfileState extends State<CreateTravellerProfile> {
     );
   }
 
-  Widget profilePic(EditProfileViewModel model) {
+  Widget profilePic(CreateProfileViewModel model) {
     return Stack(
       children: [
         model.profilePicture != null
@@ -188,7 +186,7 @@ class _CreateTravellerProfileState extends State<CreateTravellerProfile> {
     );
   }
 
-  Widget showImagePicker(EditProfileViewModel model, String fromWhere) {
+  Widget showImagePicker(CreateProfileViewModel model, String fromWhere) {
     return ListView(
       shrinkWrap: true,
       padding: EdgeInsets.all(MediaQuery.of(context).size.height *
@@ -286,7 +284,7 @@ class _CreateTravellerProfileState extends State<CreateTravellerProfile> {
   }
 
   /// IMAGE SELECTION WITH CAMERA
-  imageFromCamera(EditProfileViewModel model, String fromWhere) async {
+  imageFromCamera(CreateProfileViewModel model, String fromWhere) async {
     XFile? pickedFile = await ImagePicker()
         .pickImage(source: ImageSource.camera, imageQuality: 100);
     setState(() {
@@ -301,7 +299,7 @@ class _CreateTravellerProfileState extends State<CreateTravellerProfile> {
   }
 
   /// IMAGE SELECTION WITH Gallery
-  imageFromGallery(EditProfileViewModel model, String fromWhere) async {
+  imageFromGallery(CreateProfileViewModel model, String fromWhere) async {
     XFile? pickedFile = await ImagePicker()
         .pickImage(source: ImageSource.gallery, imageQuality: 100);
     setState(() {
@@ -315,7 +313,7 @@ class _CreateTravellerProfileState extends State<CreateTravellerProfile> {
     });
   }
 
-  Widget nameField(EditProfileViewModel model) {
+  Widget nameField(CreateProfileViewModel model) {
     return TextFormField(
       controller: nameController,
       onChanged: (value) {
@@ -343,7 +341,7 @@ class _CreateTravellerProfileState extends State<CreateTravellerProfile> {
     );
   }
 
-  Widget emailField(EditProfileViewModel model) {
+  Widget emailField(CreateProfileViewModel model) {
     return TextFormField(
       controller: emailController,
       autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -532,7 +530,7 @@ class _CreateTravellerProfileState extends State<CreateTravellerProfile> {
   }
 */
 
-  Widget countryField(EditProfileViewModel model) {
+  Widget countryField(CreateProfileViewModel model) {
     return ValueListenableBuilder(
       valueListenable: model.destinationNotifier,
       builder: (context, value, child) {
@@ -818,7 +816,7 @@ class _CreateTravellerProfileState extends State<CreateTravellerProfile> {
     );
   }
 
-  Widget submitButton(EditProfileViewModel model) {
+  Widget submitButton(CreateProfileViewModel model) {
     return model.isBusy == false
         ? CommonButton.commonBoldTextButton(
             context: context,
@@ -839,7 +837,7 @@ class _CreateTravellerProfileState extends State<CreateTravellerProfile> {
           );
   }
 
-  onTextFieldChange(EditProfileViewModel model) {
+  onTextFieldChange(CreateProfileViewModel model) {
     if (nameController.text.replaceAll(" ", "") != "" &&
             emailController.text.replaceAll(" ", "") != "" &&
             model.userStateController.text.replaceAll(" ", "") != "" &&
@@ -855,7 +853,7 @@ class _CreateTravellerProfileState extends State<CreateTravellerProfile> {
     }
   }
 
-  bool validate(EditProfileViewModel model) {
+  bool validate(CreateProfileViewModel model) {
     String userName = nameController.text;
     String email = emailController.text;
     // String contact = model.userPhoneController.text;

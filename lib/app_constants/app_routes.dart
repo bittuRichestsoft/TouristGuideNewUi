@@ -36,4 +36,6 @@ class AppRoutes {
   static const String generalDetailPage = "generalDetailPage";
   static const String experienceDetailPage = "experienceDetailPage";
   static const String createGeneralPage = "createGeneralPage";
+
+  static const String editGuideProfilePage = "editGuideProfilePage";
 }

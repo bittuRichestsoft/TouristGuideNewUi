@@ -219,7 +219,9 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
           context: context,
           text: "Edit Profile",
           iconPath: AppImages().svgImages.icEditProfile,
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context, AppRoutes.editGuideProfilePage);
+          },
         ),
         UiSpacer.verticalSpace(context: context, space: 0.01),
 

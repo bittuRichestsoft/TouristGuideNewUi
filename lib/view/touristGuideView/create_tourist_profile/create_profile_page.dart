@@ -11,10 +11,8 @@ import 'package:Siesta/app_constants/textfield_decoration.dart';
 import 'package:Siesta/common_widgets/common_button.dart';
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
 import 'package:Siesta/utility/globalUtility.dart';
-import 'package:Siesta/view_models/edit_profile.view_model.dart';
-import 'package:dotted_decoration/dotted_decoration.dart';
+import 'package:Siesta/view_models/create_profile.view_model.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:stacked/stacked.dart';
@@ -40,9 +38,9 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
   Widget build(BuildContext context) {
     screenHeight = MediaQuery.of(context).size.height;
     screenWidth = MediaQuery.of(context).size.width;
-    return ViewModelBuilder<EditProfileViewModel>.reactive(
-        viewModelBuilder: () => EditProfileViewModel(),
-        onViewModelReady: (model) => model.initialise(context),
+    return ViewModelBuilder<CreateProfileViewModel>.reactive(
+        viewModelBuilder: () => CreateProfileViewModel(),
+        onViewModelReady: (model) => model.initialised,
         builder: (context, model, child) {
           return Scaffold(
             backgroundColor: AppColor.whiteColor,
@@ -106,7 +104,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
     );
   }
 
-  Widget profilePic(EditProfileViewModel model) {
+  Widget profilePic(CreateProfileViewModel model) {
     return Stack(
       children: [
         model.profilePicture != null
@@ -168,7 +166,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
     );
   }
 
-  Widget showImagePicker(EditProfileViewModel model, String fromWhere) {
+  Widget showImagePicker(CreateProfileViewModel model, String fromWhere) {
     return ListView(
       shrinkWrap: true,
       padding: EdgeInsets.all(MediaQuery.of(context).size.height *
@@ -266,7 +264,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
   }
 
   /// IMAGE SELECTION WITH CAMERA
-  imageFromCamera(EditProfileViewModel model, String fromWhere) async {
+  imageFromCamera(CreateProfileViewModel model, String fromWhere) async {
     XFile? pickedFile = await ImagePicker()
         .pickImage(source: ImageSource.camera, imageQuality: 100);
     setState(() {
@@ -285,7 +283,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
   }
 
   /// IMAGE SELECTION WITH Gallery
-  imageFromGallery(EditProfileViewModel model, String fromWhere) async {
+  imageFromGallery(CreateProfileViewModel model, String fromWhere) async {
     XFile? pickedFile = await ImagePicker()
         .pickImage(source: ImageSource.gallery, imageQuality: 100);
     setState(() {
@@ -302,7 +300,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
   }
 
   /// FIELDS
-  Widget detailFields(EditProfileViewModel model) {
+  Widget detailFields(CreateProfileViewModel model) {
     return ListView(
       shrinkWrap: true,
       physics: const ClampingScrollPhysics(),
@@ -485,7 +483,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
         });
   }*/
 
-  Widget emailView(EditProfileViewModel model) {
+  Widget emailView(CreateProfileViewModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -533,7 +531,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
     );
   }
 
-  Widget contactNumberView(EditProfileViewModel model) {
+  Widget contactNumberView(CreateProfileViewModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -581,7 +579,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
     );
   }
 
-  Widget countryCityField(EditProfileViewModel model) {
+  Widget countryCityField(CreateProfileViewModel model) {
     return ValueListenableBuilder(
       valueListenable: model.destinationNotifier,
       builder: (context, value, child) {
@@ -602,16 +600,17 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                         .getLocationApi(
                             viewContext: context, countryId: "", stateId: "")
                         .then((value) {
-                      showModalBottomSheet(
-                        context: context,
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(30)),
-                        builder: (cxt) {
-                          return Padding(
-                              padding:
-                                  EdgeInsets.only(top: screenHeight * 0.03),
-                              child: Scaffold(
-                                  /*   appBar: AppBar(
+                      if (value == true) {
+                        showModalBottomSheet(
+                          context: context,
+                          shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(30)),
+                          builder: (cxt) {
+                            return Padding(
+                                padding:
+                                    EdgeInsets.only(top: screenHeight * 0.03),
+                                child: Scaffold(
+                                    /*   appBar: AppBar(
                                     elevation: 0,
                                     backgroundColor: Colors.white,
                                     automaticallyImplyLeading: false,
@@ -639,32 +638,33 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                                       ],
                                     ),
                                   ),*/
-                                  body: ListView.builder(
-                                shrinkWrap: true,
-                                itemCount: model.countryList.length,
-                                itemBuilder: (context, index) => ListTile(
-                                  onTap: () {
-                                    if (model.countryNameController.text !=
-                                        model.countryList[index]) {
-                                      model.countryNameController.text =
-                                          model.countryList[index];
-                                      model.stateNameController.clear();
-                                      model.cityNameController.clear();
-                                    } else {
-                                      model.countryNameController.text =
-                                          model.countryList[index];
-                                    }
+                                    body: ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: model.countryList.length,
+                                  itemBuilder: (context, index) => ListTile(
+                                    onTap: () {
+                                      if (model.countryNameController.text !=
+                                          model.countryList[index]) {
+                                        model.countryNameController.text =
+                                            model.countryList[index];
+                                        model.stateNameController.clear();
+                                        model.cityNameController.clear();
+                                      } else {
+                                        model.countryNameController.text =
+                                            model.countryList[index];
+                                      }
 
-                                    Navigator.pop(cxt);
-                                  },
-                                  title: Text(model.countryList[index]),
-                                ),
-                              )));
-                        },
-                      ).whenComplete(() {
-                        onCreateProfileValueChanged(model);
-                        setState(() {});
-                      });
+                                      Navigator.pop(cxt);
+                                    },
+                                    title: Text(model.countryList[index]),
+                                  ),
+                                )));
+                          },
+                        ).whenComplete(() {
+                          onCreateProfileValueChanged(model);
+                          setState(() {});
+                        });
+                      }
                     });
                   },
                   child: Container(
@@ -711,16 +711,17 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                               countryId: model.countryNameController.text,
                               stateId: "")
                           .then((value) {
-                        showModalBottomSheet(
-                          context: context,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                          builder: (cxt) {
-                            return Padding(
-                                padding:
-                                    EdgeInsets.only(top: screenHeight * 0.03),
-                                child: Scaffold(
-                                    /* appBar: AppBar(
+                        if (value == true) {
+                          showModalBottomSheet(
+                            context: context,
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30)),
+                            builder: (cxt) {
+                              return Padding(
+                                  padding:
+                                      EdgeInsets.only(top: screenHeight * 0.03),
+                                  child: Scaffold(
+                                      /* appBar: AppBar(
                                       elevation: 0,
                                       backgroundColor: Colors.white,
                                       automaticallyImplyLeading: false,
@@ -747,27 +748,28 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                                         ],
                                       ),
                                     ),*/
-                                    body: ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: model.stateList.length,
-                                  itemBuilder: (context, index) => ListTile(
-                                    onTap: () {
-                                      if (model.stateNameController.text !=
-                                          model.stateList[index]) {
-                                        model.stateNameController.text =
-                                            model.stateList[index];
-                                        model.cityNameController.clear();
-                                      }
-                                      Navigator.pop(cxt);
-                                    },
-                                    title: Text(model.stateList[index]),
-                                  ),
-                                )));
-                          },
-                        ).whenComplete(() {
-                          onCreateProfileValueChanged(model);
-                          setState(() {});
-                        });
+                                      body: ListView.builder(
+                                    shrinkWrap: true,
+                                    itemCount: model.stateList.length,
+                                    itemBuilder: (context, index) => ListTile(
+                                      onTap: () {
+                                        if (model.stateNameController.text !=
+                                            model.stateList[index]) {
+                                          model.stateNameController.text =
+                                              model.stateList[index];
+                                          model.cityNameController.clear();
+                                        }
+                                        Navigator.pop(cxt);
+                                      },
+                                      title: Text(model.stateList[index]),
+                                    ),
+                                  )));
+                            },
+                          ).whenComplete(() {
+                            onCreateProfileValueChanged(model);
+                            setState(() {});
+                          });
+                        }
                       });
                     }
                   },
@@ -817,17 +819,18 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                               countryId: model.countryNameController.text,
                               stateId: model.stateNameController.text)
                           .then((value) {
-                        showModalBottomSheet(
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
-                          context: context,
-                          enableDrag: true,
-                          builder: (cxt) {
-                            return Padding(
-                                padding:
-                                    EdgeInsets.only(top: screenHeight * 0.03),
-                                child: Scaffold(
-                                    /*     appBar: AppBar(
+                        if (value == true) {
+                          showModalBottomSheet(
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30)),
+                            context: context,
+                            enableDrag: true,
+                            builder: (cxt) {
+                              return Padding(
+                                  padding:
+                                      EdgeInsets.only(top: screenHeight * 0.03),
+                                  child: Scaffold(
+                                      /*     appBar: AppBar(
                                       elevation: 0,
                                       backgroundColor: Colors.white,
                                       automaticallyImplyLeading: false,
@@ -854,25 +857,26 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                                         ],
                                       ),
                                     ),*/
-                                    body: ListView.builder(
-                                  physics:
-                                      const AlwaysScrollableScrollPhysics(),
-                                  shrinkWrap: true,
-                                  itemCount: model.cityList.length,
-                                  itemBuilder: (context, index) => ListTile(
-                                    onTap: () {
-                                      model.cityNameController.text =
-                                          model.cityList[index];
-                                      Navigator.pop(cxt);
-                                    },
-                                    title: Text(model.cityList[index]),
-                                  ),
-                                )));
-                          },
-                        ).whenComplete(() {
-                          onCreateProfileValueChanged(model);
-                          setState(() {});
-                        });
+                                      body: ListView.builder(
+                                    physics:
+                                        const AlwaysScrollableScrollPhysics(),
+                                    shrinkWrap: true,
+                                    itemCount: model.cityList.length,
+                                    itemBuilder: (context, index) => ListTile(
+                                      onTap: () {
+                                        model.cityNameController.text =
+                                            model.cityList[index];
+                                        Navigator.pop(cxt);
+                                      },
+                                      title: Text(model.cityList[index]),
+                                    ),
+                                  )));
+                            },
+                          ).whenComplete(() {
+                            onCreateProfileValueChanged(model);
+                            setState(() {});
+                          });
+                        }
                       });
                     }
                   },
@@ -909,7 +913,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
   }
 
   /// HOST SINCE
-  Widget hostSinceView(EditProfileViewModel model) {
+  Widget hostSinceView(CreateProfileViewModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -922,8 +926,10 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
           children: [
             Expanded(
               child: TextFormField(
-                // controller: model.pincodeController,
+                controller:
+                    TextEditingController(text: model.yearValue.toString()),
                 onChanged: (value) {},
+                readOnly: true,
                 textAlignVertical: TextAlignVertical.center,
                 textAlign: TextAlign.start,
                 style: TextStyle(
@@ -943,7 +949,9 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                         ),
                       ),
                       InkWell(
-                          onTap: () {},
+                          onTap: () {
+                            model.decreaseHostValue("year");
+                          },
                           child: SizedBox(
                             height: screenHeight * 0.04,
                             width: screenHeight * 0.04,
@@ -954,7 +962,9 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                             ),
                           )),
                       InkWell(
-                          onTap: () {},
+                          onTap: () {
+                            model.increaseHostValue("year");
+                          },
                           child: SizedBox(
                             height: screenHeight * 0.04,
                             width: screenHeight * 0.04,
@@ -1007,8 +1017,10 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
             UiSpacer.horizontalSpace(space: 0.04, context: context),
             Expanded(
               child: TextFormField(
-                // controller: model.pincodeController,
+                controller:
+                    TextEditingController(text: model.monthValue.toString()),
                 onChanged: (value) {},
+                readOnly: true,
                 textAlignVertical: TextAlignVertical.center,
                 textAlign: TextAlign.start,
                 style: TextStyle(
@@ -1028,7 +1040,9 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                         ),
                       ),
                       InkWell(
-                          onTap: () {},
+                          onTap: () {
+                            model.decreaseHostValue("month");
+                          },
                           child: SizedBox(
                             height: screenHeight * 0.04,
                             width: screenHeight * 0.04,
@@ -1039,7 +1053,9 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                             ),
                           )),
                       InkWell(
-                          onTap: () {},
+                          onTap: () {
+                            model.increaseHostValue("month");
+                          },
                           child: SizedBox(
                             height: screenHeight * 0.04,
                             width: screenHeight * 0.04,
@@ -1098,10 +1114,8 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
     );
   }
 
-  String? selectedValue;
-
   /// PRONOUNS
-  Widget pronounView(EditProfileViewModel model) {
+  Widget pronounView(CreateProfileViewModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1119,10 +1133,10 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                   fontSize: MediaQuery.of(context).size.height *
                       AppSizes().fontSize.simpleFontSize),
             ),
-            value: selectedValue,
+            value: model.selectedPronounValue,
             onChanged: (value) {
-              selectedValue = value;
-              setState(() {});
+              model.selectedPronounValue = value;
+              model.notifyListeners();
             },
             style: TextStyle(
                 color: AppColor.lightBlack,
@@ -1136,12 +1150,12 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
             ),
             items: [
               DropdownMenuItem(
-                child: Text("He/Him"),
-                value: "He/Him",
+                child: Text(model.pronounsList[0]),
+                value: model.pronounsList[0],
               ),
               DropdownMenuItem(
-                child: Text("She/Her"),
-                value: "She/Her",
+                child: Text(model.pronounsList[1]),
+                value: model.pronounsList[1],
               ),
             ],
             buttonStyleData: ButtonStyleData(
@@ -1156,7 +1170,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
   }
 
   /// ACTIVITIES
-  Widget activitiesView(EditProfileViewModel model) {
+  Widget activitiesView(CreateProfileViewModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1178,10 +1192,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
             value: model.activitiesList.isEmpty
                 ? null
                 : model.activitiesList.last.id.toString(),
-            onChanged: (value) {
-              selectedValue = value;
-              setState(() {});
-            },
+            onChanged: (value) {},
             style: TextStyle(
                 color: AppColor.lightBlack,
                 fontFamily: AppFonts.nunitoRegular,
@@ -1273,7 +1284,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
   }
 
   /// Pin Code
-  Widget pinCode(EditProfileViewModel model) {
+  Widget pinCode(CreateProfileViewModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1405,7 +1416,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
   }
 
   ///describe yourself
-  Widget describeYourself(EditProfileViewModel model) {
+  Widget describeYourself(CreateProfileViewModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1465,7 +1476,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
   }
 
   /// Upload id proof
-  Widget uploadIdProofView(EditProfileViewModel model) {
+  /* Widget uploadIdProofView(CreateProfileViewModel model) {
     return ListView(
       shrinkWrap: true,
       physics: const ClampingScrollPhysics(),
@@ -1484,10 +1495,10 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
         UiSpacer.verticalSpace(space: 0.03, context: context),
       ],
     );
-  }
+  }*/
 
   /// id proof image listing builder
-  Widget idProofImageList(BuildContext context, EditProfileViewModel model) {
+  /* Widget idProofImageList(BuildContext context, CreateProfileViewModel model) {
     return Visibility(
       visible: model.idProofFile.isNotEmpty ? true : false,
       child: SizedBox(
@@ -1510,10 +1521,10 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
             }),
       ),
     );
-  }
+  }*/
 
   /// DOTTED BORDER CONTAINER
-  Widget dottedContainer(EditProfileViewModel model) {
+/*  Widget dottedContainer(CreateProfileViewModel model) {
     return GestureDetector(
       onTap: () {
         showModalBottomSheet<void>(
@@ -1584,9 +1595,9 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
             ],
           )),
     );
-  }
+  }*/
 
-  Widget enrollmentAndNote(EditProfileViewModel model) {
+  Widget enrollmentAndNote(CreateProfileViewModel model) {
     return Column(
       children: [
         Text(
@@ -1638,7 +1649,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
   }
 
   /// submit button
-  Widget buttonContainer(EditProfileViewModel model) {
+  Widget buttonContainer(CreateProfileViewModel model) {
     return model.isBusy == false
         ? Container(
             padding: EdgeInsets.only(bottom: screenHeight * 0.02),
@@ -1660,14 +1671,13 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
           );
   }
 
-  onCreateProfileValueChanged(EditProfileViewModel model) {
+  onCreateProfileValueChanged(CreateProfileViewModel model) {
     if (/*model.phoneNumController.text.isNotEmpty &&*/
         model.countryNameController.text.isNotEmpty &&
             model.stateNameController.text.isNotEmpty &&
             model.cityNameController.text.isNotEmpty &&
             model.pincodeController.text.isNotEmpty &&
-            model.bioController.text.isNotEmpty &&
-            model.priceController.text.isNotEmpty) {
+            model.bioController.text.isNotEmpty) {
       model.isSubmitProfileButtonEnable = true;
       model.notifyListeners();
     } else {
@@ -1676,28 +1686,31 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
     }
   }
 
-  bool validate(EditProfileViewModel model) {
+  bool validate(CreateProfileViewModel model) {
     // String contact = model.phoneNumController.text;
     String country = model.countryNameController.text;
     String state = model.stateNameController.text;
     String city = model.cityNameController.text;
     String pincode = model.pincodeController.text;
-    String price = model.priceController.text;
-    String bio = model.bioController.text;
+    String bio = model.bioController.text.trim();
 
     if (model.checkBoxVal == false) {
       GlobalUtility.showToast(context,
           "Read note and agree with the enrollment as a guide with Siesta");
       return false;
     }
-    /* if (model.profilePicture == null) {
+    if (model.profilePicture == null) {
       GlobalUtility.showToast(context, AppStrings().uploadProfile);
       return false;
-    }*/
-    /* if (contact == "") {
-      GlobalUtility.showToast(context, AppStrings().enterPhoneNumber);
+    }
+    if (bio == "") {
+      GlobalUtility.showToast(context, "Please describe yourself");
       return false;
-    }*/
+    }
+    if (activitiesSelected(model) == false) {
+      GlobalUtility.showToast(context, "Please select activity");
+      return false;
+    }
     if (country == "") {
       GlobalUtility.showToast(context, AppStrings().countryEnter);
       return false;
@@ -1716,19 +1729,20 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
       return false;
     }
 
-    if (price == "") {
-      GlobalUtility.showToast(context, "Enter price per hour");
-      return false;
-    }
-    if (bio == "") {
-      GlobalUtility.showToast(context, "Please describe yourself");
-      return false;
-    }
     /* if (model.idProofFile.isEmpty) {
       GlobalUtility.showToast(context, "Please upload id proof");
       return false;
     }*/
 
     return true;
+  }
+
+  bool activitiesSelected(CreateProfileViewModel model) {
+    for (int i = 0; i < model.activitiesList.length; i++) {
+      if (model.activitiesList[i].isSelect == true) {
+        return true;
+      }
+    }
+    return false;
   }
 }

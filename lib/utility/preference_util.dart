@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../app_constants/shared_preferences.dart';
@@ -199,6 +198,17 @@ class PreferenceUtil {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     String? tokenValue = prefs.getString(SharedPreferenceValues.token);
     return tokenValue;
+  }
+
+  Future<Map<String, String>> getAuthHeader() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? tokenValue = prefs.getString(SharedPreferenceValues.token);
+
+    Map<String, String> accessTokenHeader = {
+      "Accept": "application/json",
+      "Authorization": "Bearer ${tokenValue ?? ""}"
+    };
+    return accessTokenHeader;
   }
 
   getTravellerProfileStatus() async {
