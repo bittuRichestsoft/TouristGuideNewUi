@@ -1,5 +1,6 @@
 import 'package:Siesta/common_widgets/common_textview.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../app_constants/app_color.dart';
@@ -23,7 +24,10 @@ class CustomTextField extends StatefulWidget {
       this.suffixWidget,
       this.readOnly,
       this.onTap,
-      this.borderRadius});
+      this.borderRadius,
+      this.maxLength,
+      this.inputFormatter,
+      this.prefixWidget});
   final TextEditingController? textEditingController;
   final Function(String)? onChange;
   final Function()? onTap;
@@ -38,6 +42,9 @@ class CustomTextField extends StatefulWidget {
   final String? suffixIconPath;
   final bool? readOnly;
   final Widget? suffixWidget; // preference to it
+  final Widget? prefixWidget;
+  final int? maxLength;
+  final List<TextInputFormatter>? inputFormatter;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -69,6 +76,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           minLines: widget.minLines,
           maxLines: widget.maxLines,
           onTap: widget.onTap,
+          maxLength: widget.maxLength,
           style: TextStyle(
               color: AppColor.lightBlack,
               fontFamily: AppFonts.nunitoRegular,
@@ -76,6 +84,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                   AppSizes().fontSize.simpleFontSize),
           decoration: InputDecoration(
             hintText: widget.hintText,
+            prefixIcon: widget.prefixWidget,
             suffixIcon: widget.suffixWidget != null
                 ? widget.suffixWidget
                 : widget.suffixIconPath != null
@@ -128,6 +137,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           keyboardType: widget.keyboardType ?? TextInputType.text,
           autovalidateMode: AutovalidateMode.onUserInteraction,
           validator: widget.validator,
+          inputFormatters: widget.inputFormatter,
         ),
       ],
     );

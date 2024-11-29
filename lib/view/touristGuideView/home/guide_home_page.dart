@@ -9,12 +9,12 @@ import 'package:Siesta/view/touristGuideView/bookingHistory/booking_history_page
 import 'package:Siesta/view/touristGuideView/guide_bookings/guide_bookings_page.dart';
 import 'package:Siesta/view/touristGuideView/home/guide_drawer_page.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/tourist_profile_page.dart';
-import 'package:Siesta/view/touristGuideView/tourist_profile_view/tourist_profile_page_new.dart';
 import 'package:Siesta/view/travellerView/message_screen/message_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../../utility/preference_util.dart';
+import '../tourist_profile_view/tourist_profile_page_new.dart';
 
 // ignore: must_be_immutable
 class TouristGuideHomePage extends StatefulWidget {
@@ -40,7 +40,8 @@ setWidgetOptions() {
       const GuideBookingsPage(),
       const BookingHistoryScreen(),
       MessagePage(fromWhere: "message_guide"),
-      const TouristProfilePage(),
+      // const TouristProfilePage(),
+      TouristProfilePageNew()
     ];
   } else {
     _widgetOptions.clear();

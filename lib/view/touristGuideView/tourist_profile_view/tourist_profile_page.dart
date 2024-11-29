@@ -23,7 +23,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:stacked/stacked.dart';
 
-import '../../../common_widgets/common_imageview.dart';
 import '../../travellerView/delete_account.dart';
 
 class TouristProfilePage extends StatefulWidget {
@@ -61,6 +60,9 @@ class _ProfilePageState extends State<TouristProfilePage> {
                   padding: EdgeInsets.zero,
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: [
+                    UiSpacer.verticalSpace(
+                        space: AppSizes().widgetSize.normalPadding,
+                        context: context),
                     // Guide Profile view
                     profileImageView(model.profileImage),
                     UiSpacer.verticalSpace(
@@ -235,38 +237,23 @@ class _ProfilePageState extends State<TouristProfilePage> {
 
   Widget profileImageView(img) {
     return Container(
-      height: screenHeight * 0.44,
-      child: Stack(
-        children: [
-          Container(
-            height: screenHeight * 0.4,
-            width: screenWidth,
-            child: CommonImageView.rectangleNetworkImage(imgUrl: img),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: CircleAvatar(
-              radius: screenWidth * 0.17,
-              child: Container(
-                  width: screenWidth * 0.35,
-                  height: screenWidth * 0.35,
-                  decoration: BoxDecoration(
-                      color: AppColor.whiteColor,
-                      border: Border.all(
-                          color: AppColor.buttonDisableColor, width: 3),
-                      shape: BoxShape.circle,
-                      image: img != null && img != ""
-                          ? DecorationImage(
-                              fit: BoxFit.fill, image: NetworkImage(img))
-                          : DecorationImage(
-                              image: AssetImage(AppImages()
-                                  .pngImages
-                                  .icProfilePlaceholder)))),
-            ),
-          ),
-        ],
+      // height: screenHeight * 0.44,
+      child: CircleAvatar(
+        radius: screenWidth * 0.17,
+        child: Container(
+            width: screenWidth * 0.35,
+            height: screenWidth * 0.35,
+            decoration: BoxDecoration(
+                color: AppColor.whiteColor,
+                border:
+                    Border.all(color: AppColor.buttonDisableColor, width: 3),
+                shape: BoxShape.circle,
+                image: img != null && img != ""
+                    ? DecorationImage(
+                        fit: BoxFit.fill, image: NetworkImage(img))
+                    : DecorationImage(
+                        image: AssetImage(
+                            AppImages().pngImages.icProfilePlaceholder)))),
       ),
     );
   }

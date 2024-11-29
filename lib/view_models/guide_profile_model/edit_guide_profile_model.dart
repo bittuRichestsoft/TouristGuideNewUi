@@ -1,30 +1,65 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:Siesta/api_requests/api.dart';
 import 'package:Siesta/api_requests/api_request.dart';
+import 'package:Siesta/main.dart';
+import 'package:Siesta/response_pojo/get_guide_profile_response.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:http_parser/http_parser.dart';
 import 'package:stacked/stacked.dart';
 
 import '../../app_constants/app_strings.dart';
 import '../../response_pojo/county_pojo.dart';
+import '../../response_pojo/get_activities_pojo.dart';
 import '../../utility/globalUtility.dart';
+import '../../utility/preference_util.dart';
 
 class EditGuideProfileModel extends BaseViewModel implements Initialisable {
   int yearValue = 0;
   int monthValue = 0;
   String? selectedPronounValue;
 
-  TextEditingController countryNameController = TextEditingController();
-  TextEditingController stateNameController = TextEditingController();
-  TextEditingController cityNameController = TextEditingController();
+  String countryCode = "";
+  String countryCodeIso = "";
+
+  String? profileImgLocal;
+  String? profileImgUrl;
+
+  String? coverImgLocal;
+  String? coverImgUrl;
+
+  TextEditingController firstNameTEC = TextEditingController();
+  TextEditingController lastNameTEC = TextEditingController();
+  TextEditingController phoneTEC = TextEditingController();
+  TextEditingController hostSinceYearTEC = TextEditingController();
+  TextEditingController hostSinceMonthTEC = TextEditingController();
+  TextEditingController bioTEC = TextEditingController();
+  TextEditingController zipcodeTEC = TextEditingController();
+
+  TextEditingController countryNameTEC = TextEditingController();
+  TextEditingController stateNameTEC = TextEditingController();
+  TextEditingController cityNameTEC = TextEditingController();
+
   ValueNotifier<bool> destinationNotifier = ValueNotifier(false);
+
+  List<ActivitiesModel> activitiesList = [];
+  List<String> documentProofList = [];
 
   List<String> countryList = ["Select Country"];
   List<String> stateList = ["Select State"];
   List<String> cityList = ["Select City"];
 
+  List<String> pronounsList = ["He/Him", "She/Her"];
+
   @override
   void initialise() {
+    // get Activities
+    getActivitiesAPI().then((value) {
+      getProfileAPI();
+    });
+
     // call get Profile
   }
 
@@ -36,6 +71,8 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
         monthValue++;
       }
     }
+    hostSinceYearTEC.text = yearValue.toString();
+    hostSinceMonthTEC.text = monthValue.toString();
     notifyListeners();
   }
 
@@ -45,6 +82,8 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
     } else if (type == "month" && monthValue > 0) {
       monthValue--;
     }
+    hostSinceYearTEC.text = yearValue.toString();
+    hostSinceMonthTEC.text = monthValue.toString();
     notifyListeners();
   }
 
@@ -107,4 +146,245 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
     }
     return false;
   }
+
+  Future<void> getActivitiesAPI() async {
+    BuildContext context = navigatorKey.currentContext!;
+    try {
+      if (await GlobalUtility.isConnected()) {
+        GlobalUtility().showLoaderDialog(context);
+        final apiResponse = await ApiRequest()
+            .getWithHeader(Api.getActivities)
+            .timeout(Duration(seconds: 20));
+
+        var jsonData = jsonDecode(apiResponse.body);
+        int status = jsonData['statusCode'] ?? 404;
+        String message = jsonData['message'] ?? "";
+
+        if (status == 200) {
+          GetActivitiesPojo getActivitiesPojo =
+              getActivitiesPojoFromJson(apiResponse.body);
+          activitiesList.clear();
+
+          activitiesList = getActivitiesPojo.data!.rows!.map((e) {
+            return ActivitiesModel(id: e.id!, title: e.name ?? "");
+          }).toList();
+        } else if (status == 400) {
+          GlobalUtility.showToast(context, message);
+        } else if (status == 401) {
+          GlobalUtility().handleSessionExpire(context);
+        }
+      } else {
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+      debugPrint("Get Activities error : $e");
+      GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      setBusy(false);
+      GlobalUtility().closeLoaderDialog(context);
+    }
+  }
+
+  Future<void> updateGuideProfileAPI() async {
+    BuildContext context = navigatorKey.currentContext!;
+    try {
+      if (await GlobalUtility.isConnected()) {
+        GlobalUtility().showLoaderDialog(context);
+        List<int> selectedActivitiesId =
+            activitiesList.where((e) => e.isSelect).map((e) => e.id).toList();
+        Map<String, String> map = {
+          "name": firstNameTEC.text.trim(),
+          "last_name": lastNameTEC.text.trim(),
+          "phone": phoneTEC.text.trim(),
+          "country_code": countryCode,
+          "country_code_iso": countryCodeIso,
+          "pincode": zipcodeTEC.text.trim(),
+          "country": countryNameTEC.text,
+          "state": stateNameTEC.text,
+          "city": cityNameTEC.text,
+          "bio": bioTEC.text.trim(),
+          "hostYear": hostSinceYearTEC.text,
+          "hostMonth": hostSinceMonthTEC.text,
+          if (selectedPronounValue != null)
+            "pronouns": selectedPronounValue ?? "",
+        };
+
+        for (int i = 0; i < selectedActivitiesId.length; i++) {
+          map['activities[$i]'] = selectedActivitiesId[i].toString();
+        }
+
+        List<http.MultipartFile> field = [];
+
+        if (profileImgLocal != null) {
+          field.add(http.MultipartFile.fromBytes(
+              'profile_picture', File(profileImgLocal!).readAsBytesSync(),
+              filename: File(profileImgLocal!).path.split("/").last,
+              contentType: MediaType('image', '*')));
+        }
+        if (documentProofList.isNotEmpty) {
+          for (int i = 0; i < documentProofList.length; i++) {
+            field.add(http.MultipartFile.fromBytes(
+                'id_proof', File(documentProofList[i]).readAsBytesSync(),
+                filename: File(documentProofList[i]).path.split("/").last));
+          }
+        }
+
+        final response = await ApiRequest()
+            .putMultipartRequest(map, Api.updateGuideProfile, field)
+            .timeout(Duration(seconds: 20));
+
+        var apiResponse = await response.stream.bytesToString();
+
+        var jsonData = jsonDecode(apiResponse);
+        int status = jsonData['statusCode'] ?? 404;
+        String message = jsonData['message'] ?? "";
+
+        if (status == 200) {
+          getProfileAPI();
+          GlobalUtility.showToast(context, message);
+        } else if (status == 400) {
+          GlobalUtility.showToast(context, message);
+        } else if (status == 401) {
+          GlobalUtility().handleSessionExpire(context);
+        }
+      } else {
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+      debugPrint("Get Activities error : $e");
+      GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      setBusy(false);
+      GlobalUtility().closeLoaderDialog(context);
+    }
+  }
+
+  Future<void> getProfileAPI() async {
+    BuildContext context = navigatorKey.currentContext!;
+    try {
+      if (await GlobalUtility.isConnected()) {
+        GlobalUtility().showLoaderDialog(context);
+
+        final apiResponse = await ApiRequest()
+            .getWithHeader(Api.guideGetProfile)
+            .timeout(const Duration(seconds: 20));
+
+        var jsonData = jsonDecode(apiResponse.body);
+        int status = jsonData['statusCode'] ?? 404;
+        String message = jsonData['message'] ?? "";
+
+        if (status == 200) {
+          GetGuideProfileResponse getGuideProfileResponse =
+              getGuideProfileResponseFromJson(apiResponse.body);
+
+          // Saving User data
+          PreferenceUtil().updateUserDataGuide(
+              getGuideProfileResponse.data!.guideDetails!.name!,
+              getGuideProfileResponse.data!.guideDetails!.lastName!,
+              getGuideProfileResponse.data!.guideDetails!.phone.toString(),
+              getGuideProfileResponse
+                  .data!.guideDetails!.userDetail!.profilePicture!,
+              getGuideProfileResponse.data!.guideDetails!.pincode.toString(),
+              getGuideProfileResponse.data!.guideDetails!.userDetail!.price
+                  .toString(),
+              getGuideProfileResponse.data!.guideDetails!.country.toString(),
+              getGuideProfileResponse.data!.guideDetails!.state.toString(),
+              getGuideProfileResponse.data!.guideDetails!.city.toString(),
+              getGuideProfileResponse.data!.guideDetails!.userDetail!.bio
+                  .toString());
+
+          profileImgUrl = getGuideProfileResponse
+              .data!.guideDetails!.userDetail!.profilePicture;
+          coverImgUrl = getGuideProfileResponse
+              .data!.guideDetails!.userDetail!.coverPicture;
+          firstNameTEC.text =
+              getGuideProfileResponse.data!.guideDetails!.name ?? "";
+          lastNameTEC.text =
+              getGuideProfileResponse.data!.guideDetails!.lastName ?? "";
+          countryCode =
+              getGuideProfileResponse.data!.guideDetails!.countryCode ?? "+1";
+          countryCodeIso =
+              getGuideProfileResponse.data!.guideDetails!.countryCodeIso ??
+                  "Us";
+          phoneTEC.text =
+              (getGuideProfileResponse.data!.guideDetails!.phone ?? "")
+                  .toString();
+
+          hostSinceYearTEC.text = getGuideProfileResponse
+                  .data!.guideDetails!.userDetail!.hostSinceYears ??
+              "0";
+          yearValue = int.parse(hostSinceYearTEC.text);
+
+          hostSinceMonthTEC.text = getGuideProfileResponse
+                  .data!.guideDetails!.userDetail!.hostSinceMonths ??
+              "0";
+          monthValue = int.parse(hostSinceMonthTEC.text);
+
+          selectedPronounValue =
+              getGuideProfileResponse.data!.guideDetails!.userDetail!.pronouns;
+
+          bioTEC.text =
+              getGuideProfileResponse.data!.guideDetails!.userDetail!.bio ?? "";
+
+          if (getGuideProfileResponse.data!.guideDetails!.guideActivities !=
+              null) {
+            List<int> selectedIds = getGuideProfileResponse
+                .data!.guideDetails!.guideActivities!
+                .map((item) => item.activity!.id!)
+                .toList();
+
+            // Update isSelect for activities in activityList
+            for (var activity in activitiesList) {
+              activity.isSelect = selectedIds.contains(activity.id);
+            }
+            debugPrint(
+                "Activity selected IDs : ${getGuideProfileResponse.data!.guideDetails!.guideActivities!.length}");
+          }
+
+          countryNameTEC.text =
+              getGuideProfileResponse.data!.guideDetails!.country ?? "";
+          stateNameTEC.text =
+              getGuideProfileResponse.data!.guideDetails!.state ?? "";
+          cityNameTEC.text =
+              getGuideProfileResponse.data!.guideDetails!.city ?? "";
+
+          zipcodeTEC.text =
+              getGuideProfileResponse.data!.guideDetails!.pincode ?? "";
+
+          // set guide notification setting
+          await PreferenceUtil().setGuideNotificationSetting(
+            getGuideProfileResponse.data!.guideDetails!.notificationStatus
+                .toString(),
+          );
+          // await  PreferenceUtil().setIdProof(document);
+
+          await PreferenceUtil().setGuideAvailability(
+            getGuideProfileResponse.data!.guideDetails!.availability == 1
+                ? "1"
+                : "0",
+          );
+        } else if (status == 400) {
+          GlobalUtility.showToast(context, message);
+        } else if (status == 401) {
+          GlobalUtility().handleSessionExpire(context);
+        } else {}
+      } else {
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+      debugPrint("Get Activities error : $e");
+      GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      setBusy(false);
+      GlobalUtility().closeLoaderDialog(context);
+    }
+  }
+}
+
+class ActivitiesModel {
+  String title;
+  int id;
+  bool isSelect;
+  ActivitiesModel(
+      {required this.id, required this.title, this.isSelect = false});
 }

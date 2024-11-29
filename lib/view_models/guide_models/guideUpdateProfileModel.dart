@@ -2,17 +2,18 @@
 
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:Siesta/api_requests/api.dart';
 import 'package:Siesta/api_requests/guideUpdateProfileRequest.dart';
 import 'package:Siesta/app_constants/app_strings.dart';
+import 'package:Siesta/response_pojo/getTravellerProfileResponse.dart';
 import 'package:Siesta/response_pojo/guid_login_response.dart';
 import 'package:Siesta/response_pojo/guideAccountDeatilsPojo.dart';
 import 'package:Siesta/utility/globalUtility.dart';
+import 'package:Siesta/utility/preference_util.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:stacked/stacked.dart';
-import 'package:Siesta/utility/preference_util.dart';
-import 'package:Siesta/response_pojo/getTravellerProfileResponse.dart';
 
 import '../../api_requests/traveller_find_guide.dart';
 import '../../response_pojo/county_pojo.dart';
@@ -31,6 +32,7 @@ class GuideUpdateProfileModel extends BaseViewModel implements Initialisable {
   TextEditingController stateController = TextEditingController();
   TextEditingController cityController = TextEditingController();
   TextEditingController bioController = TextEditingController();
+
   //banking controller
   TextEditingController customerNameController = TextEditingController();
   TextEditingController branchNameController = TextEditingController();
@@ -147,11 +149,14 @@ class GuideUpdateProfileModel extends BaseViewModel implements Initialisable {
             getTravellerProfileResponse!.data!.userDetail!.bio.toString());
         countryCode = getTravellerProfileResponse!.data!.countryCode!;
         notifyListeners();
+
         await PreferenceUtil().setGuideNotificationSetting(
             getTravellerProfileResponse!.data!.notificationStatus.toString());
         // await  PreferenceUtil().setIdProof(document);
+
         await PreferenceUtil().setGuideAvailability(
             getTravellerProfileResponse!.data!.availability == 1 ? "1" : "0");
+
         username = getTravellerProfileResponse!.data!.name!;
         profileImage =
             getTravellerProfileResponse!.data!.userDetail!.profilePicture!;

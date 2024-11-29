@@ -206,7 +206,8 @@ class PreferenceUtil {
 
     Map<String, String> accessTokenHeader = {
       "Accept": "application/json",
-      "Authorization": "Bearer ${tokenValue ?? ""}"
+      "Content-Type": "application/json",
+      "access_token": tokenValue ?? ""
     };
     return accessTokenHeader;
   }

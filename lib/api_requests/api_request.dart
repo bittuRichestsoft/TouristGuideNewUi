@@ -44,7 +44,7 @@ class ApiRequest {
     var postUrl = Api.baseUrl + url;
     Uri myUri = Uri.parse(postUrl);
     debugPrint("map data : ${jsonEncode(map)}");
-    final apiResult = await post(myUri, headers: header, body: map);
+    final apiResult = await post(myUri, headers: header, body: jsonEncode(map));
 
     debugPrint(Api.baseUrl + url);
     debugPrint("$url apiResult---- ${apiResult.body}");
@@ -87,6 +87,37 @@ class ApiRequest {
     Uri myUri = Uri.parse(postUrl);
 
     var request = MultipartRequest('POST', myUri)
+      ..headers.addAll(header)
+      ..fields.addAll(fields);
+
+    if (files.isNotEmpty) {
+      for (var file in files) {
+        request.files.add(file);
+      }
+    }
+
+    // debugPrint("fields: $fields");
+    // debugPrint("files: ${files.map((file) => file.filename)}");
+
+    final streamedResponse = await request.send();
+
+    // streamedResponse.stream.transform(utf8.decoder).listen((value) {
+    //   debugPrint("response: $value");
+    // });
+    if (streamedResponse.statusCode == 401) {
+      GlobalUtility().handleSessionExpire(navigatorKey.currentContext!);
+    }
+
+    return streamedResponse;
+  }
+
+  Future<StreamedResponse> putMultipartRequest(
+      Map<String, String> fields, String url, List<MultipartFile> files) async {
+    Map<String, String> header = await PreferenceUtil().getAuthHeader();
+    var postUrl = Api.baseUrl + url;
+    Uri myUri = Uri.parse(postUrl);
+
+    var request = MultipartRequest('PUT', myUri)
       ..headers.addAll(header)
       ..fields.addAll(fields);
 
