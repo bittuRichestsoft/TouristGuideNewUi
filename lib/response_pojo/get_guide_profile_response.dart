@@ -129,6 +129,7 @@ class GuideDetails {
   int? status;
   UserDetail? userDetail;
   List<GuideActivities>? guideActivities;
+  List<UserDocumentUrl>? userDocumentUrl;
 
   GuideDetails(
       {this.id,
@@ -147,7 +148,8 @@ class GuideDetails {
       this.isVerified,
       this.status,
       this.userDetail,
-      this.guideActivities});
+      this.guideActivities,
+      this.userDocumentUrl});
 
   GuideDetails.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -172,6 +174,12 @@ class GuideDetails {
       guideActivities = <GuideActivities>[];
       json['guide_activities'].forEach((v) {
         guideActivities!.add(new GuideActivities.fromJson(v));
+      });
+    }
+    if (json['user_document_url'] != null) {
+      userDocumentUrl = <UserDocumentUrl>[];
+      json['user_document_url'].forEach((v) {
+        userDocumentUrl!.add(new UserDocumentUrl.fromJson(v));
       });
     }
   }
@@ -206,10 +214,10 @@ class GuideDetails {
 
 class UserDetail {
   String? profilePicture;
-  Null? price;
+  dynamic price;
   String? preferredCurrency;
   String? bio;
-  Null? coverPicture;
+  String? coverPicture;
   String? hostSinceYears;
   String? hostSinceMonths;
   String? pronouns;
@@ -287,6 +295,25 @@ class Activity {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['title'] = this.title;
+    return data;
+  }
+}
+
+class UserDocumentUrl {
+  int? id;
+  String? documentUrl;
+
+  UserDocumentUrl({this.id, this.documentUrl});
+
+  UserDocumentUrl.fromJson(Map<String, dynamic> json) {
+    documentUrl = json['document_url'];
+    id = json['id'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['document_url'] = this.documentUrl;
+    data['id'] = this.id;
     return data;
   }
 }

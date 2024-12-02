@@ -141,4 +141,33 @@ class ApiRequest {
 
     return streamedResponse;
   }
+
+  /// DELETE request
+  Future<Response> deleteWithHeader(String url) async {
+    Map<String, String> header = await PreferenceUtil().getAuthHeader();
+    var getUrl = Api.baseUrl + url;
+    Uri myUri = Uri.parse(getUrl);
+    final apiResult = await delete(
+      myUri,
+      headers: header,
+    );
+
+    debugPrint(Api.baseUrl + url);
+    debugPrint("$url apiResult---- ${apiResult.body}");
+
+    if (apiResult.statusCode == 401) {
+      return Response(
+        json.encode({
+          "status": 401,
+          "message": "Session Expired",
+        }),
+        401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+    }
+
+    return apiResult;
+  }
 }

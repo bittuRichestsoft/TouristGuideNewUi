@@ -5,6 +5,7 @@ import 'dart:convert';
 
 import 'package:Siesta/app_constants/app_color.dart';
 import 'package:Siesta/app_constants/app_routes.dart';
+import 'package:Siesta/app_constants/shared_preferences.dart';
 import 'package:Siesta/app_service/router_service.dart' as router;
 import 'package:Siesta/response_pojo/waiting_list_pojo.dart';
 import 'package:Siesta/utility/globalUtility.dart';
@@ -50,6 +51,10 @@ void main() async {
   await FirebaseMessaging.instance.requestPermission();
   await FirebaseMessaging.instance.getToken();
   prefs = await SharedPreferences.getInstance();
+
+  debugPrint(
+      "Access Token: ${prefs.getString(SharedPreferenceValues.token) ?? ""}");
+
   getTokenData();
 }
 

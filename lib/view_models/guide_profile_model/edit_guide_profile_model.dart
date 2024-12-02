@@ -45,7 +45,7 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
   ValueNotifier<bool> destinationNotifier = ValueNotifier(false);
 
   List<ActivitiesModel> activitiesList = [];
-  List<String> documentProofList = [];
+  List<DocumentsModel> documentsList = [];
 
   List<String> countryList = ["Select Country"];
   List<String> stateList = ["Select State"];
@@ -59,8 +59,6 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
     getActivitiesAPI().then((value) {
       getProfileAPI();
     });
-
-    // call get Profile
   }
 
   void increaseHostValue(String type) {
@@ -87,6 +85,44 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
     notifyListeners();
   }
 
+  bool validate() {
+    BuildContext context = navigatorKey.currentContext!;
+    List<ActivitiesModel> activityList =
+        activitiesList.where((element) => element.isSelect == true).toList();
+    if (firstNameTEC.text.trim().isEmpty) {
+      GlobalUtility.showToast(context, "Please enter first name");
+      return false;
+    } else if (lastNameTEC.text.trim().isEmpty) {
+      GlobalUtility.showToast(context, "Please enter last name");
+      return false;
+    } else if (phoneTEC.text.trim().isEmpty) {
+      GlobalUtility.showToast(context, "Please enter phone number");
+      return false;
+    } else if (phoneTEC.text.trim().length < 6) {
+      GlobalUtility.showToast(context, "Please enter valid phone number");
+      return false;
+    } else if (bioTEC.text.trim().isEmpty) {
+      GlobalUtility.showToast(context, "Please enter your bio");
+      return false;
+    } else if (activityList.isEmpty) {
+      GlobalUtility.showToast(context, "Please choose the activity");
+      return false;
+    } else if (countryNameTEC.text.trim().isEmpty) {
+      GlobalUtility.showToast(context, "Please select the county");
+      return false;
+    } else if (stateNameTEC.text.trim().isEmpty) {
+      GlobalUtility.showToast(context, "Please select the state");
+      return false;
+    } else if (cityNameTEC.text.trim().isEmpty) {
+      GlobalUtility.showToast(context, "Please select the city");
+      return false;
+    } else if (zipcodeTEC.text.trim().isEmpty) {
+      GlobalUtility.showToast(context, "Please enter your zipcode");
+      return false;
+    }
+    return true;
+  }
+
   Future<bool> getLocationApi(
       {BuildContext? viewContext, String? countryId, String? stateId}) async {
     try {
@@ -100,6 +136,9 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
         final apiResponse =
             await ApiRequest().postWithMap(map, Api.getLocation);
         Map jsonData = jsonDecode(apiResponse.body);
+
+        GlobalUtility().closeLoaderDialog(viewContext);
+
         debugPrint("MAP --- $map ----- \n$jsonData");
         var status = jsonData['statusCode'];
         var message = jsonData['message'];
@@ -127,11 +166,9 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
 
           return true;
         } else if (status == 400) {
-          setBusy(false);
           notifyListeners();
           GlobalUtility.showToast(viewContext, message);
         } else if (status == 401) {
-          setBusy(false);
           notifyListeners();
           GlobalUtility.showToast(viewContext, message);
           GlobalUtility().handleSessionExpire(viewContext);
@@ -141,8 +178,6 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
       }
     } catch (e) {
       GlobalUtility.showToast(viewContext!, AppStrings.someErrorOccurred);
-    } finally {
-      GlobalUtility().closeLoaderDialog(viewContext!);
     }
     return false;
   }
@@ -157,6 +192,9 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
             .timeout(Duration(seconds: 20));
 
         var jsonData = jsonDecode(apiResponse.body);
+
+        GlobalUtility().closeLoaderDialog(context);
+
         int status = jsonData['statusCode'] ?? 404;
         String message = jsonData['message'] ?? "";
 
@@ -177,71 +215,30 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
         GlobalUtility.showToast(context, AppStrings().INTERNET);
       }
     } catch (e) {
-      debugPrint("Get Activities error : $e");
+      debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
-    } finally {
-      setBusy(false);
-      GlobalUtility().closeLoaderDialog(context);
     }
   }
 
-  Future<void> updateGuideProfileAPI() async {
+  Future<void> deleteDocumentAPI(
+      {required int documentId, required int index}) async {
     BuildContext context = navigatorKey.currentContext!;
     try {
       if (await GlobalUtility.isConnected()) {
         GlobalUtility().showLoaderDialog(context);
-        List<int> selectedActivitiesId =
-            activitiesList.where((e) => e.isSelect).map((e) => e.id).toList();
-        Map<String, String> map = {
-          "name": firstNameTEC.text.trim(),
-          "last_name": lastNameTEC.text.trim(),
-          "phone": phoneTEC.text.trim(),
-          "country_code": countryCode,
-          "country_code_iso": countryCodeIso,
-          "pincode": zipcodeTEC.text.trim(),
-          "country": countryNameTEC.text,
-          "state": stateNameTEC.text,
-          "city": cityNameTEC.text,
-          "bio": bioTEC.text.trim(),
-          "hostYear": hostSinceYearTEC.text,
-          "hostMonth": hostSinceMonthTEC.text,
-          if (selectedPronounValue != null)
-            "pronouns": selectedPronounValue ?? "",
-        };
-
-        for (int i = 0; i < selectedActivitiesId.length; i++) {
-          map['activities[$i]'] = selectedActivitiesId[i].toString();
-        }
-
-        List<http.MultipartFile> field = [];
-
-        if (profileImgLocal != null) {
-          field.add(http.MultipartFile.fromBytes(
-              'profile_picture', File(profileImgLocal!).readAsBytesSync(),
-              filename: File(profileImgLocal!).path.split("/").last,
-              contentType: MediaType('image', '*')));
-        }
-        if (documentProofList.isNotEmpty) {
-          for (int i = 0; i < documentProofList.length; i++) {
-            field.add(http.MultipartFile.fromBytes(
-                'id_proof', File(documentProofList[i]).readAsBytesSync(),
-                filename: File(documentProofList[i]).path.split("/").last));
-          }
-        }
-
-        final response = await ApiRequest()
-            .putMultipartRequest(map, Api.updateGuideProfile, field)
+        final apiResponse = await ApiRequest()
+            .deleteWithHeader(Api.deleteDocuments + "?document_id=$documentId")
             .timeout(Duration(seconds: 20));
 
-        var apiResponse = await response.stream.bytesToString();
+        var jsonData = jsonDecode(apiResponse.body);
 
-        var jsonData = jsonDecode(apiResponse);
+        GlobalUtility().closeLoaderDialog(context);
+
         int status = jsonData['statusCode'] ?? 404;
         String message = jsonData['message'] ?? "";
 
         if (status == 200) {
-          getProfileAPI();
-          GlobalUtility.showToast(context, message);
+          documentsList.removeAt(index);
         } else if (status == 400) {
           GlobalUtility.showToast(context, message);
         } else if (status == 401) {
@@ -251,11 +248,10 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
         GlobalUtility.showToast(context, AppStrings().INTERNET);
       }
     } catch (e) {
-      debugPrint("Get Activities error : $e");
+      debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
-      setBusy(false);
-      GlobalUtility().closeLoaderDialog(context);
+      notifyListeners();
     }
   }
 
@@ -270,6 +266,9 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
             .timeout(const Duration(seconds: 20));
 
         var jsonData = jsonDecode(apiResponse.body);
+
+        GlobalUtility().closeLoaderDialog(context);
+
         int status = jsonData['statusCode'] ?? 404;
         String message = jsonData['message'] ?? "";
 
@@ -302,7 +301,10 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
           lastNameTEC.text =
               getGuideProfileResponse.data!.guideDetails!.lastName ?? "";
           countryCode =
-              getGuideProfileResponse.data!.guideDetails!.countryCode ?? "+1";
+              (getGuideProfileResponse.data!.guideDetails!.countryCode)
+                      ?.replaceAll(" ", "") ??
+                  "+1";
+          debugPrint("Country code : $countryCode");
           countryCodeIso =
               getGuideProfileResponse.data!.guideDetails!.countryCodeIso ??
                   "Us";
@@ -351,6 +353,23 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
           zipcodeTEC.text =
               getGuideProfileResponse.data!.guideDetails!.pincode ?? "";
 
+          documentsList.clear();
+
+          for (int i = 0;
+              i <
+                  getGuideProfileResponse
+                      .data!.guideDetails!.userDocumentUrl!.length;
+              i++) {
+            documentsList.add(DocumentsModel(
+                id: getGuideProfileResponse
+                        .data!.guideDetails!.userDocumentUrl![i].id ??
+                    0,
+                documentPath: getGuideProfileResponse
+                        .data!.guideDetails!.userDocumentUrl![i].documentUrl ??
+                    "",
+                isLocal: false));
+          }
+
           // set guide notification setting
           await PreferenceUtil().setGuideNotificationSetting(
             getGuideProfileResponse.data!.guideDetails!.notificationStatus
@@ -372,11 +391,175 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
         GlobalUtility.showToast(context, AppStrings().INTERNET);
       }
     } catch (e) {
-      debugPrint("Get Activities error : $e");
+      debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
-      setBusy(false);
-      GlobalUtility().closeLoaderDialog(context);
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateGuideProfileAPI() async {
+    BuildContext context = navigatorKey.currentContext!;
+    try {
+      if (await GlobalUtility.isConnected()) {
+        GlobalUtility().showLoaderDialog(context);
+
+        List<int> selectedActivitiesId =
+            activitiesList.where((e) => e.isSelect).map((e) => e.id).toList();
+        Map<String, String> map = {
+          "name": firstNameTEC.text.trim(),
+          "last_name": lastNameTEC.text.trim(),
+          "phone": phoneTEC.text.trim(),
+          "country_code": countryCode,
+          "country_code_iso": countryCodeIso,
+          "pincode": zipcodeTEC.text.trim(),
+          "country": countryNameTEC.text,
+          "state": stateNameTEC.text,
+          "city": cityNameTEC.text,
+          "bio": bioTEC.text.trim(),
+          "hostYear": hostSinceYearTEC.text,
+          "hostMonth": hostSinceMonthTEC.text,
+          if (selectedPronounValue != null)
+            "pronouns": selectedPronounValue ?? "",
+        };
+
+        for (int i = 0; i < selectedActivitiesId.length; i++) {
+          map['activities[$i]'] = selectedActivitiesId[i].toString();
+        }
+
+        List<http.MultipartFile> field = [];
+
+        if (profileImgLocal != null) {
+          field.add(http.MultipartFile.fromBytes(
+              'profile_picture', File(profileImgLocal!).readAsBytesSync(),
+              filename: File(profileImgLocal!).path.split("/").last,
+              contentType: MediaType('image', '*')));
+        }
+        if (documentsList.isNotEmpty) {
+          for (int i = 0; i < documentsList.length; i++) {
+            if (documentsList[i].isLocal == true) {
+              field.add(http.MultipartFile.fromBytes('id_proof',
+                  File(documentsList[i].documentPath).readAsBytesSync(),
+                  filename: File(documentsList[i].documentPath)
+                      .path
+                      .split("/")
+                      .last));
+            }
+          }
+        }
+
+        final response = await ApiRequest()
+            .putMultipartRequest(map, Api.updateGuideProfile, field)
+            .timeout(Duration(seconds: 20));
+
+        var apiResponse = await response.stream.bytesToString();
+
+        GlobalUtility().closeLoaderDialog(context);
+
+        var jsonData = jsonDecode(apiResponse);
+        int status = jsonData['statusCode'] ?? 404;
+        String message = jsonData['message'] ?? "";
+
+        if (status == 200) {
+          getProfileAPI();
+          GlobalUtility.showToast(context, message);
+        } else if (status == 400) {
+          GlobalUtility.showToast(context, message);
+        } else if (status == 401) {
+          GlobalUtility().handleSessionExpire(context);
+        }
+      } else {
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+      debugPrint("$runtimeType error : $e");
+      GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    }
+  }
+
+  Future<void> updateCoverImageAPI() async {
+    BuildContext context = navigatorKey.currentContext!;
+    try {
+      if (await GlobalUtility.isConnected()) {
+        GlobalUtility().showLoaderDialog(context);
+
+        List<http.MultipartFile> field = [];
+
+        if (coverImgLocal != null) {
+          field.add(http.MultipartFile.fromBytes(
+              'cover_picture', File(coverImgLocal!).readAsBytesSync(),
+              filename: File(coverImgLocal!).path.split("/").last,
+              contentType: MediaType('image', '*')));
+        }
+
+        final response = await ApiRequest().putMultipartRequest(
+            {}, Api.updateCoverImage, field).timeout(Duration(seconds: 20));
+
+        var apiResponse = await response.stream.bytesToString();
+
+        GlobalUtility().closeLoaderDialog(context);
+
+        var jsonData = jsonDecode(apiResponse);
+        debugPrint(apiResponse);
+        int status = jsonData['statusCode'] ?? 404;
+        String message = jsonData['message'] ?? "";
+
+        if (status == 200) {
+          // getProfileAPI();
+          // GlobalUtility.showToast(context, message);
+          coverImgLocal = null;
+          coverImgUrl = jsonData["data"]["image_url"];
+        } else if (status == 400) {
+          GlobalUtility.showToast(context, message);
+        } else if (status == 401) {
+          GlobalUtility().handleSessionExpire(context);
+        }
+      } else {
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+      debugPrint("$runtimeType error : $e");
+      GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      notifyListeners();
+    }
+  }
+
+  Future<void> removeCoverImageAPI() async {
+    BuildContext context = navigatorKey.currentContext!;
+    try {
+      if (await GlobalUtility.isConnected()) {
+        GlobalUtility().showLoaderDialog(context);
+
+        final apiResponse = await ApiRequest()
+            .deleteWithHeader(
+              Api.removeCoverImage,
+            )
+            .timeout(Duration(seconds: 20));
+
+        GlobalUtility().closeLoaderDialog(context);
+
+        var jsonData = jsonDecode(apiResponse.body);
+        int status = jsonData['statusCode'] ?? 404;
+        String message = jsonData['message'] ?? "";
+
+        if (status == 200) {
+          // getProfileAPI();
+          // GlobalUtility.showToast(context, message);
+          coverImgUrl = null;
+        } else if (status == 400) {
+          GlobalUtility.showToast(context, message);
+        } else if (status == 401) {
+          GlobalUtility().handleSessionExpire(context);
+        }
+      } else {
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+      debugPrint("$runtimeType error : $e");
+      GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      notifyListeners();
     }
   }
 }
@@ -387,4 +570,12 @@ class ActivitiesModel {
   bool isSelect;
   ActivitiesModel(
       {required this.id, required this.title, this.isSelect = false});
+}
+
+class DocumentsModel {
+  int id;
+  String documentPath;
+  bool isLocal;
+  DocumentsModel(
+      {this.id = 0, required this.documentPath, required this.isLocal});
 }

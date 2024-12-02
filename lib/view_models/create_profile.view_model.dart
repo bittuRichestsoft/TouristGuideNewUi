@@ -104,7 +104,11 @@ class CreateProfileViewModel extends BaseViewModel implements Initialisable {
           "stateName": stateId ?? "",
         };
         Response apiResponse = await _profileRequest.getLocation(map);
+
         Map jsonData = jsonDecode(apiResponse.body);
+
+        GlobalUtility().closeLoaderDialog(viewContext!);
+
         debugPrint("MAP --- $map ----- \n$jsonData");
         var status = jsonData['statusCode'];
         var message = jsonData['message'];
@@ -148,8 +152,6 @@ class CreateProfileViewModel extends BaseViewModel implements Initialisable {
       }
     } catch (e) {
       GlobalUtility.showToast(viewContext!, AppStrings.someErrorOccurred);
-    } finally {
-      GlobalUtility().closeLoaderDialog(viewContext!);
     }
     return false;
   }
@@ -346,6 +348,7 @@ class CreateProfileViewModel extends BaseViewModel implements Initialisable {
             .timeout(Duration(seconds: 20));
 
         var jsonData = jsonDecode(apiResponse.body);
+        GlobalUtility().closeLoaderDialog(context);
         int status = jsonData['statusCode'] ?? 404;
         String message = jsonData['message'] ?? "";
 
@@ -370,7 +373,6 @@ class CreateProfileViewModel extends BaseViewModel implements Initialisable {
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
       setBusy(false);
-      GlobalUtility().closeLoaderDialog(context);
     }
   }
 }

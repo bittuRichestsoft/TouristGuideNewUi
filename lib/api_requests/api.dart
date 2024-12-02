@@ -115,6 +115,11 @@ class Api {
   static String waitingList = "${Api.baseUrl}waiting-list";
 
   static String getActivities = "guide/get-activities";
+  static String deleteDocuments = "guide/delete-documents";
+  static String updateCoverImage = "guide/update-cover-image";
+  static String removeCoverImage = "guide/remove-cover-image";
+
+  static String getGalleryPosts = "guide/get-gallery-posts";
 }
 
 /// -- ---- --- ---- --- STATUS MEAN --- ---- - - - -- ---- - -- ---

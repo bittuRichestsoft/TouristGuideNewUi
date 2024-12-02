@@ -39,7 +39,7 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
 
     return ViewModelBuilder.reactive(
         viewModelBuilder: () => EditGuideProfileModel(),
-        onViewModelReady: (model) => model.initialised,
+        // onViewModelReady: (model) => model.initialised,
         builder: (context, model, child) {
           return Scaffold(
             appBar: AppBar(
@@ -137,10 +137,12 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
                         child: CommonButton.commonBoldTextButton(
                           context: context,
                           text: "Save",
+                          isButtonEnable: true,
                           onPressed: () {
-                            model.updateGuideProfileAPI();
+                            if (model.validate()) {
+                              model.updateGuideProfileAPI();
+                            }
                           },
-                          // isButtonEnable: true,
                         ),
                       )
                     ],
@@ -161,11 +163,9 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
             height: screenHeight * 0.4,
             width: screenWidth,
             child: model.coverImgLocal != null
-                ? DecorationImage(
+                ? Image.file(
+                    File(model.coverImgLocal ?? ""),
                     fit: BoxFit.cover,
-                    image: FileImage(
-                      File(model.coverImgLocal ?? ""),
-                    ),
                   )
                 : CommonImageView.rectangleNetworkImage(
                     imgUrl: model.coverImgUrl ?? "",
@@ -180,33 +180,30 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
               child: Stack(
                 children: [
                   Container(
-                      width: screenWidth * 0.35,
-                      height: screenWidth * 0.35,
-                      decoration: BoxDecoration(
-                          color: AppColor.whiteColor,
-                          border: Border.all(
-                              color: AppColor.buttonDisableColor, width: 3),
-                          shape: BoxShape.circle,
-                          image: model.profileImgLocal != null
-                              ? DecorationImage(
-                                  fit: BoxFit.cover,
-                                  image: FileImage(
-                                    File(model.profileImgLocal ?? ""),
-                                  ),
-                                )
-                              : model.profileImgUrl != null &&
-                                      model.profileImgUrl != ""
-                                  ? DecorationImage(
-                                      fit: BoxFit.cover,
-                                      image: NetworkImage(
-                                          model.profileImgUrl ?? ""))
-                                  : DecorationImage(
-                                      image: AssetImage(AppImages()
-                                          .pngImages
-                                          .icProfilePlaceholder)))),
+                    width: screenWidth * 0.35,
+                    height: screenWidth * 0.35,
+                    decoration: BoxDecoration(
+                      color: AppColor.whiteColor,
+                      border: Border.all(
+                          color: AppColor.buttonDisableColor, width: 3),
+                      shape: BoxShape.circle,
+                    ),
+                    child: model.profileImgLocal != null
+                        ? Image.file(
+                            File(model.profileImgLocal ?? ""),
+                            fit: BoxFit.cover,
+                          )
+                        : model.profileImgUrl != null &&
+                                model.profileImgUrl != ""
+                            ? CommonImageView.roundNetworkImage(
+                                imgUrl: model.profileImgUrl,
+                              )
+                            : Image.asset(
+                                AppImages().pngImages.icProfilePlaceholder),
+                  ),
                   Positioned(
-                      right: screenHeight * 0.02,
-                      bottom: screenHeight * 0.02,
+                      right: screenHeight * 0.015,
+                      bottom: screenHeight * 0.015,
                       child: InkWell(
                         onTap: () {
                           CommonImageView.chooseImageDialog(
@@ -248,45 +245,58 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
               ),
             ),
           ),
-          Positioned(
-              top: screenWidth * 0.04,
-              right: screenWidth * 0.04,
-              child: InkWell(
-                onTap: () {
-                  CommonImageView.chooseImageDialog(
-                      context: context,
-                      onTapGallery: () async {
-                        Navigator.pop(context);
-                        String? pickedFile =
-                            await CommonImageView.pickFromGallery();
-                        if (pickedFile != null) {
-                          model.coverImgLocal = pickedFile;
-                          model.notifyListeners();
-                        }
+          model.coverImgUrl == null
+              ? Positioned(
+                  top: screenWidth * 0.04,
+                  right: screenWidth * 0.04,
+                  child: InkWell(
+                    onTap: () {
+                      CommonImageView.chooseImageDialog(
+                          context: context,
+                          onTapGallery: () async {
+                            Navigator.pop(context);
+                            String? pickedFile =
+                                await CommonImageView.pickFromGallery();
+                            if (pickedFile != null) {
+                              model.coverImgLocal = pickedFile;
+                              model.updateCoverImageAPI();
+                            }
+                          },
+                          onTapCamera: () async {
+                            Navigator.pop(context);
+                            String? pickedFile =
+                                await CommonImageView.pickFromCamera();
+                            if (pickedFile != null) {
+                              model.coverImgLocal = pickedFile;
+                              model.updateCoverImageAPI();
+                            }
+                          });
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(screenWidth * 0.02),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: AppColor.greyColor500,
+                      ),
+                      child: TextView.mediumText(
+                        context: context,
+                        text: "Upload cover photo",
+                        textColor: AppColor.whiteColor,
+                      ),
+                    ),
+                  ))
+              : Positioned(
+                  top: 0,
+                  right: 0,
+                  child: IconButton(
+                      onPressed: () {
+                        model.removeCoverImageAPI();
                       },
-                      onTapCamera: () async {
-                        Navigator.pop(context);
-                        String? pickedFile =
-                            await CommonImageView.pickFromCamera();
-                        if (pickedFile != null) {
-                          model.coverImgLocal = pickedFile;
-                          model.notifyListeners();
-                        }
-                      });
-                },
-                child: Container(
-                  padding: EdgeInsets.all(screenWidth * 0.02),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    color: AppColor.greyColor500,
-                  ),
-                  child: TextView.mediumText(
-                    context: context,
-                    text: "Upload cover photo",
-                    textColor: AppColor.whiteColor,
-                  ),
+                      icon: Icon(
+                        Icons.cancel,
+                        color: Colors.red,
+                      )),
                 ),
-              )),
         ],
       ),
     );
@@ -1109,8 +1119,7 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
                 children: [
                   Padding(
                     padding: const EdgeInsets.only(left: 15, right: 8),
-                    child: Text(
-                        model.countryCode == "" ? "+1" : model.countryCode),
+                    child: Text(model.countryCode),
                   ),
                   Padding(
                       padding: const EdgeInsets.only(right: 10),
@@ -1140,10 +1149,10 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
           textSize: AppSizes().fontSize.simpleFontSize,
         ),
         UiSpacer.verticalSpace(context: context, space: 0.01),
-        if (model.documentProofList.length < 4)
+        if (model.documentsList.length < 4)
           InkWell(
             onTap: () {
-              if (model.documentProofList.length < 4) {
+              if (model.documentsList.length < 4) {
                 CommonImageView.chooseImageDialog(
                   context: context,
                   onTapGallery: () async {
@@ -1151,7 +1160,8 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
                     String? pickedFile =
                         await CommonImageView.pickFromGallery();
                     if (pickedFile != null) {
-                      model.documentProofList.add(pickedFile);
+                      model.documentsList.add(DocumentsModel(
+                          documentPath: pickedFile, isLocal: true));
                       model.notifyListeners();
                     }
                   },
@@ -1159,7 +1169,8 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
                     Navigator.pop(context);
                     String? pickedFile = await CommonImageView.pickFromCamera();
                     if (pickedFile != null) {
-                      model.documentProofList.add(pickedFile);
+                      model.documentsList.add(DocumentsModel(
+                          documentPath: pickedFile, isLocal: true));
                       model.notifyListeners();
                     }
                   },
@@ -1218,14 +1229,14 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
               ),
             ),
           ),
-        if (model.documentProofList.length < 5)
+        if (model.documentsList.length < 5)
           UiSpacer.verticalSpace(context: context, space: 0.02),
         SizedBox(
           width: double.infinity,
           child: Wrap(
             spacing: screenWidth * 0.04,
             alignment: WrapAlignment.start,
-            children: model.documentProofList.asMap().entries.map((e) {
+            children: model.documentsList.asMap().entries.map((e) {
               int index = e.key;
               return Container(
                 width: screenWidth * 0.2,
@@ -1237,16 +1248,27 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
                 ),
                 child: Stack(
                   children: [
-                    SizedBox(
-                        width: screenWidth * 0.15,
-                        height: screenWidth * 0.15,
-                        child: Image.file(File(e.value))),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10),
+                      child: SizedBox(
+                          width: screenWidth * 0.2,
+                          height: screenWidth * 0.2,
+                          child: e.value.isLocal == false
+                              ? CommonImageView.rectangleNetworkImage(
+                                  imgUrl: e.value.documentPath)
+                              : Image.file(File(e.value.documentPath))),
+                    ),
                     Positioned(
                       bottom: 4,
                       right: 4,
                       child: InkWell(
                         onTap: () {
-                          model.documentProofList.removeAt(index);
+                          if (e.value.isLocal == true) {
+                            model.documentsList.removeAt(index);
+                          } else {
+                            model.deleteDocumentAPI(
+                                index: e.key, documentId: e.value.id);
+                          }
                           model.notifyListeners();
                         },
                         child: CircleAvatar(
