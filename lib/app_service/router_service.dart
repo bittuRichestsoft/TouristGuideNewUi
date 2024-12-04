@@ -10,10 +10,11 @@ import 'package:Siesta/view/touristGuideView/guide_transaction_history/guidetran
 import 'package:Siesta/view/touristGuideView/guide_transaction_history/withdraw_request_screen.dart';
 import 'package:Siesta/view/touristGuideView/home/guide_home_page.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/banking_detail.dart';
-import 'package:Siesta/view/touristGuideView/tourist_profile_view/create_general_page.dart';
-import 'package:Siesta/view/touristGuideView/tourist_profile_view/experience_detail_page.dart';
-import 'package:Siesta/view/touristGuideView/tourist_profile_view/gallery_page.dart';
-import 'package:Siesta/view/touristGuideView/tourist_profile_view/general_detail_page.dart';
+import 'package:Siesta/view/touristGuideView/tourist_profile_view/create_post_page.dart';
+import 'package:Siesta/view/touristGuideView/tourist_profile_view/experience/experience_page.dart';
+import 'package:Siesta/view/touristGuideView/tourist_profile_view/experience/post_detail_page.dart';
+import 'package:Siesta/view/touristGuideView/tourist_profile_view/gallery/gallery_detail_page.dart';
+import 'package:Siesta/view/touristGuideView/tourist_profile_view/gallery/gallery_page.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/review_page.dart';
 import 'package:Siesta/view/travellerView/about_us/about_us_page.dart';
 import 'package:Siesta/view/travellerView/bookTrip/book_your_trip_page.dart';
@@ -174,22 +175,28 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case AppRoutes.findGuideScreenNew:
       return MaterialPageRoute(builder: (context) => FindGuideScreenNew());
 
-    case AppRoutes.experienceDetailPage:
-      return MaterialPageRoute(builder: (context) => ExperienceDetailPage());
-
-    case AppRoutes.generalDetailPage:
+    case AppRoutes.postDetailPage:
       return MaterialPageRoute(
-          builder: (context) => GeneralDetailPage(
-              argData: settings.arguments as Map<String, dynamic>));
+          builder: (context) => PostDetailPage(
+                argData: settings.arguments as Map<String, dynamic>,
+              ));
 
-    case AppRoutes.createGeneralPage:
+    case AppRoutes.galleryDetailPage:
       return MaterialPageRoute(
-          builder: (context) => CreateGeneralPage(
+          builder: (context) =>
+              GalleryDetailPage(galleryId: settings.arguments as String));
+
+    case AppRoutes.createPostPage:
+      return MaterialPageRoute(
+          builder: (context) => CreatePostPage(
                 argData: settings.arguments as Map<String, dynamic>,
               ));
 
     case AppRoutes.editGuideProfilePage:
       return MaterialPageRoute(builder: (context) => EditGuideProfilePage());
+
+    case AppRoutes.experiencePage:
+      return MaterialPageRoute(builder: (context) => ExperiencePage());
 
     default:
       return MaterialPageRoute(builder: (context) => const LoginPage());

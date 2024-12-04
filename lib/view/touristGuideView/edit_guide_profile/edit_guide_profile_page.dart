@@ -41,114 +41,120 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
         viewModelBuilder: () => EditGuideProfileModel(),
         // onViewModelReady: (model) => model.initialised,
         builder: (context, model, child) {
-          return Scaffold(
-            appBar: AppBar(
-              systemOverlayStyle:
-                  SystemUiOverlayStyle(statusBarColor: AppColor.appthemeColor),
-              centerTitle: true,
-              backgroundColor: AppColor.appthemeColor,
-              leading: IconButton(
-                icon: Icon(Icons.arrow_back, color: AppColor.whiteColor),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
+          return WillPopScope(
+            onWillPop: () async {
+              Navigator.pop(context, "back");
+              return true;
+            },
+            child: Scaffold(
+              appBar: AppBar(
+                systemOverlayStyle: SystemUiOverlayStyle(
+                    statusBarColor: AppColor.appthemeColor),
+                centerTitle: true,
+                backgroundColor: AppColor.appthemeColor,
+                leading: IconButton(
+                  icon: Icon(Icons.arrow_back, color: AppColor.whiteColor),
+                  onPressed: () {
+                    Navigator.pop(context, "back");
+                  },
+                ),
+                title: TextView.headingWhiteText(
+                    text: AppStrings.editProfile, context: context),
               ),
-              title: TextView.headingWhiteText(
-                  text: AppStrings.editProfile, context: context),
-            ),
 
-            // body
-            body: ListView(
-              shrinkWrap: true,
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: [
-                // Cover and profile photo
-                profileImageView(model),
-                UiSpacer.verticalSpace(
-                    space: AppSizes().widgetSize.normalPadding,
-                    context: context),
+              // body
+              body: ListView(
+                shrinkWrap: true,
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  // Cover and profile photo
+                  profileImageView(model),
+                  UiSpacer.verticalSpace(
+                      space: AppSizes().widgetSize.normalPadding,
+                      context: context),
 
-                Padding(
-                  padding: EdgeInsets.all(screenWidth * 0.04),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // name view
-                      nameView(model),
-                      UiSpacer.verticalSpace(
-                          space: AppSizes().widgetSize.normalPadding,
-                          context: context),
+                  Padding(
+                    padding: EdgeInsets.all(screenWidth * 0.04),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // name view
+                        nameView(model),
+                        UiSpacer.verticalSpace(
+                            space: AppSizes().widgetSize.normalPadding,
+                            context: context),
 
-                      // phone field
-                      phoneField(model),
-                      UiSpacer.verticalSpace(
-                          space: AppSizes().widgetSize.normalPadding,
-                          context: context),
+                        // phone field
+                        phoneField(model),
+                        UiSpacer.verticalSpace(
+                            space: AppSizes().widgetSize.normalPadding,
+                            context: context),
 
-                      // Host since view
-                      hostSinceView(model),
-                      UiSpacer.verticalSpace(
-                          space: AppSizes().widgetSize.normalPadding,
-                          context: context),
+                        // Host since view
+                        hostSinceView(model),
+                        UiSpacer.verticalSpace(
+                            space: AppSizes().widgetSize.normalPadding,
+                            context: context),
 
-                      pronounView(model),
-                      UiSpacer.verticalSpace(
-                          space: AppSizes().widgetSize.normalPadding,
-                          context: context),
+                        pronounView(model),
+                        UiSpacer.verticalSpace(
+                            space: AppSizes().widgetSize.normalPadding,
+                            context: context),
 
-                      describeYourself(model),
-                      UiSpacer.verticalSpace(
-                          space: AppSizes().widgetSize.normalPadding,
-                          context: context),
+                        describeYourself(model),
+                        UiSpacer.verticalSpace(
+                            space: AppSizes().widgetSize.normalPadding,
+                            context: context),
 
-                      // activities
-                      activitiesView(model),
-                      UiSpacer.verticalSpace(
-                          space: AppSizes().widgetSize.normalPadding,
-                          context: context),
+                        // activities
+                        activitiesView(model),
+                        UiSpacer.verticalSpace(
+                            space: AppSizes().widgetSize.normalPadding,
+                            context: context),
 
-                      // country state city
-                      countryCityField(model),
-                      UiSpacer.verticalSpace(
-                          space: AppSizes().widgetSize.normalPadding,
-                          context: context),
+                        // country state city
+                        countryCityField(model),
+                        UiSpacer.verticalSpace(
+                            space: AppSizes().widgetSize.normalPadding,
+                            context: context),
 
-                      // Zipcode
-                      CustomTextField(
-                        textEditingController: model.zipcodeTEC,
-                        headingText: "Zipcode",
-                        hintText: "Enter zipcode",
-                      ),
-                      UiSpacer.verticalSpace(
-                          space: AppSizes().widgetSize.normalPadding,
-                          context: context),
-
-                      // upload ID proof
-                      uploadIdProofView(model),
-                      UiSpacer.verticalSpace(
-                          space: AppSizes().widgetSize.normalPadding,
-                          context: context),
-
-                      // save button
-                      SizedBox(
-                        height: screenHeight * 0.06,
-                        width: screenWidth,
-                        child: CommonButton.commonBoldTextButton(
-                          context: context,
-                          text: "Save",
-                          isButtonEnable: true,
-                          onPressed: () {
-                            if (model.validate()) {
-                              model.updateGuideProfileAPI();
-                            }
-                          },
+                        // Zipcode
+                        CustomTextField(
+                          textEditingController: model.zipcodeTEC,
+                          headingText: "Zipcode",
+                          hintText: "Enter zipcode",
                         ),
-                      )
-                    ],
-                  ),
-                )
-              ],
+                        UiSpacer.verticalSpace(
+                            space: AppSizes().widgetSize.normalPadding,
+                            context: context),
+
+                        // upload ID proof
+                        uploadIdProofView(model),
+                        UiSpacer.verticalSpace(
+                            space: AppSizes().widgetSize.normalPadding,
+                            context: context),
+
+                        // save button
+                        SizedBox(
+                          height: screenHeight * 0.06,
+                          width: screenWidth,
+                          child: CommonButton.commonBoldTextButton(
+                            context: context,
+                            text: "Save",
+                            isButtonEnable: true,
+                            onPressed: () {
+                              if (model.validate()) {
+                                model.updateGuideProfileAPI();
+                              }
+                            },
+                          ),
+                        )
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           );
         });
@@ -1229,7 +1235,7 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
               ),
             ),
           ),
-        if (model.documentsList.length < 5)
+        if (model.documentsList.length < 4)
           UiSpacer.verticalSpace(context: context, space: 0.02),
         SizedBox(
           width: double.infinity,

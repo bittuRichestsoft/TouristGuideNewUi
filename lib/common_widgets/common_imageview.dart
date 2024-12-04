@@ -24,7 +24,7 @@ class CommonImageView {
         height: MediaQuery.of(ctx).size.height * 0.2,
       ));
 
-  static rectangleNetworkImage(
+  static Widget rectangleNetworkImage(
           {String? imgUrl = '',
           double? height,
           double? width,
@@ -46,11 +46,14 @@ class CommonImageView {
           width: width,
           height: height,
           decoration: BoxDecoration(
-            color: AppColor.appthemeColor,
+            color: AppColor.greyColor500.withOpacity(0.5),
           ),
           child: Padding(
             padding: const EdgeInsets.all(30.0),
-            child: SvgPicture.asset(AppImages().svgImages.ivProfilePlaceholder),
+            child: SvgPicture.asset(
+              AppImages().svgImages.icPlaceHolder,
+              color: AppColor.greyColor,
+            ),
           ),
         ),
       );

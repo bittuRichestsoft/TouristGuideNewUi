@@ -33,9 +33,10 @@ class AppRoutes {
   static const String travellerHomeMessagePage = "travellerHomeMessagePage";
 
   static const String findGuideScreenNew = "findGuideScreenNew";
-  static const String generalDetailPage = "generalDetailPage";
-  static const String experienceDetailPage = "experienceDetailPage";
-  static const String createGeneralPage = "createGeneralPage";
+  static const String galleryDetailPage = "galleryDetailPage";
+  static const String postDetailPage = "postDetailPage";
+  static const String createPostPage = "createPostPage";
 
   static const String editGuideProfilePage = "editGuideProfilePage";
+  static const String experiencePage = "experiencePage";
 }

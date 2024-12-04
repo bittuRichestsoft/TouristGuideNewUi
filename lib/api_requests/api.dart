@@ -114,12 +114,26 @@ class Api {
   static String aboutUs = "${Api.baseUrl}about-us";
   static String waitingList = "${Api.baseUrl}waiting-list";
 
+  // For Profile
   static String getActivities = "guide/get-activities";
   static String deleteDocuments = "guide/delete-documents";
   static String updateCoverImage = "guide/update-cover-image";
   static String removeCoverImage = "guide/remove-cover-image";
 
+  // To get listing of gallery, general & experience
   static String getGalleryPosts = "guide/get-gallery-posts";
+  static String getGeneralPosts = "guide/get-general-posts";
+  static String getExperiencePosts = "guide/get-experience-posts";
+
+  // for gallery, general & experience detail page
+  static String getGalleryDetail = "guide/get-gallery-detail";
+  static String getPostDetail = "guide/get-post-detail";
+
+  // to like unlike the post
+  static String likePost = "guide/like-post";
+  static String unLikePost = "guide/unlike-post";
+  static String likeGallery = "guide/like-gallery";
+  static String unLikeGallery = "guide/unlike-gallery";
 }
 
 /// -- ---- --- ---- --- STATUS MEAN --- ---- - - - -- ---- - -- ---

@@ -12,10 +12,10 @@ import '../app_constants/app_color.dart';
 import '../app_constants/app_images.dart';
 import '../common_widgets/common_imageview.dart';
 import '../common_widgets/common_textview.dart';
-import '../response_pojo/get_gallery_post_response.dart';
+import '../response_pojo/get_experience_post_response.dart';
 
-class CustomGalleryTile extends StatefulWidget {
-  const CustomGalleryTile(
+class CustomGeneralTile extends StatefulWidget {
+  const CustomGeneralTile(
       {super.key,
       this.showDescription = true,
       required this.tileData,
@@ -25,10 +25,10 @@ class CustomGalleryTile extends StatefulWidget {
   final VoidCallback onClickLike;
 
   @override
-  State<CustomGalleryTile> createState() => _CustomGalleryTileState();
+  State<CustomGeneralTile> createState() => _CustomGeneralTileState();
 }
 
-class _CustomGalleryTileState extends State<CustomGalleryTile> {
+class _CustomGeneralTileState extends State<CustomGeneralTile> {
   double screenWidth = 0.0, screenHeight = 0.0;
   int curIndex = 0;
 
@@ -37,7 +37,7 @@ class _CustomGalleryTileState extends State<CustomGalleryTile> {
   @override
   void initState() {
     imgList = [MediaTypePojo(mediaUrl: widget.tileData.heroImage!)];
-    imgList.addAll(widget.tileData.galleryMedia!.map((e) =>
+    imgList.addAll(widget.tileData.postImages!.map((e) =>
         MediaTypePojo(mediaUrl: e.url!, mediaType: e.mediaType ?? "image")));
     super.initState();
   }
@@ -49,8 +49,10 @@ class _CustomGalleryTileState extends State<CustomGalleryTile> {
 
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(context, AppRoutes.galleryDetailPage,
-            arguments: (widget.tileData.id ?? 0).toString());
+        Navigator.pushNamed(context, AppRoutes.postDetailPage, arguments: {
+          "type": "general",
+          "postId": (widget.tileData.id ?? 0).toString()
+        });
       },
       child: Container(
         decoration: BoxDecoration(

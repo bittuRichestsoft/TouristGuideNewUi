@@ -2,7 +2,7 @@
 
 import 'dart:convert';
 
-import 'package:Siesta/response_pojo/get_gallery_post_response.dart';
+import 'package:Siesta/response_pojo/get_experience_post_response.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
 
@@ -15,11 +15,11 @@ import '../../utility/globalUtility.dart';
 
 enum Status { error, loading, initialised }
 
-class GuideGalleryModel extends BaseViewModel implements Initialisable {
-  List<Rows> galleryPostList = [];
+class GuideExperienceModel extends BaseViewModel implements Initialisable {
+  List<Rows> experiencePostList = [];
 
   int pageNo = 1;
-  int totalGalleryPost = 0;
+  int totalExperiencePost = 0;
   late var scrollController;
   bool isLoadMore = false;
 
@@ -31,22 +31,22 @@ class GuideGalleryModel extends BaseViewModel implements Initialisable {
   @override
   void initialise() async {
     scrollController = ScrollController()..addListener(pagination);
-    getGalleryPosts();
+    getExperiencePosts();
   }
 
   void pagination() {
     if ((scrollController.position.maxScrollExtent ==
         scrollController.offset)) {
-      if (totalGalleryPost > galleryPostList.length) {
+      if (totalExperiencePost > experiencePostList.length) {
         isLoadMore = true;
         pageNo++;
         notifyListeners();
-        getGalleryPosts();
+        getExperiencePosts();
       }
     }
   }
 
-  Future<void> getGalleryPosts() async {
+  Future<void> getExperiencePosts() async {
     BuildContext context = navigatorKey.currentContext!;
     try {
       if (await GlobalUtility.isConnected()) {
@@ -57,7 +57,7 @@ class GuideGalleryModel extends BaseViewModel implements Initialisable {
           notifyListeners();
         }
         final apiResponse = await ApiRequest()
-            .getWithHeader(Api.getGalleryPosts +
+            .getWithHeader(Api.getExperiencePosts +
                 "?id=$userId&page_no=$pageNo&number_of_rows=5&user_id=$userId")
             .timeout(Duration(seconds: 20));
 
@@ -69,15 +69,16 @@ class GuideGalleryModel extends BaseViewModel implements Initialisable {
         String message = jsonData['message'] ?? "";
 
         if (status == 200) {
-          GetGalleryPostResponse getGalleryPostResponse =
-              getGalleryPostRespFromJson(apiResponse.body);
+          GetExperiencePostResponse getExperiencePostResponse =
+              getExperiencePostRespFromJson(apiResponse.body);
 
-          totalGalleryPost = getGalleryPostResponse.data!.totalCounts ?? 0;
+          totalExperiencePost =
+              getExperiencePostResponse.data!.totalCounts ?? 0;
 
           if (pageNo == 1) {
-            galleryPostList = getGalleryPostResponse.data!.rows!;
+            experiencePostList = getExperiencePostResponse.data!.rows!;
           } else {
-            galleryPostList.addAll(getGalleryPostResponse.data!.rows!);
+            experiencePostList.addAll(getExperiencePostResponse.data!.rows!);
           }
         } else if (status == 400) {
           _status = Status.error;

@@ -1,17 +1,21 @@
 import 'package:Siesta/app_constants/app_routes.dart';
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
+import 'package:Siesta/response_pojo/get_experience_post_response.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 
 import '../app_constants/app_color.dart';
 import '../app_constants/app_images.dart';
-import '../app_constants/app_strings.dart';
 import '../common_widgets/common_imageview.dart';
 import '../common_widgets/common_textview.dart';
+import '../response_pojo/custom_pojos/media_type_pojo.dart';
 
 class CustomExperienceTile extends StatefulWidget {
-  const CustomExperienceTile({super.key});
+  const CustomExperienceTile(
+      {super.key, required this.tileData, required this.onClickLike});
+  final Rows tileData;
+  final VoidCallback onClickLike;
 
   @override
   State<CustomExperienceTile> createState() => _CustomExperienceTileState();
@@ -20,6 +24,20 @@ class CustomExperienceTile extends StatefulWidget {
 class _CustomExperienceTileState extends State<CustomExperienceTile> {
   double screenWidth = 0.0, screenHeight = 0.0;
   int curIndex = 0;
+  List<MediaTypePojo> imgList = [];
+
+  @override
+  void initState() {
+    imgList = [
+      MediaTypePojo(
+        mediaUrl: widget.tileData.heroImage ?? "",
+      )
+    ];
+    imgList.addAll(widget.tileData.postImages!.map((e) =>
+        MediaTypePojo(mediaUrl: e.url!, mediaType: e.mediaType ?? "image")));
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     screenHeight = MediaQuery.of(context).size.height;
@@ -30,47 +48,32 @@ class _CustomExperienceTileState extends State<CustomExperienceTile> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // 1st Image
-        SizedBox(
-          height: screenHeight * 0.36,
-          width: screenWidth,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: CommonImageView.rectangleNetworkImage(
-              imgUrl: AppImages().dummyImage,
-            ),
-          ),
+        ListView.separated(
+          shrinkWrap: true,
+          itemCount: imgList.length,
+          physics: const NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) {
+            return SizedBox(
+              height: getContainerHeight(index),
+              width: screenWidth,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: CommonImageView.rectangleNetworkImage(
+                  imgUrl: imgList[index].mediaUrl,
+                ),
+              ),
+            );
+          },
+          separatorBuilder: (context, index) =>
+              UiSpacer.verticalSpace(context: context, space: 0.02),
         ),
-        UiSpacer.verticalSpace(context: context, space: 0.02),
-
-        // 2nd Image
-        SizedBox(
-          height: screenHeight * 0.25,
-          width: screenWidth,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: CommonImageView.rectangleNetworkImage(
-              imgUrl: AppImages().dummyImage,
-            ),
-          ),
-        ),
-        UiSpacer.verticalSpace(context: context, space: 0.02),
-
-        // 3rd image
-        SizedBox(
-          height: screenHeight * 0.15,
-          width: screenWidth,
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(10),
-            child: CommonImageView.rectangleNetworkImage(
-              imgUrl: AppImages().dummyImage,
-            ),
-          ),
-        ),
-        UiSpacer.verticalSpace(context: context, space: 0.02),
 
         InkWell(
-          onTap: (){
-            Navigator.pushNamed(context, AppRoutes.experienceDetailPage);
+          onTap: () {
+            Navigator.pushNamed(context, AppRoutes.postDetailPage, arguments: {
+              "type": "experience",
+              "postId": (widget.tileData.id ?? 0).toString()
+            });
           },
           child: Container(
             padding: EdgeInsets.all(screenWidth * 0.04),
@@ -96,7 +99,7 @@ class _CustomExperienceTileState extends State<CustomExperienceTile> {
                     Expanded(
                       child: TextView.mediumText(
                         context: context,
-                        text: "Belgium, Europe",
+                        text: widget.tileData.location ?? "",
                         textAlign: TextAlign.start,
                         fontWeight: FontWeight.w400,
                         textColor: AppColor.greyColor,
@@ -115,16 +118,21 @@ class _CustomExperienceTileState extends State<CustomExperienceTile> {
 
                     // Like button
                     IconButton(
-                      onPressed: () {},
+                      onPressed: widget.onClickLike,
                       splashRadius: screenHeight * 0.025,
-                      icon: Icon(
-                        CupertinoIcons.heart,
-                        color: AppColor.greyColor500,
-                      ),
+                      icon: widget.tileData.likedPost == 1
+                          ? Icon(
+                              CupertinoIcons.heart_fill,
+                              color: Colors.red,
+                            )
+                          : Icon(
+                              CupertinoIcons.heart,
+                              color: AppColor.greyColor500,
+                            ),
                     ),
                     TextView.mediumText(
                       context: context,
-                      text: "50.1k",
+                      text: (widget.tileData.likesCount ?? 0).toString(),
                       textAlign: TextAlign.start,
                       fontWeight: FontWeight.w400,
                       textColor: AppColor.greyColor500,
@@ -147,7 +155,7 @@ class _CustomExperienceTileState extends State<CustomExperienceTile> {
                         UiSpacer.horizontalSpace(context: context, space: 0.02),
                         TextView.mediumText(
                           context: context,
-                          text: "4.0 (40)",
+                          text: "0 (0)",
                           textAlign: TextAlign.start,
                           fontWeight: FontWeight.w400,
                           textColor: AppColor.greyColor,
@@ -167,7 +175,7 @@ class _CustomExperienceTileState extends State<CustomExperienceTile> {
                         UiSpacer.horizontalSpace(context: context, space: 0.02),
                         TextView.mediumText(
                           context: context,
-                          text: "4:45 hrs",
+                          text: widget.tileData.duration ?? "",
                           textAlign: TextAlign.start,
                           fontWeight: FontWeight.w400,
                           textColor: AppColor.greyColor,
@@ -182,8 +190,7 @@ class _CustomExperienceTileState extends State<CustomExperienceTile> {
                 // title
                 TextView.mediumText(
                   context: context,
-                  text:
-                      "sdfn sfjdghfldsbfjkbd sd fadsf adsf dsf dsfd fds dsf dsf ds fds dsa",
+                  text: widget.tileData.title ?? "",
                   textAlign: TextAlign.start,
                   fontWeight: FontWeight.w500,
                   textColor: AppColor.greyColor,
@@ -194,7 +201,7 @@ class _CustomExperienceTileState extends State<CustomExperienceTile> {
                 // description
                 TextView.mediumText(
                   context: context,
-                  text: AppStrings().dummyText,
+                  text: widget.tileData.description ?? "",
                   textAlign: TextAlign.start,
                   fontWeight: FontWeight.w400,
                   textColor: AppColor.greyColor500,
@@ -218,5 +225,26 @@ class _CustomExperienceTileState extends State<CustomExperienceTile> {
         )
       ],
     );
+  }
+
+  double getContainerHeight(int index) {
+    switch (index) {
+      case 0:
+        {
+          return screenHeight * 0.36;
+        }
+      case 1:
+        {
+          return screenHeight * 0.25;
+        }
+      case 2:
+        {
+          return screenHeight * 0.15;
+        }
+      default:
+        {
+          return screenHeight * 0.15;
+        }
+    }
   }
 }

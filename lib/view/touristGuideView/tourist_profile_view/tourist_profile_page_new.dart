@@ -1,9 +1,12 @@
 import 'package:Siesta/app_constants/app_routes.dart';
-import 'package:Siesta/app_constants/app_strings.dart';
+import 'package:Siesta/app_constants/shared_preferences.dart';
 import 'package:Siesta/custom_widgets/custom_experience_tile.dart';
 import 'package:Siesta/custom_widgets/custom_gallery_tile.dart';
+import 'package:Siesta/view_models/gallery_general_experience_models/post_like_model.dart';
+import 'package:Siesta/view_models/guide_profile_model/tourist_profile_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:stacked/stacked.dart';
 
 import '../../../app_constants/app_color.dart';
 import '../../../app_constants/app_images.dart';
@@ -12,6 +15,8 @@ import '../../../common_widgets/common_button.dart';
 import '../../../common_widgets/common_imageview.dart';
 import '../../../common_widgets/common_textview.dart';
 import '../../../common_widgets/vertical_size_box.dart';
+import '../../../custom_widgets/custom_general_tile.dart';
+import '../../../main.dart';
 
 class TouristProfilePageNew extends StatefulWidget {
   const TouristProfilePageNew({super.key});
@@ -28,50 +33,59 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
     screenHeight = MediaQuery.of(context).size.height;
     screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      body: ListView(
-        shrinkWrap: true,
-        physics: const AlwaysScrollableScrollPhysics(),
-        children: [
-          // Cover and profile photo
-          profileImageView(AppImages().dummyImage),
-          UiSpacer.verticalSpace(
-              space: AppSizes().widgetSize.normalPadding, context: context),
-
-          // Profile description
-          Padding(
-            padding: EdgeInsets.all(screenWidth * 0.04),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return ViewModelBuilder.reactive(
+        viewModelBuilder: () => TouristProfileModel(),
+        builder: (context, model, child) {
+          return Scaffold(
+            body: ListView(
+              shrinkWrap: true,
+              physics: const AlwaysScrollableScrollPhysics(),
               children: [
-                // Profile desc
-                profileDescription(),
-                UiSpacer.verticalSpace(context: context, space: 0.03),
+                // Cover and profile photo
+                profileImageView(model),
+                UiSpacer.verticalSpace(
+                    space: AppSizes().widgetSize.normalPadding,
+                    context: context),
 
-                // Buttons view
-                buttonsView(),
-                UiSpacer.verticalSpace(context: context, space: 0.05),
+                // Profile description
+                Padding(
+                  padding: EdgeInsets.all(screenWidth * 0.04),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Profile desc
+                      profileDescription(model),
+                      UiSpacer.verticalSpace(context: context, space: 0.03),
 
-                // Gallery view
-                galleryView(),
-                UiSpacer.verticalSpace(context: context, space: 0.05),
+                      // Buttons view
+                      buttonsView(model),
+                      UiSpacer.verticalSpace(context: context, space: 0.05),
 
-                // general planner
-                generalPlannerView(),
-                UiSpacer.verticalSpace(context: context, space: 0.05),
+                      // Gallery view
+                      if (model.galleryPostList.isNotEmpty) galleryView(model),
+                      if (model.galleryPostList.isNotEmpty)
+                        UiSpacer.verticalSpace(context: context, space: 0.05),
 
-                // special experience
-                specialExperienceView(),
+                      // general planner
+                      if (model.generalPostList.isNotEmpty)
+                        generalPlannerView(model),
+                      if (model.generalPostList.isNotEmpty)
+                        UiSpacer.verticalSpace(context: context, space: 0.05),
+
+                      // special experience
+                      if (model.experiencePostList.isNotEmpty)
+                        specialExperienceView(model),
+                    ],
+                  ),
+                )
               ],
             ),
-          )
-        ],
-      ),
-    );
+          );
+        });
   }
 
-  Widget profileImageView(img) {
+  Widget profileImageView(TouristProfileModel model) {
     return Container(
       height: screenHeight * 0.44,
       child: Stack(
@@ -79,7 +93,8 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
           Container(
             height: screenHeight * 0.4,
             width: screenWidth,
-            child: CommonImageView.rectangleNetworkImage(imgUrl: img),
+            child: CommonImageView.rectangleNetworkImage(
+                imgUrl: model.coverImageUrl ?? ""),
           ),
           Positioned(
             bottom: 0,
@@ -95,9 +110,10 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                       border: Border.all(
                           color: AppColor.buttonDisableColor, width: 3),
                       shape: BoxShape.circle,
-                      image: img != null && img != ""
+                      image: model.profileImageUrl != null
                           ? DecorationImage(
-                              fit: BoxFit.fill, image: NetworkImage(img))
+                              fit: BoxFit.fill,
+                              image: NetworkImage(model.profileImageUrl ?? ""))
                           : DecorationImage(
                               image: AssetImage(AppImages()
                                   .pngImages
@@ -109,7 +125,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
     );
   }
 
-  Widget profileDescription() {
+  Widget profileDescription(TouristProfileModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +133,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
         // Name
         TextView.headingText(
           context: context,
-          text: "Robert Luis",
+          text: model.nameText ?? "",
           color: AppColor.blackColor,
           fontSize: screenHeight * 0.03,
         ),
@@ -125,7 +141,8 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
         // host since
         TextView.mediumText(
           context: context,
-          text: "Hosted since 2002",
+          text:
+              "Hosted since ${model.calculateYear(y: model.hostSinceYear ?? "0", m: model.hostSinceMonth ?? "0")}",
           textColor: AppColor.hintTextColor,
           textSize: 0.015,
           fontWeight: FontWeight.w400,
@@ -135,7 +152,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
         // Rating
         RatingBar.builder(
           wrapAlignment: WrapAlignment.start,
-          initialRating: 4.5,
+          initialRating: double.parse(model.avgRating ?? "0"),
           minRating: 1,
           direction: Axis.horizontal,
           allowHalfRating: true,
@@ -154,7 +171,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
         // Bio
         TextView.mediumText(
           context: context,
-          text: AppStrings().dummyText,
+          text: model.bioText ?? "",
           textColor: AppColor.hintTextColor,
           textSize: 0.015,
           fontWeight: FontWeight.w400,
@@ -164,7 +181,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
     );
   }
 
-  Widget buttonsView() {
+  Widget buttonsView(TouristProfileModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -175,7 +192,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
           text: "Create Experience",
           iconPath: AppImages().svgImages.icAdd,
           onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.createGeneralPage,
+            Navigator.pushNamed(context, AppRoutes.createPostPage,
                 arguments: {"type": "experience"});
           },
         ),
@@ -187,7 +204,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
           text: "Create General",
           iconPath: AppImages().svgImages.icAdd,
           onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.createGeneralPage,
+            Navigator.pushNamed(context, AppRoutes.createPostPage,
                 arguments: {"type": "general"});
           },
         ),
@@ -199,7 +216,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
           text: "Create Gallery",
           iconPath: AppImages().svgImages.icAdd,
           onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.createGeneralPage,
+            Navigator.pushNamed(context, AppRoutes.createPostPage,
                 arguments: {"type": "gallery"});
           },
         ),
@@ -219,8 +236,12 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
           context: context,
           text: "Edit Profile",
           iconPath: AppImages().svgImages.icEditProfile,
-          onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.editGuideProfilePage);
+          onPressed: () async {
+            var val = await Navigator.pushNamed(
+                context, AppRoutes.editGuideProfilePage);
+            if (val != null) {
+              model.getProfileAPI();
+            }
           },
         ),
         UiSpacer.verticalSpace(context: context, space: 0.01),
@@ -238,38 +259,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
     );
   }
 
-  Widget galleryView() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        // title
-        TextView.headingText(
-          context: context,
-          text: "Gallery",
-          color: AppColor.blackColor,
-          fontSize: screenHeight * 0.026,
-        ),
-        UiSpacer.verticalSpace(context: context, space: 0.02),
-
-        // List
-        ListView.separated(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: 3,
-          itemBuilder: (context, index) {
-            return CustomGeneralTile(
-              tileType: "gallery",
-            );
-          },
-          separatorBuilder: (context, index) =>
-              UiSpacer.verticalSpace(context: context, space: 0.02),
-        )
-      ],
-    );
-  }
-
-  Widget generalPlannerView() {
+  Widget galleryView(TouristProfileModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,10 +268,9 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // General planner heading
             TextView.headingText(
               context: context,
-              text: "General Planner",
+              text: "Gallery",
               color: AppColor.blackColor,
               fontSize: screenHeight * 0.026,
             ),
@@ -294,7 +283,14 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                 text: "Show more",
                 iconPath: AppImages().svgImages.arrowRight,
                 borderRadius: 50,
-                onPressed: () {},
+                onPressed: () async {
+                  var val =
+                      await Navigator.pushNamed(context, AppRoutes.galleryPage);
+
+                  if (val != null) {
+                    model.getGalleryPosts();
+                  }
+                },
               ),
             )
           ],
@@ -305,11 +301,36 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: 3,
+          itemCount: model.galleryPostList.length,
           itemBuilder: (context, index) {
-            return CustomGeneralTile(
-              showDescription: false,
-              tileType: "general",
+            return CustomGalleryTile(
+              tileData: model.galleryPostList[index],
+              onClickLike: () async {
+                String postId =
+                    (model.galleryPostList[index].id ?? 0).toString();
+                String likedById =
+                    (prefs.getString(SharedPreferenceValues.id) ?? "0")
+                        .toString();
+                if (model.galleryPostList[index].likedPost == 0) {
+                  bool val =
+                      await PostLikeModel().likeGalleryAPI(postId, likedById);
+                  if (val == true) {
+                    model.galleryPostList[index].likedPost = 1;
+                    model.galleryPostList[index].likesCount =
+                        (model.galleryPostList[index].likesCount ?? 0) + 1;
+                    model.notifyListeners();
+                  }
+                } else {
+                  bool val =
+                      await PostLikeModel().unLikeGalleryAPI(postId, likedById);
+                  if (val == true) {
+                    model.galleryPostList[index].likedPost = 0;
+                    model.galleryPostList[index].likesCount =
+                        (model.galleryPostList[index].likesCount ?? 0) - 1;
+                    model.notifyListeners();
+                  }
+                }
+              },
             );
           },
           separatorBuilder: (context, index) =>
@@ -319,7 +340,65 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
     );
   }
 
-  Widget specialExperienceView() {
+  Widget generalPlannerView(TouristProfileModel model) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // title
+        TextView.headingText(
+          context: context,
+          text: "General Planner",
+          color: AppColor.blackColor,
+          fontSize: screenHeight * 0.026,
+        ),
+        UiSpacer.verticalSpace(context: context, space: 0.02),
+
+        // List
+        ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: model.generalPostList.length,
+          itemBuilder: (context, index) {
+            return CustomGeneralTile(
+              showDescription: false,
+              tileData: model.generalPostList[index],
+              onClickLike: () async {
+                String postId =
+                    (model.generalPostList[index].id ?? 0).toString();
+                String likedById =
+                    (prefs.getString(SharedPreferenceValues.id) ?? "0")
+                        .toString();
+                if (model.generalPostList[index].likedPost == 0) {
+                  bool val =
+                      await PostLikeModel().likePostAPI(postId, likedById);
+                  if (val == true) {
+                    model.generalPostList[index].likedPost = 1;
+                    model.generalPostList[index].likesCount =
+                        (model.generalPostList[index].likesCount ?? 0) + 1;
+                    model.notifyListeners();
+                  }
+                } else {
+                  bool val =
+                      await PostLikeModel().unLikePostAPI(postId, likedById);
+                  if (val == true) {
+                    model.generalPostList[index].likedPost = 0;
+                    model.generalPostList[index].likesCount =
+                        (model.generalPostList[index].likesCount ?? 0) - 1;
+                    model.notifyListeners();
+                  }
+                }
+              },
+            );
+          },
+          separatorBuilder: (context, index) =>
+              UiSpacer.verticalSpace(context: context, space: 0.02),
+        )
+      ],
+    );
+  }
+
+  Widget specialExperienceView(TouristProfileModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -344,7 +423,13 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                 text: "Show more",
                 iconPath: AppImages().svgImages.arrowRight,
                 borderRadius: 50,
-                onPressed: () {},
+                onPressed: () async {
+                  var val = await Navigator.pushNamed(
+                      context, AppRoutes.experiencePage);
+                  if (val != null) {
+                    model.getExperiencePosts();
+                  }
+                },
               ),
             )
           ],
@@ -355,9 +440,38 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
-          itemCount: 3,
+          itemCount: model.experiencePostList.length,
           itemBuilder: (context, index) {
-            return CustomExperienceTile();
+            return CustomExperienceTile(
+              tileData: model.experiencePostList[index],
+              onClickLike: () async {
+                String postId =
+                    (model.experiencePostList[index].id ?? 0).toString();
+                String likedById =
+                    (prefs.getString(SharedPreferenceValues.id) ?? "0")
+                        .toString();
+
+                if (model.experiencePostList[index].likedPost == 0) {
+                  bool val =
+                      await PostLikeModel().likePostAPI(postId, likedById);
+                  if (val == true) {
+                    model.experiencePostList[index].likedPost = 1;
+                    model.experiencePostList[index].likesCount =
+                        (model.experiencePostList[index].likesCount ?? 0) + 1;
+                    model.notifyListeners();
+                  }
+                } else {
+                  bool val =
+                      await PostLikeModel().unLikePostAPI(postId, likedById);
+                  if (val == true) {
+                    model.experiencePostList[index].likedPost = 0;
+                    model.experiencePostList[index].likesCount =
+                        (model.experiencePostList[index].likesCount ?? 0) - 1;
+                    model.notifyListeners();
+                  }
+                }
+              },
+            );
           },
           separatorBuilder: (context, index) =>
               UiSpacer.verticalSpace(context: context, space: 0.02),

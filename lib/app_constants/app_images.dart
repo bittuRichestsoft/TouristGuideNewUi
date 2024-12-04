@@ -96,6 +96,7 @@ class SvgImages {
 
   String icCameraOutline = "assets/svgFiles/icCameraOutline.svg";
   String icUpload = "assets/svgFiles/icUpload.svg";
+  String icPlaceHolder = "assets/svgFiles/icPlaceHolder.svg";
 
   //////////
 }
