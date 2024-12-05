@@ -11,10 +11,10 @@ import 'package:Siesta/view/touristGuideView/guide_transaction_history/withdraw_
 import 'package:Siesta/view/touristGuideView/home/guide_home_page.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/banking_detail.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/create_post_page.dart';
-import 'package:Siesta/view/touristGuideView/tourist_profile_view/experience/experience_page.dart';
+import 'package:Siesta/view/touristGuideView/tourist_profile_view/experience/experience_listing_page.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/experience/post_detail_page.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/gallery/gallery_detail_page.dart';
-import 'package:Siesta/view/touristGuideView/tourist_profile_view/gallery/gallery_page.dart';
+import 'package:Siesta/view/touristGuideView/tourist_profile_view/gallery/gallery_listing_page.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/review_page.dart';
 import 'package:Siesta/view/travellerView/about_us/about_us_page.dart';
 import 'package:Siesta/view/travellerView/bookTrip/book_your_trip_page.dart';
@@ -114,8 +114,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case AppRoutes.notificationPage:
       return MaterialPageRoute(builder: (context) => const NotificationPage());
 
-    case AppRoutes.galleryPage:
-      return MaterialPageRoute(builder: (context) => const GalleryPage());
+    case AppRoutes.galleryListingPage:
+      return MaterialPageRoute(
+          builder: (context) => const GalleryListingPage());
 
     case AppRoutes.touristGuideHome:
       return MaterialPageRoute(
@@ -195,8 +196,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case AppRoutes.editGuideProfilePage:
       return MaterialPageRoute(builder: (context) => EditGuideProfilePage());
 
-    case AppRoutes.experiencePage:
-      return MaterialPageRoute(builder: (context) => ExperiencePage());
+    case AppRoutes.experienceListingPage:
+      return MaterialPageRoute(builder: (context) => ExperienceListingPage());
 
     default:
       return MaterialPageRoute(builder: (context) => const LoginPage());

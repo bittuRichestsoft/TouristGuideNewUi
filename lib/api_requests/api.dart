@@ -134,6 +134,10 @@ class Api {
   static String unLikePost = "guide/unlike-post";
   static String likeGallery = "guide/like-gallery";
   static String unLikeGallery = "guide/unlike-gallery";
+
+  // Create gallery, post
+  static String createPost = "guide/create-post";
+  static String createGallery = "guide/create-gallery";
 }
 
 /// -- ---- --- ---- --- STATUS MEAN --- ---- - - - -- ---- - -- ---

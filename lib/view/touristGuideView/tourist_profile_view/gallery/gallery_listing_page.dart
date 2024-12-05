@@ -17,14 +17,14 @@ import '../../../../custom_widgets/custom_gallery_tile.dart';
 import '../../../../main.dart';
 import '../../../../view_models/gallery_general_experience_models/post_like_model.dart';
 
-class GalleryPage extends StatefulWidget {
-  const GalleryPage({Key? key}) : super(key: key);
+class GalleryListingPage extends StatefulWidget {
+  const GalleryListingPage({Key? key}) : super(key: key);
 
   @override
-  State<GalleryPage> createState() => _GalleryPageState();
+  State<GalleryListingPage> createState() => _GalleryListingPageState();
 }
 
-class _GalleryPageState extends State<GalleryPage> {
+class _GalleryListingPageState extends State<GalleryListingPage> {
   double screenWidth = 0.0, screenHeight = 0.0;
 
   @override

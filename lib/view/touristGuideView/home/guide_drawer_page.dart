@@ -7,10 +7,10 @@ import 'package:Siesta/common_widgets/common_textview.dart';
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
 import 'package:Siesta/utility/globalUtility.dart';
 import 'package:Siesta/view/all_dialogs/dialog_with_twoButton.dart';
+import 'package:Siesta/view_models/guide_models/guideUpdateProfileModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'package:Siesta/view_models/guide_models/guideUpdateProfileModel.dart';
 
 class GuideDrawerPage extends StatefulWidget {
   const GuideDrawerPage({Key? key}) : super(key: key);
@@ -210,7 +210,7 @@ class _DrawerPageState extends State<GuideDrawerPage> {
         break;
 
       case 4:
-        Navigator.pushReplacementNamed(context, AppRoutes.galleryPage);
+        Navigator.pushReplacementNamed(context, AppRoutes.galleryListingPage);
         break;
 
       case 7:

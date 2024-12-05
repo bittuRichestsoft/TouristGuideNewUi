@@ -17,7 +17,7 @@ class AppRoutes {
   static const String itineraryPage = "ItineraryPage";
   static const String notificationPage = "notificationPage";
   static const String aboutUsPage = "aboutUsPage";
-  static const String galleryPage = "galleryPage";
+  static const String galleryListingPage = "galleryListingPage";
   static const String touristGuideHome = "touristGuideHome";
   static const String touristGuideHome1 = "touristGuideHome1";
   static const String touristGuideHome2 = "touristGuideHome2";
@@ -38,5 +38,5 @@ class AppRoutes {
   static const String createPostPage = "createPostPage";
 
   static const String editGuideProfilePage = "editGuideProfilePage";
-  static const String experiencePage = "experiencePage";
+  static const String experienceListingPage = "experienceListingPage";
 }

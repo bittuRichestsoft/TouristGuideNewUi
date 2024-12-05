@@ -27,6 +27,8 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
   String? hostSinceMonth;
   String? avgRating;
 
+  bool showCreateGeneral = false;
+
   @override
   void initialise() {
     getProfileAPI();
@@ -51,7 +53,9 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
 
   Future<void> getProfileAPI() async {
     BuildContext context = navigatorKey.currentContext!;
+
     try {
+      // GlobalUtility().showLoaderDialog(navigatorKey.currentContext!);
       if (await GlobalUtility.isConnected()) {
         final apiResponse = await ApiRequest()
             .getWithHeader(Api.guideGetProfile)
@@ -90,6 +94,7 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
       debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
+      // GlobalUtility().closeLoaderDialog(context);
       notifyListeners();
     }
   }
@@ -100,7 +105,7 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
       if (await GlobalUtility.isConnected()) {
         String userId = prefs.getString(SharedPreferenceValues.id) ?? "0";
 
-        GlobalUtility().showLoaderDialog(context);
+        // GlobalUtility().showLoaderDialog(context);
         final apiResponse = await ApiRequest()
             .getWithHeader(Api.getGalleryPosts +
                 "?id=$userId&page_no=1&number_of_rows=3&user_id=$userId")
@@ -108,7 +113,7 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
 
         var jsonData = jsonDecode(apiResponse.body);
 
-        GlobalUtility().closeLoaderDialog(context);
+        // GlobalUtility().closeLoaderDialog(context);
 
         int status = jsonData['statusCode'] ?? 404;
         String message = jsonData['message'] ?? "";
@@ -140,7 +145,7 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
       if (await GlobalUtility.isConnected()) {
         String userId = prefs.getString(SharedPreferenceValues.id) ?? "0";
 
-        GlobalUtility().showLoaderDialog(context);
+        // GlobalUtility().showLoaderDialog(context);
         final apiResponse = await ApiRequest()
             .getWithHeader(Api.getGeneralPosts +
                 "?page_no=1&number_of_rows=1&id=$userId&user_id=$userId")
@@ -148,7 +153,7 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
 
         var jsonData = jsonDecode(apiResponse.body);
 
-        GlobalUtility().closeLoaderDialog(context);
+        // GlobalUtility().closeLoaderDialog(context);
 
         int status = jsonData['statusCode'] ?? 404;
         String message = jsonData['message'] ?? "";
@@ -158,6 +163,11 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
               exp_resp.getExperiencePostRespFromJson(apiResponse.body);
 
           generalPostList = getExperiencePostResponse.data!.rows!;
+          if (generalPostList.length == 0) {
+            showCreateGeneral = true;
+          } else {
+            showCreateGeneral = false;
+          }
         } else if (status == 400) {
           GlobalUtility.showToast(context, message);
         } else if (status == 401) {
@@ -180,7 +190,7 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
       if (await GlobalUtility.isConnected()) {
         String userId = prefs.getString(SharedPreferenceValues.id) ?? "0";
 
-        GlobalUtility().showLoaderDialog(context);
+        // GlobalUtility().showLoaderDialog(context);
         final apiResponse = await ApiRequest()
             .getWithHeader(Api.getExperiencePosts +
                 "?page_no=1&number_of_rows=3&id=$userId&user_id=$userId")
@@ -188,7 +198,7 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
 
         var jsonData = jsonDecode(apiResponse.body);
 
-        GlobalUtility().closeLoaderDialog(context);
+        // GlobalUtility().closeLoaderDialog(context);
 
         int status = jsonData['statusCode'] ?? 404;
         String message = jsonData['message'] ?? "";

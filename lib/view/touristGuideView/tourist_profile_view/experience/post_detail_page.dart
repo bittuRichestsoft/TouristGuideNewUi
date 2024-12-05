@@ -63,11 +63,16 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 actions: [
                   IconButton(
                       onPressed: () {
-                        Navigator.pushNamed(context, AppRoutes.createPostPage,
-                            arguments: {
-                              "type": "experience",
-                              "screenType": "edit"
-                            });
+                        if (model.postDetail != null) {
+                          Navigator.pushNamed(context, AppRoutes.createPostPage,
+                              arguments: {
+                                "type": type == "general"
+                                    ? "general"
+                                    : "experience",
+                                "screenType": "edit",
+                                "postDetails": model.postDetail,
+                              });
+                        }
                       },
                       icon: Icon(
                         Icons.edit,

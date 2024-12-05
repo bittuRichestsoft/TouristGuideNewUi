@@ -50,7 +50,7 @@ class _CustomExperienceTileState extends State<CustomExperienceTile> {
         // 1st Image
         ListView.separated(
           shrinkWrap: true,
-          itemCount: imgList.length,
+          itemCount: imgList.length > 3 ? 3 : imgList.length,
           physics: const NeverScrollableScrollPhysics(),
           itemBuilder: (context, index) {
             return SizedBox(

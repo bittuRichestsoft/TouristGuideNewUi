@@ -128,8 +128,8 @@ class _ProfilePageState extends State<TouristProfilePage> {
                                 // gallery container
                                 InkWell(
                                     onTap: () {
-                                      Navigator.pushNamed(
-                                          context, AppRoutes.galleryPage);
+                                      Navigator.pushNamed(context,
+                                          AppRoutes.galleryListingPage);
                                     },
                                     child: galleryContainer()),
 

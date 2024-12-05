@@ -86,6 +86,8 @@ class ApiRequest {
     var postUrl = Api.baseUrl + url;
     Uri myUri = Uri.parse(postUrl);
 
+    debugPrint("Api : $url --> ${fields.toString()}  --> ${files.toString()}");
+
     var request = MultipartRequest('POST', myUri)
       ..headers.addAll(header)
       ..fields.addAll(fields);

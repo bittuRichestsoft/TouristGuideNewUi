@@ -16,14 +16,14 @@ import '../../../../custom_widgets/common_widgets.dart';
 import '../../../../main.dart';
 import '../../../../view_models/gallery_general_experience_models/post_like_model.dart';
 
-class ExperiencePage extends StatefulWidget {
-  const ExperiencePage({Key? key}) : super(key: key);
+class ExperienceListingPage extends StatefulWidget {
+  const ExperienceListingPage({Key? key}) : super(key: key);
 
   @override
-  State<ExperiencePage> createState() => _ExperiencePageState();
+  State<ExperienceListingPage> createState() => _ExperienceListingPageState();
 }
 
-class _ExperiencePageState extends State<ExperiencePage> {
+class _ExperienceListingPageState extends State<ExperienceListingPage> {
   double screenWidth = 0.0, screenHeight = 0.0;
 
   @override

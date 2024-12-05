@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:Siesta/app_constants/app_color.dart';
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
 import 'package:Siesta/main.dart';
@@ -6,6 +9,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 import '../app_constants/app_fonts.dart';
 import '../app_constants/app_images.dart';
@@ -207,6 +211,42 @@ class CommonImageView {
       if (extension == 'jpg' || extension == 'jpeg' || extension == 'png') {
         String imgLocal = pickedFile.path;
         return imgLocal;
+      } else {
+        GlobalUtility.showToast(navigatorKey.currentContext!,
+            "\"$extension\" format isn't supported");
+      }
+    }
+    return null;
+  }
+
+  static Future<Map<String, dynamic>?> pickImageVideoFromGallery() async {
+    final List<AssetEntity>? pickedFile = await AssetPicker.pickAssets(
+      navigatorKey.currentContext!,
+      pickerConfig: const AssetPickerConfig(
+        maxAssets: 1,
+      ),
+    );
+    if (pickedFile != null) {
+      File? file = await pickedFile[0].file;
+      int fileSize = await file!.length();
+      String extension = file.path.split('.').last.toLowerCase();
+      if (fileSize > 52428800) {
+        GlobalUtility.showToast(
+            navigatorKey.currentContext!, "File size must not exceed 50 MB");
+        return null;
+      } else if (extension == 'jpg' ||
+          extension == 'jpeg' ||
+          extension == 'png') {
+        return {"filePath": file.path, "contentType": "image"};
+      } else if (extension == 'mp4' ||
+          extension == 'mov' ||
+          extension == 'avi') {
+        Uint8List? thumbnailData = await pickedFile[0].thumbnailData;
+        return {
+          "filePath": file.path,
+          "contentType": "video",
+          "thumbNailData": thumbnailData
+        };
       } else {
         GlobalUtility.showToast(navigatorKey.currentContext!,
             "\"$extension\" format isn't supported");

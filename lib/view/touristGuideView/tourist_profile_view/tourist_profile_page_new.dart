@@ -37,49 +37,56 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
         viewModelBuilder: () => TouristProfileModel(),
         builder: (context, model, child) {
           return Scaffold(
-            body: ListView(
-              shrinkWrap: true,
-              physics: const AlwaysScrollableScrollPhysics(),
-              children: [
-                // Cover and profile photo
-                profileImageView(model),
-                UiSpacer.verticalSpace(
-                    space: AppSizes().widgetSize.normalPadding,
-                    context: context),
+            body: RefreshIndicator(
+              color: AppColor.appthemeColor,
+              onRefresh: () async {
+                model.initialise();
+              },
+              child: ListView(
+                shrinkWrap: true,
+                physics: const AlwaysScrollableScrollPhysics(),
+                children: [
+                  // Cover and profile photo
+                  profileImageView(model),
+                  UiSpacer.verticalSpace(
+                      space: AppSizes().widgetSize.normalPadding,
+                      context: context),
 
-                // Profile description
-                Padding(
-                  padding: EdgeInsets.all(screenWidth * 0.04),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Profile desc
-                      profileDescription(model),
-                      UiSpacer.verticalSpace(context: context, space: 0.03),
+                  // Profile description
+                  Padding(
+                    padding: EdgeInsets.all(screenWidth * 0.04),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Profile desc
+                        profileDescription(model),
+                        UiSpacer.verticalSpace(context: context, space: 0.03),
 
-                      // Buttons view
-                      buttonsView(model),
-                      UiSpacer.verticalSpace(context: context, space: 0.05),
-
-                      // Gallery view
-                      if (model.galleryPostList.isNotEmpty) galleryView(model),
-                      if (model.galleryPostList.isNotEmpty)
+                        // Buttons view
+                        buttonsView(model),
                         UiSpacer.verticalSpace(context: context, space: 0.05),
 
-                      // general planner
-                      if (model.generalPostList.isNotEmpty)
-                        generalPlannerView(model),
-                      if (model.generalPostList.isNotEmpty)
-                        UiSpacer.verticalSpace(context: context, space: 0.05),
+                        // Gallery view
+                        if (model.galleryPostList.isNotEmpty)
+                          galleryView(model),
+                        if (model.galleryPostList.isNotEmpty)
+                          UiSpacer.verticalSpace(context: context, space: 0.05),
 
-                      // special experience
-                      if (model.experiencePostList.isNotEmpty)
-                        specialExperienceView(model),
-                    ],
-                  ),
-                )
-              ],
+                        // general planner
+                        if (model.generalPostList.isNotEmpty)
+                          generalPlannerView(model),
+                        if (model.generalPostList.isNotEmpty)
+                          UiSpacer.verticalSpace(context: context, space: 0.05),
+
+                        // special experience
+                        if (model.experiencePostList.isNotEmpty)
+                          specialExperienceView(model),
+                      ],
+                    ),
+                  )
+                ],
+              ),
             ),
           );
         });
@@ -191,33 +198,47 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
           context: context,
           text: "Create Experience",
           iconPath: AppImages().svgImages.icAdd,
-          onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.createPostPage,
+          onPressed: () async {
+            var backData = await Navigator.pushNamed(
+                context, AppRoutes.createPostPage,
                 arguments: {"type": "experience"});
+            if (backData != null) {
+              model.getExperiencePosts();
+            }
           },
         ),
         UiSpacer.verticalSpace(context: context, space: 0.01),
 
         // Create general
-        CommonButton.commonOutlineButtonWithIconText(
-          context: context,
-          text: "Create General",
-          iconPath: AppImages().svgImages.icAdd,
-          onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.createPostPage,
-                arguments: {"type": "general"});
-          },
-        ),
-        UiSpacer.verticalSpace(context: context, space: 0.01),
+        if (model.showCreateGeneral == true)
+          CommonButton.commonOutlineButtonWithIconText(
+            context: context,
+            text: "Create General",
+            iconPath: AppImages().svgImages.icAdd,
+            onPressed: () async {
+              var backData = await Navigator.pushNamed(
+                  context, AppRoutes.createPostPage,
+                  arguments: {"type": "general"});
+              if (backData != null) {
+                model.getGeneralPosts();
+              }
+            },
+          ),
+        if (model.showCreateGeneral == true)
+          UiSpacer.verticalSpace(context: context, space: 0.01),
 
         // Create gallery
         CommonButton.commonOutlineButtonWithIconText(
           context: context,
           text: "Create Gallery",
           iconPath: AppImages().svgImages.icAdd,
-          onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.createPostPage,
+          onPressed: () async {
+            var backData = await Navigator.pushNamed(
+                context, AppRoutes.createPostPage,
                 arguments: {"type": "gallery"});
+            if (backData != null) {
+              model.getGalleryPosts();
+            }
           },
         ),
         UiSpacer.verticalSpace(context: context, space: 0.01),
@@ -284,8 +305,8 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                 iconPath: AppImages().svgImages.arrowRight,
                 borderRadius: 50,
                 onPressed: () async {
-                  var val =
-                      await Navigator.pushNamed(context, AppRoutes.galleryPage);
+                  var val = await Navigator.pushNamed(
+                      context, AppRoutes.galleryListingPage);
 
                   if (val != null) {
                     model.getGalleryPosts();
@@ -425,7 +446,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                 borderRadius: 50,
                 onPressed: () async {
                   var val = await Navigator.pushNamed(
-                      context, AppRoutes.experiencePage);
+                      context, AppRoutes.experienceListingPage);
                   if (val != null) {
                     model.getExperiencePosts();
                   }

@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:Siesta/app_constants/app_images.dart';
+import 'package:Siesta/app_constants/decimal_formatter.dart';
 import 'package:Siesta/common_widgets/common_button.dart';
 import 'package:Siesta/common_widgets/common_imageview.dart';
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
@@ -46,7 +47,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
     screenWidth = MediaQuery.of(context).size.width;
 
     return ViewModelBuilder<CreatePostModel>.reactive(
-        viewModelBuilder: () => CreatePostModel(),
+        viewModelBuilder: () => CreatePostModel(
+            type: widget.argData["type"], argData: widget.argData),
         builder: (context, model, child) {
           return Scaffold(
               appBar: AppBar(
@@ -70,10 +72,10 @@ class _CreatePostPageState extends State<CreatePostPage> {
                         context: context)
                     : TextView.headingWhiteText(
                         text: widget.argData["type"] == "gallery"
-                            ? AppStrings.createGallery
+                            ? AppStrings.editGallery
                             : widget.argData["type"] == "experience"
-                                ? AppStrings.createExperience
-                                : AppStrings.createGeneral,
+                                ? AppStrings.editExperience
+                                : AppStrings.editGeneral,
                         context: context),
               ),
 
@@ -83,8 +85,23 @@ class _CreatePostPageState extends State<CreatePostPage> {
                 child: CommonButton.commonBoldTextButton(
                   context: context,
                   text: "Save",
-                  onPressed: () {},
-                  // isButtonEnable: true,
+                  onPressed: () async {
+                    debugPrint("Latutude : ${model.latitude}");
+                    if (widget.argData["type"] == "experience" &&
+                        model.validateExperience()) {
+                      // debugPrint(
+                      //     " ${File(model.documentsList[0].documentPath).readAsBytesSync()}");
+                      // model.createExperienceUsingDio();
+                      model.createExperienceAPI();
+                    } else if (widget.argData["type"] == "general" &&
+                        model.validateGeneral()) {
+                      model.createGeneralAPI();
+                    } else if (widget.argData["type"] == "gallery" &&
+                        model.validateGallery()) {
+                      model.createGalleryAPI();
+                    }
+                  },
+                  isButtonEnable: true,
                 ),
               ),
 
@@ -113,7 +130,59 @@ class _CreatePostPageState extends State<CreatePostPage> {
                     hintText: "Enter location",
                     headingText: "Location",
                     suffixIconPath: AppImages().svgImages.icLocation,
+                    onTap: () {
+                      if (model.locationTEC.text.isNotEmpty) {
+                        model.isPlaceListShow = true;
+                        model.notifyListeners();
+                      }
+                    },
+                    onChange: (value) async {
+                      model.latitude = null;
+                      model.longitude = null;
+                      await model.searchLocation(value);
+                    },
                   ),
+                  if (model.isPlaceListShow == true)
+                    Container(
+                      // height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: ListView.separated(
+                        shrinkWrap: true,
+                        padding: EdgeInsets.zero,
+                        itemCount: model.placeList.length,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          return InkWell(
+                            onTap: () {
+                              model.onClickSuggestion(index);
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: screenWidth * 0.04, vertical: 6),
+                              child: TextView.mediumText(
+                                context: context,
+                                text: model.placeList[index]["description"],
+                                textAlign: TextAlign.start,
+                                textColor: AppColor.greyColor,
+                                textSize: 0.016,
+                              ),
+                            ),
+                          );
+                        },
+                        separatorBuilder: (context, index) {
+                          return Divider(
+                            color: Colors.grey,
+                            height: 1,
+                            indent: screenWidth * 0.04,
+                            endIndent: screenWidth * 0.04,
+                          );
+                        },
+                      ),
+                    ),
                   UiSpacer.verticalSpace(context: context, space: 0.02),
 
                   if (widget.argData["type"] == "general" ||
@@ -144,6 +213,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   // Accessibility
                   if (widget.argData["type"] == "experience")
                     CustomTextField(
+                      readOnly: true,
                       hintText: "Select accessibility",
                       headingText: "Accessibility",
                       suffixWidget: Switch(
@@ -165,6 +235,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       hintText: "Enter max no. of people",
                       headingText: "Maximum People",
                       keyboardType: TextInputType.number,
+                      maxLength: 5,
+                      inputFormatter: [FilteringTextInputFormatter.digitsOnly],
                     ),
                   if (widget.argData["type"] == "experience")
                     UiSpacer.verticalSpace(context: context, space: 0.02),
@@ -176,6 +248,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       hintText: "Enter min no. of people",
                       headingText: "Minimum People",
                       keyboardType: TextInputType.number,
+                      maxLength: 5,
+                      inputFormatter: [FilteringTextInputFormatter.digitsOnly],
                     ),
                   if (widget.argData["type"] == "experience")
                     UiSpacer.verticalSpace(context: context, space: 0.02),
@@ -187,8 +261,33 @@ class _CreatePostPageState extends State<CreatePostPage> {
                       hintText: "Select starting time",
                       headingText: "Starting Time",
                       readOnly: true,
-                      onTap: () {
+                      onTap: () async {
                         // code for time picker
+                        TimeOfDay? pickedTime = await showTimePicker(
+                          context: context,
+                          initialTime: const TimeOfDay(hour: 10, minute: 00),
+                          initialEntryMode: TimePickerEntryMode.dial,
+                          builder: (context, child) {
+                            return MediaQuery(
+                              data: MediaQuery.of(context)
+                                  .copyWith(alwaysUse24HourFormat: true),
+                              child: child ?? Container(),
+                            );
+                          },
+                        );
+
+                        if (pickedTime != null) {
+                          final now = DateTime.now();
+                          final dateTime = DateTime.utc(now.year, now.month,
+                              now.day, pickedTime.hour, pickedTime.minute);
+                          model.startingTimeValue = dateTime.toIso8601String();
+
+                          final localizations =
+                              MaterialLocalizations.of(context);
+                          final formattedTimeOfDay =
+                              localizations.formatTimeOfDay(pickedTime);
+                          model.startingTimeTEC.text = formattedTimeOfDay;
+                        }
                       },
                     ),
                   if (widget.argData["type"] == "experience")
@@ -267,6 +366,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
           hintText: "Enter price",
           suffixIconPath: AppImages().svgImages.icDollar,
           keyboardType: TextInputType.number,
+          inputFormatter: [
+            DecimalTextInputFormatter(decimalRange: 2, integerRange: 7)
+          ],
         ),
         UiSpacer.verticalSpace(context: context, space: 0.02),
       ],
@@ -457,8 +559,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   ? Image.file(
                       File(model.heroImageLocal ?? ""),
                       fit: BoxFit.cover,
-                    )
-                  : Column(
+                    ) : model.heroImageUrl != null ? CommonImageView.rectangleNetworkImage(imgUrl: model.heroImageUrl) :
+                   Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
@@ -528,10 +630,41 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             child: e.value.isLocal == false
                                 ? CommonImageView.rectangleNetworkImage(
                                     imgUrl: e.value.documentPath)
-                                : Image.file(
-                                    File(e.value.documentPath),
-                                    fit: BoxFit.cover,
-                                  )),
+                                : e.value.documentType == "image"
+                                    ? Image.file(
+                                        File(e.value.documentPath),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : Stack(
+                                        children: [
+                                          Image.memory(
+                                            e.value.thumbnailPath!,
+                                            fit: BoxFit.cover,
+                                            width: double.infinity,
+                                            height: double.infinity,
+                                          ),
+                                          Positioned(
+                                              top: 5,
+                                              left: 5,
+                                              child: Container(
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 2, horizontal: 5),
+                                                decoration: BoxDecoration(
+                                                    color:
+                                                        AppColor.appthemeColor,
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            5)),
+                                                child: TextView.mediumText(
+                                                  context: context,
+                                                  textColor:
+                                                      AppColor.whiteColor,
+                                                  text: "Video",
+                                                  textSize: 0.012,
+                                                ),
+                                              ))
+                                        ],
+                                      )),
                       ),
                       Positioned(
                         bottom: 4,
@@ -564,17 +697,32 @@ class _CreatePostPageState extends State<CreatePostPage> {
               }).toList(),
               if (model.documentsList.length < 4)
                 InkWell(
-                  onTap: () {
+                  onTap: () async {
                     if (model.documentsList.length < 4) {
-                      CommonImageView.chooseImageDialog(
+                      Map<String, dynamic>? pickedFile =
+                          await CommonImageView.pickImageVideoFromGallery();
+                      if (pickedFile != null) {
+                        model.documentsList.add(DocumentsModel(
+                          documentPath: pickedFile["filePath"],
+                          documentType: pickedFile["contentType"],
+                          thumbnailPath: pickedFile["thumbNailData"],
+                          isLocal: true,
+                        ));
+                        model.notifyListeners();
+                      }
+                      /*CommonImageView.chooseImageDialog(
                         context: context,
                         onTapGallery: () async {
                           Navigator.pop(context);
-                          String? pickedFile =
-                              await CommonImageView.pickFromGallery();
+                          Map<String, dynamic>? pickedFile =
+                              await CommonImageView.pickImageVideoFromGallery();
                           if (pickedFile != null) {
                             model.documentsList.add(DocumentsModel(
-                                documentPath: pickedFile, isLocal: true));
+                              documentPath: pickedFile["filePath"],
+                              documentType: pickedFile["contentType"],
+                              thumbnailPath: pickedFile["thumbNailData"],
+                              isLocal: true,
+                            ));
                             model.notifyListeners();
                           }
                         },
@@ -588,7 +736,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                             model.notifyListeners();
                           }
                         },
-                      );
+                      );*/
                     } else {
                       GlobalUtility.showToast(
                           context, "You can only upload maximum 4 documents");
