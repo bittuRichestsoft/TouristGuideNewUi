@@ -3,8 +3,8 @@ import 'package:Siesta/app_constants/shared_preferences.dart';
 import 'package:Siesta/custom_widgets/custom_experience_tile.dart';
 import 'package:Siesta/custom_widgets/custom_gallery_tile.dart';
 import 'package:Siesta/view_models/gallery_general_experience_models/post_like_model.dart';
-import 'package:Siesta/view_models/guide_profile_model/tourist_profile_model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:stacked/stacked.dart';
 
@@ -17,15 +17,17 @@ import '../../../common_widgets/common_textview.dart';
 import '../../../common_widgets/vertical_size_box.dart';
 import '../../../custom_widgets/custom_general_tile.dart';
 import '../../../main.dart';
+import '../../view_models/preview_profile_model/preview_profile_model.dart';
 
-class TouristProfilePageNew extends StatefulWidget {
-  const TouristProfilePageNew({super.key});
+class PreviewProfilePage extends StatefulWidget {
+  const PreviewProfilePage({super.key, required this.argData});
+  final Map<String, dynamic> argData;
 
   @override
-  State<TouristProfilePageNew> createState() => _TouristProfilePageNewState();
+  State<PreviewProfilePage> createState() => _PreviewProfilePageState();
 }
 
-class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
+class _PreviewProfilePageState extends State<PreviewProfilePage> {
   double screenWidth = 0.0, screenHeight = 0.0;
 
   @override
@@ -34,9 +36,26 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
     screenWidth = MediaQuery.of(context).size.width;
 
     return ViewModelBuilder.reactive(
-        viewModelBuilder: () => TouristProfileModel(),
+        viewModelBuilder: () => PreviewProfileModel(argData: widget.argData),
         builder: (context, model, child) {
           return Scaffold(
+            // app bar
+            appBar: AppBar(
+              systemOverlayStyle:
+                  SystemUiOverlayStyle(statusBarColor: AppColor.appthemeColor),
+              centerTitle: true,
+              backgroundColor: AppColor.appthemeColor,
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: AppColor.whiteColor),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              title: TextView.headingWhiteText(
+                  text: "Preview Profile", context: context),
+            ),
+
+            // body
             body: RefreshIndicator(
               color: AppColor.appthemeColor,
               onRefresh: () async {
@@ -92,7 +111,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
         });
   }
 
-  Widget profileImageView(TouristProfileModel model) {
+  Widget profileImageView(PreviewProfileModel model) {
     return Container(
       height: screenHeight * 0.44,
       child: Stack(
@@ -132,7 +151,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
     );
   }
 
-  Widget profileDescription(TouristProfileModel model) {
+  Widget profileDescription(PreviewProfileModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -188,87 +207,17 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
     );
   }
 
-  Widget buttonsView(TouristProfileModel model) {
+  Widget buttonsView(PreviewProfileModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Create Experience
-        CommonButton.commonOutlineButtonWithIconText(
-          context: context,
-          text: "Create Experience",
-          iconPath: AppImages().svgImages.icAdd,
-          onPressed: () async {
-            var backData = await Navigator.pushNamed(
-                context, AppRoutes.createPostPage,
-                arguments: {"type": "experience"});
-            if (backData != null) {
-              model.getExperiencePosts();
-            }
-          },
-        ),
-        UiSpacer.verticalSpace(context: context, space: 0.01),
-
-        // Create general
-        if (model.showCreateGeneral == true)
-          CommonButton.commonOutlineButtonWithIconText(
-            context: context,
-            text: "Create General",
-            iconPath: AppImages().svgImages.icAdd,
-            onPressed: () async {
-              var backData = await Navigator.pushNamed(
-                  context, AppRoutes.createPostPage,
-                  arguments: {"type": "general"});
-              if (backData != null) {
-                model.getGeneralPosts();
-              }
-            },
-          ),
-        if (model.showCreateGeneral == true)
-          UiSpacer.verticalSpace(context: context, space: 0.01),
-
-        // Create gallery
-        CommonButton.commonOutlineButtonWithIconText(
-          context: context,
-          text: "Create Gallery",
-          iconPath: AppImages().svgImages.icAdd,
-          onPressed: () async {
-            var backData = await Navigator.pushNamed(
-                context, AppRoutes.createPostPage,
-                arguments: {"type": "gallery"});
-            if (backData != null) {
-              model.getGalleryPosts();
-            }
-          },
-        ),
-        UiSpacer.verticalSpace(context: context, space: 0.01),
-
         // Preview Profile
         CommonButton.commonOutlineButtonWithIconText(
           context: context,
-          text: "Preview Profile",
-          iconPath: AppImages().svgImages.icPreviewProfile,
-          onPressed: () {
-            Navigator.pushNamed(context, AppRoutes.previewProfilePage,
-                arguments: {
-                  "userId": prefs.getString(SharedPreferenceValues.id),
-                });
-          },
-        ),
-        UiSpacer.verticalSpace(context: context, space: 0.01),
-
-        // Edit profile
-        CommonButton.commonOutlineButtonWithIconText(
-          context: context,
-          text: "Edit Profile",
+          text: "Follow",
           iconPath: AppImages().svgImages.icEditProfile,
-          onPressed: () async {
-            var val = await Navigator.pushNamed(
-                context, AppRoutes.editGuideProfilePage);
-            if (val != null) {
-              model.getProfileAPI();
-            }
-          },
+          onPressed: () {},
         ),
         UiSpacer.verticalSpace(context: context, space: 0.01),
 
@@ -285,7 +234,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
     );
   }
 
-  Widget galleryView(TouristProfileModel model) {
+  Widget galleryView(PreviewProfileModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,11 +259,13 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                 iconPath: AppImages().svgImages.arrowRight,
                 borderRadius: 50,
                 onPressed: () async {
-                  var val = await Navigator.pushNamed(
-                      context, AppRoutes.galleryListingPage);
+                  if (model.isMe == false) {
+                    var val = await Navigator.pushNamed(
+                        context, AppRoutes.galleryListingPage);
 
-                  if (val != null) {
-                    model.getGalleryPosts();
+                    if (val != null) {
+                      model.getGalleryPosts();
+                    }
                   }
                 },
               ),
@@ -366,7 +317,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
     );
   }
 
-  Widget generalPlannerView(TouristProfileModel model) {
+  Widget generalPlannerView(PreviewProfileModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -424,7 +375,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
     );
   }
 
-  Widget specialExperienceView(TouristProfileModel model) {
+  Widget specialExperienceView(PreviewProfileModel model) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -450,10 +401,12 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                 iconPath: AppImages().svgImages.arrowRight,
                 borderRadius: 50,
                 onPressed: () async {
-                  var val = await Navigator.pushNamed(
-                      context, AppRoutes.experienceListingPage);
-                  if (val != null) {
-                    model.getExperiencePosts();
+                  if (model.isMe == false) {
+                    var val = await Navigator.pushNamed(
+                        context, AppRoutes.experienceListingPage);
+                    if (val != null) {
+                      model.getExperiencePosts();
+                    }
                   }
                 },
               ),

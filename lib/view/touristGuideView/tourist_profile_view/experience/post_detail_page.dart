@@ -62,9 +62,10 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     context: context),
                 actions: [
                   IconButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (model.postDetail != null) {
-                          Navigator.pushNamed(context, AppRoutes.createPostPage,
+                          var varData = await Navigator.pushNamed(
+                              context, AppRoutes.createPostPage,
                               arguments: {
                                 "type": type == "general"
                                     ? "general"
@@ -72,6 +73,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
                                 "screenType": "edit",
                                 "postDetails": model.postDetail,
                               });
+                          if (varData != null) {
+                            model.getPostDetailAPI(postId);
+                          }
                         }
                       },
                       icon: Icon(

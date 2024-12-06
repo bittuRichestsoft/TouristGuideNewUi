@@ -1,6 +1,7 @@
 import 'package:Siesta/app_constants/app_routes.dart';
 import 'package:Siesta/view/create_password/create_password.dart';
 import 'package:Siesta/view/notification_screen/notification_page.dart';
+import 'package:Siesta/view/preview_profile/preview_profile_page.dart';
 import 'package:Siesta/view/signIn/forgot_password_page.dart';
 import 'package:Siesta/view/signIn/login_page.dart';
 import 'package:Siesta/view/signUp/registration_page.dart';
@@ -198,6 +199,12 @@ Route<dynamic> generateRoute(RouteSettings settings) {
 
     case AppRoutes.experienceListingPage:
       return MaterialPageRoute(builder: (context) => ExperienceListingPage());
+
+    case AppRoutes.previewProfilePage:
+      return MaterialPageRoute(
+          builder: (context) => PreviewProfilePage(
+                argData: settings.arguments as Map<String, dynamic>,
+              ));
 
     default:
       return MaterialPageRoute(builder: (context) => const LoginPage());

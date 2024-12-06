@@ -87,18 +87,31 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   text: "Save",
                   onPressed: () async {
                     debugPrint("Latutude : ${model.latitude}");
-                    if (widget.argData["type"] == "experience" &&
-                        model.validateExperience()) {
-                      // debugPrint(
-                      //     " ${File(model.documentsList[0].documentPath).readAsBytesSync()}");
-                      // model.createExperienceUsingDio();
-                      model.createExperienceAPI();
-                    } else if (widget.argData["type"] == "general" &&
-                        model.validateGeneral()) {
-                      model.createGeneralAPI();
-                    } else if (widget.argData["type"] == "gallery" &&
-                        model.validateGallery()) {
-                      model.createGalleryAPI();
+                    if (widget.argData["screenType"] == "create") {
+                      if (widget.argData["type"] == "experience" &&
+                          model.validateExperience()) {
+                        // debugPrint(
+                        //     " ${File(model.documentsList[0].documentPath).readAsBytesSync()}");
+                        // model.createExperienceUsingDio();
+                        model.createExperienceAPI();
+                      } else if (widget.argData["type"] == "general" &&
+                          model.validateGeneral()) {
+                        model.createGeneralAPI();
+                      } else if (widget.argData["type"] == "gallery" &&
+                          model.validateGallery()) {
+                        model.createGalleryAPI();
+                      }
+                    } else {
+                      if (widget.argData["type"] == "experience" &&
+                          model.validateExperience()) {
+                        model.updateExperienceAPI();
+                      } else if (widget.argData["type"] == "general" &&
+                          model.validateGeneral()) {
+                        model.updateGeneralAPI();
+                      } else if (widget.argData["type"] == "gallery" &&
+                          model.validateGallery()) {
+                        model.updateGalleryAPI();
+                      }
                     }
                   },
                   isButtonEnable: true,
@@ -559,21 +572,26 @@ class _CreatePostPageState extends State<CreatePostPage> {
                   ? Image.file(
                       File(model.heroImageLocal ?? ""),
                       fit: BoxFit.cover,
-                    ) : model.heroImageUrl != null ? CommonImageView.rectangleNetworkImage(imgUrl: model.heroImageUrl) :
-                   Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        SvgPicture.asset(AppImages().svgImages.icUploadImage),
-                        UiSpacer.verticalSpace(space: 0.02, context: context),
-                        TextView.mediumText(
-                          context: context,
-                          text: "Click here to upload",
-                          textColor: AppColor.greyColor,
-                          textSize: 0.018,
-                        )
-                      ],
-                    ),
+                    )
+                  : model.heroImageUrl != null
+                      ? CommonImageView.rectangleNetworkImage(
+                          imgUrl: model.heroImageUrl)
+                      : Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            SvgPicture.asset(
+                                AppImages().svgImages.icUploadImage),
+                            UiSpacer.verticalSpace(
+                                space: 0.02, context: context),
+                            TextView.mediumText(
+                              context: context,
+                              text: "Click here to upload",
+                              textColor: AppColor.greyColor,
+                              textSize: 0.018,
+                            )
+                          ],
+                        ),
             ),
           ),
         ),
@@ -671,12 +689,8 @@ class _CreatePostPageState extends State<CreatePostPage> {
                         right: 4,
                         child: InkWell(
                           onTap: () {
-                            if (e.value.isLocal == true) {
-                              model.documentsList.removeAt(index);
-                            } else {
-                              /*model.deleteDocumentAPI(
-                                index: e.key, documentId: e.value.id);*/
-                            }
+                            model.documentsList.removeAt(index);
+
                             model.notifyListeners();
                           },
                           child: CircleAvatar(

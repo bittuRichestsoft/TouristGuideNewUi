@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:Siesta/app_constants/common_date_time_formats.dart';
 import 'package:Siesta/response_pojo/get_post_detail_response.dart';
 import 'package:Siesta/utility/globalUtility.dart';
 import 'package:dio/dio.dart';
@@ -16,6 +17,7 @@ import '../../app_constants/app_strings.dart';
 import '../../app_service/google_map_service.dart';
 import '../../main.dart';
 import '../../response_pojo/get_activities_pojo.dart';
+import '../../response_pojo/get_gallery_detail_response.dart';
 
 class CreatePostModel extends BaseViewModel implements Initialisable {
   final String type;
@@ -51,25 +53,31 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
 
   List<dynamic> placeList = [];
   bool isPlaceListShow = false;
+
   PostDetails? postDetail; // for general and experience data
+  GalleryDetails? galleryDetail; // for gallery data
 
   @override
   void initialise() {
-    getActivitiesAPI().then((value) {
-      if (argData!["screenType"] == "edit") {
-        if (argData!["type"] == "experience") {
-          postDetail = argData!["postDetails"];
-          getInitialExperienceData();
-        } else if (argData!["type"] == "general") {}
-      }
-    });
-
-    /*// get Activities
-    if (argData!["type"] != "gallery") getActivitiesAPI();*/
+    if (argData!["type"] != "gallery") {
+      getActivitiesAPI().then((value) {
+        if (argData!["screenType"] == "edit") {
+          if (argData!["type"] == "experience" ||
+              argData!["type"] == "general") {
+            postDetail = argData!["postDetails"];
+            getInitialPostData();
+          }
+        }
+      });
+    } else if (argData!["screenType"] == "edit" &&
+        argData!["type"] == "gallery") {
+      galleryDetail = argData!["galleryDetails"];
+      getInitialGalleryData();
+    }
   }
 
   // get initial data
-  void getInitialExperienceData() {
+  void getInitialPostData() {
     titleTEC.text = postDetail!.title ?? "";
     locationTEC.text = postDetail!.location ?? "";
     priceTEC.text = (postDetail!.price ?? 0).toString();
@@ -79,7 +87,10 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
     maximumPeopleTEC.text = (postDetail!.maxPeople ?? 0).toString();
     minimumPeopleTEC.text = (postDetail!.minPeople ?? 0).toString();
     // change time
-    startingTimeTEC.text = postDetail!.startingTime ?? "";
+    startingTimeTEC.text = CommonDateTimeFormats.timeFormatLocal(
+        postDetail!.startingTime ?? DateTime.now().toString());
+    startingTimeValue = postDetail!.startingTime;
+
     durationTEC.text = postDetail!.duration ?? "";
     meetingPointTEC.text = postDetail!.meetingPoint ?? "";
     dropOffPointTEC.text = postDetail!.dropOffPoint ?? "";
@@ -107,6 +118,25 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
       debugPrint(
           "Activity selected IDs : ${postDetail!.postsActivities!.length}");
     }
+
+    notifyListeners();
+  }
+
+  void getInitialGalleryData() {
+    titleTEC.text = galleryDetail!.title ?? "";
+    locationTEC.text = galleryDetail!.location ?? "";
+
+    descriptionTEC.text = galleryDetail!.description ?? "";
+
+    heroImageUrl = galleryDetail!.heroImage;
+
+    documentsList = galleryDetail!.galleryMedia!
+        .map((e) => DocumentsModel(
+            documentPath: e.url!,
+            id: e.id!,
+            documentType: e.mediaType ?? "image",
+            isLocal: false))
+        .toList();
 
     notifyListeners();
   }
@@ -160,7 +190,7 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
     } else if (descriptionTEC.text.trim().isEmpty) {
       GlobalUtility.showToast(context, "Please enter the description");
       return false;
-    } else if (heroImageLocal == null) {
+    } else if (heroImageLocal == null && heroImageUrl == null) {
       GlobalUtility.showToast(context, "Please upload the hero image");
       return false;
     }
@@ -350,6 +380,99 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
     }
   }
 
+  // update Experience API
+  Future<void> updateExperienceAPI() async {
+    BuildContext context = navigatorKey.currentContext!;
+    GlobalUtility().showLoaderDialog(context);
+    try {
+      if (await GlobalUtility.isConnected()) {
+        List<int> selectedActivitiesId =
+            activitiesList.where((e) => e.isSelect).map((e) => e.id).toList();
+
+        Map<String, String> map = {
+          "post_id": postDetail!.id.toString(),
+          "title": titleTEC.text.trim(),
+          "location": locationTEC.text.trim(),
+          "latitude": (latitude ?? 0.0).toString(),
+          "longitude": (longitude ?? 0.0).toString(),
+          "price": priceTEC.text.trim(),
+          "schedule": scheduleTEC.text.trim(),
+          "transport_type": transportTypeTEC.text,
+          "accessibility": accessibility.toString(),
+          "max_people": maximumPeopleTEC.text.trim(),
+          "min_people": minimumPeopleTEC.text.trim(),
+          "starting_time": startingTimeValue ?? "",
+          "duration": durationTEC.text.trim(),
+          "meeting_point": meetingPointTEC.text.trim(),
+          "drop_off_point": dropOffPointTEC.text.trim(),
+          "description": descriptionTEC.text.trim(),
+          "post_type": "EXPERIENCE",
+          "country": country ?? "USA",
+          "state": state ?? "Arizona",
+          "city": city ?? "Arizona"
+        };
+
+        for (int i = 0; i < selectedActivitiesId.length; i++) {
+          map['activities[$i]'] = selectedActivitiesId[i].toString();
+        }
+
+        List<http.MultipartFile> field = [];
+
+        if (heroImageLocal != null) {
+          field.add(http.MultipartFile.fromBytes(
+              'hero_image', File(heroImageLocal!).readAsBytesSync(),
+              filename: File(heroImageLocal!).path.split("/").last,
+              contentType: MediaType('image', '*')));
+        } else {
+          map["hero_image"] = postDetail!.heroImage ?? "";
+        }
+
+        int j = 0;
+        for (int i = 0; i < documentsList.length; i++) {
+          if (documentsList[i].isLocal == false) {
+            map["media[$j]"] = documentsList[i].documentPath;
+            j++;
+          }
+        }
+        for (int i = 0; i < documentsList.length; i++) {
+          if (documentsList[i].isLocal == true) {
+            field.add(http.MultipartFile.fromBytes(
+                'media', File(documentsList[i].documentPath).readAsBytesSync(),
+                filename:
+                    File(documentsList[i].documentPath).path.split("/").last,
+                contentType: MediaType(documentsList[i].documentType, '*')));
+          }
+        }
+
+        final response = await ApiRequest().putMultipartRequest(
+            map, Api.updatePost, field) /*.timeout(Duration(seconds: 20))*/;
+
+        var apiResponse = await response.stream.bytesToString();
+        debugPrint("API Response : ${apiResponse}");
+
+        var jsonData = jsonDecode(apiResponse);
+        int status = jsonData['statusCode'] ?? 404;
+        String message = jsonData['message'] ?? "";
+
+        if (status == 200) {
+          GlobalUtility.showToast(context, message);
+          Navigator.pop(context, "back");
+        } else if (status == 400) {
+          GlobalUtility.showToast(context, message);
+        } else if (status == 401) {
+          GlobalUtility().handleSessionExpire(context);
+        }
+      } else {
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+      debugPrint("$runtimeType error : $e");
+      GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      GlobalUtility().closeLoaderDialog(context);
+    }
+  }
+
   // Create General API
   Future<void> createGeneralAPI() async {
     BuildContext context = navigatorKey.currentContext!;
@@ -424,6 +547,91 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
     }
   }
 
+  // update General API
+  Future<void> updateGeneralAPI() async {
+    BuildContext context = navigatorKey.currentContext!;
+    GlobalUtility().showLoaderDialog(context);
+    try {
+      if (await GlobalUtility.isConnected()) {
+        List<int> selectedActivitiesId =
+            activitiesList.where((e) => e.isSelect).map((e) => e.id).toList();
+
+        Map<String, String> map = {
+          "post_id": postDetail!.id.toString(),
+          "title": titleTEC.text.trim(),
+          "location": locationTEC.text.trim(),
+          "latitude": (latitude ?? 0.0).toString(),
+          "longitude": (longitude ?? 0.0).toString(),
+          "price": priceTEC.text.trim(),
+          "description": descriptionTEC.text.trim(),
+          "post_type": "GENERAL",
+          "country": country ?? "USA",
+          "state": state ?? "Arizona",
+          "city": city ?? "Arizona"
+        };
+
+        for (int i = 0; i < selectedActivitiesId.length; i++) {
+          map['activities[$i]'] = selectedActivitiesId[i].toString();
+        }
+
+        List<http.MultipartFile> field = [];
+
+        if (heroImageLocal != null) {
+          field.add(http.MultipartFile.fromBytes(
+              'hero_image', File(heroImageLocal!).readAsBytesSync(),
+              filename: File(heroImageLocal!).path.split("/").last,
+              contentType: MediaType('image', '*')));
+        } else {
+          map["hero_image"] = postDetail!.heroImage ?? "";
+        }
+
+        int j = 0;
+        for (int i = 0; i < documentsList.length; i++) {
+          if (documentsList[i].isLocal == false) {
+            map["media[$j]"] = documentsList[i].documentPath;
+            j++;
+          }
+        }
+
+        for (int i = 0; i < documentsList.length; i++) {
+          if (documentsList[i].isLocal == true) {
+            field.add(http.MultipartFile.fromBytes(
+                'media', File(documentsList[i].documentPath).readAsBytesSync(),
+                filename:
+                    File(documentsList[i].documentPath).path.split("/").last,
+                contentType: MediaType(documentsList[i].documentType, '*')));
+          }
+        }
+
+        final response = await ApiRequest().putMultipartRequest(
+            map, Api.updatePost, field) /*.timeout(Duration(seconds: 20))*/;
+
+        var apiResponse = await response.stream.bytesToString();
+        debugPrint("API Response : ${apiResponse}");
+
+        var jsonData = jsonDecode(apiResponse);
+        int status = jsonData['statusCode'] ?? 404;
+        String message = jsonData['message'] ?? "";
+
+        if (status == 200) {
+          GlobalUtility.showToast(context, message);
+          Navigator.pop(context, "back");
+        } else if (status == 400) {
+          GlobalUtility.showToast(context, message);
+        } else if (status == 401) {
+          GlobalUtility().handleSessionExpire(context);
+        }
+      } else {
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+      debugPrint("$runtimeType error : $e");
+      GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      GlobalUtility().closeLoaderDialog(context);
+    }
+  }
+
   // Create Gallery API
   Future<void> createGalleryAPI() async {
     BuildContext context = navigatorKey.currentContext!;
@@ -459,6 +667,79 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
 
         final response = await ApiRequest().postMultipartRequest(
             map, Api.createGallery, field) /*.timeout(Duration(seconds: 20))*/;
+
+        var apiResponse = await response.stream.bytesToString();
+        debugPrint("API Response : ${apiResponse}");
+
+        var jsonData = jsonDecode(apiResponse);
+        int status = jsonData['statusCode'] ?? 404;
+        String message = jsonData['message'] ?? "";
+
+        if (status == 200) {
+          GlobalUtility.showToast(context, message);
+          Navigator.pop(context, "back");
+        } else if (status == 400) {
+          GlobalUtility.showToast(context, message);
+        } else if (status == 401) {
+          GlobalUtility().handleSessionExpire(context);
+        }
+      } else {
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+      debugPrint("$runtimeType error : $e");
+      GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      GlobalUtility().closeLoaderDialog(context);
+    }
+  }
+
+  // Update Gallery API
+  Future<void> updateGalleryAPI() async {
+    BuildContext context = navigatorKey.currentContext!;
+    GlobalUtility().showLoaderDialog(context);
+    try {
+      if (await GlobalUtility.isConnected()) {
+        Map<String, String> map = {
+          "gallery_id": (galleryDetail!.id ?? 0).toString(),
+          "title": titleTEC.text.trim(),
+          "location": locationTEC.text.trim(),
+          "latitude": (latitude ?? 0.0).toString(),
+          "longitude": (longitude ?? 0.0).toString(),
+          "description": descriptionTEC.text.trim(),
+        };
+
+        List<http.MultipartFile> field = [];
+
+        if (heroImageLocal != null) {
+          field.add(http.MultipartFile.fromBytes(
+              'hero_image', File(heroImageLocal!).readAsBytesSync(),
+              filename: File(heroImageLocal!).path.split("/").last,
+              contentType: MediaType('image', '*')));
+        } else {
+          map["hero_image"] = postDetail!.heroImage ?? "";
+        }
+
+        int j = 0;
+        for (int i = 0; i < documentsList.length; i++) {
+          if (documentsList[i].isLocal == false) {
+            map["media[$j]"] = documentsList[i].documentPath;
+            j++;
+          }
+        }
+
+        for (int i = 0; i < documentsList.length; i++) {
+          if (documentsList[i].isLocal == true) {
+            field.add(http.MultipartFile.fromBytes(
+                'media', File(documentsList[i].documentPath).readAsBytesSync(),
+                filename:
+                    File(documentsList[i].documentPath).path.split("/").last,
+                contentType: MediaType(documentsList[i].documentType, '*')));
+          }
+        }
+
+        final response = await ApiRequest().putMultipartRequest(
+            map, Api.updateGallery, field) /*.timeout(Duration(seconds: 20))*/;
 
         var apiResponse = await response.stream.bytesToString();
         debugPrint("API Response : ${apiResponse}");

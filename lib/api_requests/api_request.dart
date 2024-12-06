@@ -103,9 +103,9 @@ class ApiRequest {
 
     final streamedResponse = await request.send();
 
-    // streamedResponse.stream.transform(utf8.decoder).listen((value) {
-    //   debugPrint("response: $value");
-    // });
+    streamedResponse.stream.transform(utf8.decoder).listen((value) {
+      debugPrint("response: $value");
+    });
     if (streamedResponse.statusCode == 401) {
       GlobalUtility().handleSessionExpire(navigatorKey.currentContext!);
     }

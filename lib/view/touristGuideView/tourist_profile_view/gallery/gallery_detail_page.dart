@@ -55,9 +55,16 @@ class _GalleryDetailPageState extends State<GalleryDetailPage> {
                   text: AppStrings.galleryDetails, context: context),
               actions: [
                 IconButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, AppRoutes.createPostPage,
-                          arguments: {"type": "gallery", "screenType": "edit"});
+                    onPressed: () async {
+                      var varData = await Navigator.pushNamed(
+                          context, AppRoutes.createPostPage, arguments: {
+                        "type": "gallery",
+                        "screenType": "edit",
+                        "galleryDetails": model.galleryDetails
+                      });
+                      if (varData != null) {
+                        model.getGalleryDetailAPI(widget.galleryId);
+                      }
                     },
                     icon: Icon(
                       Icons.edit,

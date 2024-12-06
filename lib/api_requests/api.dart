@@ -138,6 +138,10 @@ class Api {
   // Create gallery, post
   static String createPost = "guide/create-post";
   static String createGallery = "guide/create-gallery";
+
+  // Update gallery, post
+  static String updatePost = "guide/update-post";
+  static String updateGallery = "guide/update-gallery";
 }
 
 /// -- ---- --- ---- --- STATUS MEAN --- ---- - - - -- ---- - -- ---
