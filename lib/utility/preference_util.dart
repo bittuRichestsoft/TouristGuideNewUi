@@ -97,9 +97,10 @@ class PreferenceUtil {
     prefs.setBool(SharedPreferenceValues.waitingStatus, waitingStatus);
   }
 
-  getWaitingStatus() async {
+  Future<bool?> getWaitingStatus() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    bool? waitingStatus = prefs.getBool(SharedPreferenceValues.waitingStatus);
+    bool? waitingStatus =
+        prefs.getBool(SharedPreferenceValues.waitingStatus) ?? false;
     return waitingStatus;
   }
 

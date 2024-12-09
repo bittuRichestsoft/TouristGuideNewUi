@@ -61,27 +61,28 @@ class _PostDetailPageState extends State<PostDetailPage> {
                         : AppStrings.specialExperience,
                     context: context),
                 actions: [
-                  IconButton(
-                      onPressed: () async {
-                        if (model.postDetail != null) {
-                          var varData = await Navigator.pushNamed(
-                              context, AppRoutes.createPostPage,
-                              arguments: {
-                                "type": type == "general"
-                                    ? "general"
-                                    : "experience",
-                                "screenType": "edit",
-                                "postDetails": model.postDetail,
-                              });
-                          if (varData != null) {
-                            model.getPostDetailAPI(postId);
+                  if (widget.argData["otherPersonProfile"] == false)
+                    IconButton(
+                        onPressed: () async {
+                          if (model.postDetail != null) {
+                            var varData = await Navigator.pushNamed(
+                                context, AppRoutes.createPostPage,
+                                arguments: {
+                                  "type": type == "general"
+                                      ? "general"
+                                      : "experience",
+                                  "screenType": "edit",
+                                  "postDetails": model.postDetail,
+                                });
+                            if (varData != null) {
+                              model.getPostDetailAPI(postId);
+                            }
                           }
-                        }
-                      },
-                      icon: Icon(
-                        Icons.edit,
-                        size: 20,
-                      ))
+                        },
+                        icon: Icon(
+                          Icons.edit,
+                          size: 20,
+                        ))
                 ],
               ),
 

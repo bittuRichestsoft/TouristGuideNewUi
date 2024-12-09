@@ -14,6 +14,8 @@ import '../../response_pojo/get_gallery_post_response.dart' as gallery_resp;
 import '../../response_pojo/get_guide_profile_response.dart';
 import '../../utility/globalUtility.dart';
 
+enum Status { error, loading, initialised }
+
 class PreviewProfileModel extends BaseViewModel implements Initialisable {
   final Map<String, dynamic> argData;
   PreviewProfileModel({required this.argData});
@@ -29,17 +31,28 @@ class PreviewProfileModel extends BaseViewModel implements Initialisable {
   String? hostSinceYear;
   String? hostSinceMonth;
   String? avgRating;
+  String? profileUrl;
+  bool isFollowed = false;
 
   bool? isMe;
   String? guideId;
+
+  Status _status = Status.loading;
+  Status get status => _status;
+
+  String errorMsg = "Some error occurred";
 
   @override
   void initialise() {
     isMe = argData["userId"] == prefs.getString(SharedPreferenceValues.id);
     guideId = argData["userId"];
 
+    debugPrint("Is me: $isMe   ${argData["userId"]}");
+
     if (isMe == true) {
       getProfileAPI();
+    } else {
+      getGuideProfileAPI();
     }
 
     getGalleryPosts();
@@ -67,6 +80,9 @@ class PreviewProfileModel extends BaseViewModel implements Initialisable {
     try {
       // GlobalUtility().showLoaderDialog(navigatorKey.currentContext!);
       if (await GlobalUtility.isConnected()) {
+        _status = Status.loading;
+        notifyListeners();
+
         final apiResponse = await ApiRequest()
             .getWithHeader(Api.guideGetProfile)
             .timeout(const Duration(seconds: 20));
@@ -77,6 +93,7 @@ class PreviewProfileModel extends BaseViewModel implements Initialisable {
         String message = jsonData['message'] ?? "";
 
         if (status == 200) {
+          _status = Status.initialised;
           GetGuideProfileResponse getGuideProfileResponse =
               getGuideProfileResponseFromJson(apiResponse.body);
 
@@ -92,15 +109,96 @@ class PreviewProfileModel extends BaseViewModel implements Initialisable {
           hostSinceMonth = getGuideProfileResponse
               .data!.guideDetails!.userDetail!.hostSinceMonths;
           avgRating = getGuideProfileResponse.data!.avgRatings ?? "0";
+          profileUrl = getGuideProfileResponse.data!.url ?? "";
         } else if (status == 400) {
+          errorMsg = "Some error occurred";
+          _status = Status.error;
           GlobalUtility.showToast(context, message);
         } else if (status == 401) {
+          errorMsg = "Session Expired";
+          _status = Status.error;
           GlobalUtility().handleSessionExpire(context);
-        } else {}
+        } else {
+          errorMsg = "Some error occurred";
+          _status = Status.error;
+        }
       } else {
+        _status = Status.error;
+        errorMsg = AppStrings().INTERNET;
         GlobalUtility.showToast(context, AppStrings().INTERNET);
       }
     } catch (e) {
+      _status = Status.error;
+      debugPrint("$runtimeType error : $e");
+      errorMsg = "Some error occurred";
+      GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      // GlobalUtility().closeLoaderDialog(context);
+      notifyListeners();
+    }
+  }
+
+  Future<void> getGuideProfileAPI() async {
+    BuildContext context = navigatorKey.currentContext!;
+
+    try {
+      // GlobalUtility().showLoaderDialog(navigatorKey.currentContext!);
+      if (await GlobalUtility.isConnected()) {
+        _status = Status.loading;
+        notifyListeners();
+
+        String myId = prefs.getString(SharedPreferenceValues.id) ?? "";
+
+        final apiResponse = await ApiRequest()
+            .getWithHeader(
+                "${Api.getOtherGuideProfile}?guideId=$guideId&userId=$myId")
+            .timeout(const Duration(seconds: 20));
+
+        var jsonData = jsonDecode(apiResponse.body);
+
+        int status = jsonData['statusCode'] ?? 404;
+        String message = jsonData['message'] ?? "";
+
+        if (status == 200) {
+          _status = Status.initialised;
+
+          GetGuideProfileResponse getGuideProfileResponse =
+              getGuideProfileResponseFromJson(apiResponse.body);
+
+          coverImageUrl = getGuideProfileResponse
+              .data?.guideDetails?.userDetail?.coverPicture;
+          profileImageUrl = getGuideProfileResponse
+              .data?.guideDetails?.userDetail?.profilePicture;
+          nameText =
+              "${getGuideProfileResponse.data?.guideDetails?.name ?? ""} ${getGuideProfileResponse.data!.guideDetails!.lastName ?? ""}";
+          bioText = getGuideProfileResponse.data?.guideDetails?.userDetail?.bio;
+          hostSinceYear = getGuideProfileResponse
+              .data?.guideDetails?.userDetail?.hostSinceYears;
+          hostSinceMonth = getGuideProfileResponse
+              .data?.guideDetails?.userDetail?.hostSinceMonths;
+          avgRating = getGuideProfileResponse.data?.avgRatings ?? "0";
+          profileUrl = getGuideProfileResponse.data?.url ?? "";
+          isFollowed = getGuideProfileResponse.data?.isFollowed ?? false;
+        } else if (status == 400) {
+          errorMsg = "Some error occurred";
+          _status = Status.error;
+          GlobalUtility.showToast(context, message);
+        } else if (status == 401) {
+          errorMsg = "Session Expired";
+          _status = Status.error;
+          GlobalUtility().handleSessionExpire(context);
+        } else {
+          errorMsg = "Some error occurred";
+          _status = Status.error;
+        }
+      } else {
+        errorMsg = AppStrings().INTERNET;
+        _status = Status.error;
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+      errorMsg = "Some error occurred";
+      _status = Status.error;
       debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
@@ -225,6 +323,84 @@ class PreviewProfileModel extends BaseViewModel implements Initialisable {
       debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
+      notifyListeners();
+    }
+  }
+
+  // follow guide
+  Future<void> followGuideAPI() async {
+    BuildContext context = navigatorKey.currentContext!;
+
+    try {
+      GlobalUtility().showLoaderDialog(navigatorKey.currentContext!);
+      if (await GlobalUtility.isConnected()) {
+        String myId = prefs.getString(SharedPreferenceValues.id) ?? "";
+
+        Map map = {"follower_id": myId, "followed_id": guideId};
+
+        final apiResponse = await ApiRequest()
+            .postWithMap(map, Api.followGuide)
+            .timeout(const Duration(seconds: 20));
+
+        var jsonData = jsonDecode(apiResponse.body);
+
+        int status = jsonData['statusCode'] ?? 404;
+        String message = jsonData['message'] ?? "";
+
+        if (status == 200) {
+          isFollowed = true;
+        } else if (status == 400) {
+          GlobalUtility.showToast(context, message);
+        } else if (status == 401) {
+          GlobalUtility().handleSessionExpire(context);
+        } else {}
+      } else {
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+      debugPrint("$runtimeType error : $e");
+      GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      GlobalUtility().closeLoaderDialog(context);
+      notifyListeners();
+    }
+  }
+
+  // un follow guide
+  Future<void> unFollowGuideAPI() async {
+    BuildContext context = navigatorKey.currentContext!;
+
+    try {
+      GlobalUtility().showLoaderDialog(navigatorKey.currentContext!);
+      if (await GlobalUtility.isConnected()) {
+        String myId = prefs.getString(SharedPreferenceValues.id) ?? "";
+
+        Map map = {"follower_id": myId, "followed_id": guideId};
+
+        final apiResponse = await ApiRequest()
+            .postWithMap(map, Api.unFollowGuide)
+            .timeout(const Duration(seconds: 20));
+
+        var jsonData = jsonDecode(apiResponse.body);
+
+        int status = jsonData['statusCode'] ?? 404;
+        String message = jsonData['message'] ?? "";
+
+        if (status == 200) {
+          isFollowed = false;
+        } else if (status == 400) {
+          GlobalUtility.showToast(context, message);
+        } else if (status == 401) {
+          GlobalUtility().handleSessionExpire(context);
+        } else {}
+      } else {
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+      debugPrint("$runtimeType error : $e");
+      GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      GlobalUtility().closeLoaderDialog(context);
       notifyListeners();
     }
   }

@@ -3,9 +3,11 @@ import 'package:Siesta/app_constants/shared_preferences.dart';
 import 'package:Siesta/custom_widgets/custom_experience_tile.dart';
 import 'package:Siesta/custom_widgets/custom_gallery_tile.dart';
 import 'package:Siesta/view_models/gallery_general_experience_models/post_like_model.dart';
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:stacked/stacked.dart';
 
 import '../../../app_constants/app_color.dart';
@@ -17,6 +19,8 @@ import '../../../common_widgets/common_textview.dart';
 import '../../../common_widgets/vertical_size_box.dart';
 import '../../../custom_widgets/custom_general_tile.dart';
 import '../../../main.dart';
+import '../../custom_widgets/common_widgets.dart';
+import '../../utility/globalUtility.dart';
 import '../../view_models/preview_profile_model/preview_profile_model.dart';
 
 class PreviewProfilePage extends StatefulWidget {
@@ -35,7 +39,7 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
     screenHeight = MediaQuery.of(context).size.height;
     screenWidth = MediaQuery.of(context).size.width;
 
-    return ViewModelBuilder.reactive(
+    return ViewModelBuilder<PreviewProfileModel>.reactive(
         viewModelBuilder: () => PreviewProfileModel(argData: widget.argData),
         builder: (context, model, child) {
           return Scaffold(
@@ -52,61 +56,75 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
                 },
               ),
               title: TextView.headingWhiteText(
-                  text: "Preview Profile", context: context),
+                  text: model.isMe == true
+                      ? "Preview Profile"
+                      : "Localite Profile",
+                  context: context),
             ),
 
             // body
-            body: RefreshIndicator(
-              color: AppColor.appthemeColor,
-              onRefresh: () async {
-                model.initialise();
-              },
-              child: ListView(
-                shrinkWrap: true,
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  // Cover and profile photo
-                  profileImageView(model),
-                  UiSpacer.verticalSpace(
-                      space: AppSizes().widgetSize.normalPadding,
-                      context: context),
+            body: model.status == Status.loading
+                ? CommonWidgets().inPageLoader()
+                : model.status == Status.error
+                    ? CommonWidgets()
+                        .inAppErrorWidget(context: context, model.errorMsg, () {
+                        model.initialise();
+                      })
+                    : RefreshIndicator(
+                        color: AppColor.appthemeColor,
+                        onRefresh: () async {
+                          model.initialise();
+                        },
+                        child: ListView(
+                          shrinkWrap: true,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            // Cover and profile photo
+                            profileImageView(model),
+                            UiSpacer.verticalSpace(
+                                space: AppSizes().widgetSize.normalPadding,
+                                context: context),
 
-                  // Profile description
-                  Padding(
-                    padding: EdgeInsets.all(screenWidth * 0.04),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Profile desc
-                        profileDescription(model),
-                        UiSpacer.verticalSpace(context: context, space: 0.03),
+                            // Profile description
+                            Padding(
+                              padding: EdgeInsets.all(screenWidth * 0.04),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Profile desc
+                                  profileDescription(model),
+                                  UiSpacer.verticalSpace(
+                                      context: context, space: 0.03),
 
-                        // Buttons view
-                        buttonsView(model),
-                        UiSpacer.verticalSpace(context: context, space: 0.05),
+                                  // Buttons view
+                                  buttonsView(model),
+                                  UiSpacer.verticalSpace(
+                                      context: context, space: 0.05),
 
-                        // Gallery view
-                        if (model.galleryPostList.isNotEmpty)
-                          galleryView(model),
-                        if (model.galleryPostList.isNotEmpty)
-                          UiSpacer.verticalSpace(context: context, space: 0.05),
+                                  // Gallery view
+                                  if (model.galleryPostList.isNotEmpty)
+                                    galleryView(model),
+                                  if (model.galleryPostList.isNotEmpty)
+                                    UiSpacer.verticalSpace(
+                                        context: context, space: 0.05),
 
-                        // general planner
-                        if (model.generalPostList.isNotEmpty)
-                          generalPlannerView(model),
-                        if (model.generalPostList.isNotEmpty)
-                          UiSpacer.verticalSpace(context: context, space: 0.05),
+                                  // general planner
+                                  if (model.generalPostList.isNotEmpty)
+                                    generalPlannerView(model),
+                                  if (model.generalPostList.isNotEmpty)
+                                    UiSpacer.verticalSpace(
+                                        context: context, space: 0.05),
 
-                        // special experience
-                        if (model.experiencePostList.isNotEmpty)
-                          specialExperienceView(model),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
+                                  // special experience
+                                  if (model.experiencePostList.isNotEmpty)
+                                    specialExperienceView(model),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
           );
         });
   }
@@ -215,9 +233,17 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
         // Preview Profile
         CommonButton.commonOutlineButtonWithIconText(
           context: context,
-          text: "Follow",
+          text: model.isFollowed == true ? "Followed" : "Follow",
           iconPath: AppImages().svgImages.icEditProfile,
-          onPressed: () {},
+          onPressed: () {
+            if (model.isMe == false) {
+              if (model.isFollowed == false) {
+                model.followGuideAPI();
+              } else {
+                model.unFollowGuideAPI();
+              }
+            }
+          },
         ),
         UiSpacer.verticalSpace(context: context, space: 0.01),
 
@@ -227,7 +253,7 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
           text: "Share profile",
           iconPath: AppImages().svgImages.icShare,
           onPressed: () {
-            showShareProfileWidget();
+            showShareProfileWidget(model);
           },
         ),
       ],
@@ -282,32 +308,36 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
           itemBuilder: (context, index) {
             return CustomGalleryTile(
               tileData: model.galleryPostList[index],
-              onClickLike: () async {
-                String postId =
-                    (model.galleryPostList[index].id ?? 0).toString();
-                String likedById =
-                    (prefs.getString(SharedPreferenceValues.id) ?? "0")
-                        .toString();
-                if (model.galleryPostList[index].likedPost == 0) {
-                  bool val =
-                      await PostLikeModel().likeGalleryAPI(postId, likedById);
-                  if (val == true) {
-                    model.galleryPostList[index].likedPost = 1;
-                    model.galleryPostList[index].likesCount =
-                        (model.galleryPostList[index].likesCount ?? 0) + 1;
-                    model.notifyListeners();
-                  }
-                } else {
-                  bool val =
-                      await PostLikeModel().unLikeGalleryAPI(postId, likedById);
-                  if (val == true) {
-                    model.galleryPostList[index].likedPost = 0;
-                    model.galleryPostList[index].likesCount =
-                        (model.galleryPostList[index].likesCount ?? 0) - 1;
-                    model.notifyListeners();
-                  }
-                }
-              },
+              onClickLike: model.isMe == true
+                  ? () {}
+                  : () async {
+                      String postId =
+                          (model.galleryPostList[index].id ?? 0).toString();
+                      String likedById =
+                          (prefs.getString(SharedPreferenceValues.id) ?? "0")
+                              .toString();
+                      if (model.galleryPostList[index].likedPost == 0) {
+                        bool val = await PostLikeModel()
+                            .likeGalleryAPI(postId, likedById);
+                        if (val == true) {
+                          model.galleryPostList[index].likedPost = 1;
+                          model.galleryPostList[index].likesCount =
+                              (model.galleryPostList[index].likesCount ?? 0) +
+                                  1;
+                          model.notifyListeners();
+                        }
+                      } else {
+                        bool val = await PostLikeModel()
+                            .unLikeGalleryAPI(postId, likedById);
+                        if (val == true) {
+                          model.galleryPostList[index].likedPost = 0;
+                          model.galleryPostList[index].likesCount =
+                              (model.galleryPostList[index].likesCount ?? 0) -
+                                  1;
+                          model.notifyListeners();
+                        }
+                      }
+                    },
             );
           },
           separatorBuilder: (context, index) =>
@@ -340,32 +370,36 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
             return CustomGeneralTile(
               showDescription: false,
               tileData: model.generalPostList[index],
-              onClickLike: () async {
-                String postId =
-                    (model.generalPostList[index].id ?? 0).toString();
-                String likedById =
-                    (prefs.getString(SharedPreferenceValues.id) ?? "0")
-                        .toString();
-                if (model.generalPostList[index].likedPost == 0) {
-                  bool val =
-                      await PostLikeModel().likePostAPI(postId, likedById);
-                  if (val == true) {
-                    model.generalPostList[index].likedPost = 1;
-                    model.generalPostList[index].likesCount =
-                        (model.generalPostList[index].likesCount ?? 0) + 1;
-                    model.notifyListeners();
-                  }
-                } else {
-                  bool val =
-                      await PostLikeModel().unLikePostAPI(postId, likedById);
-                  if (val == true) {
-                    model.generalPostList[index].likedPost = 0;
-                    model.generalPostList[index].likesCount =
-                        (model.generalPostList[index].likesCount ?? 0) - 1;
-                    model.notifyListeners();
-                  }
-                }
-              },
+              onClickLike: model.isMe == true
+                  ? () {}
+                  : () async {
+                      String postId =
+                          (model.generalPostList[index].id ?? 0).toString();
+                      String likedById =
+                          (prefs.getString(SharedPreferenceValues.id) ?? "0")
+                              .toString();
+                      if (model.generalPostList[index].likedPost == 0) {
+                        bool val = await PostLikeModel()
+                            .likePostAPI(postId, likedById);
+                        if (val == true) {
+                          model.generalPostList[index].likedPost = 1;
+                          model.generalPostList[index].likesCount =
+                              (model.generalPostList[index].likesCount ?? 0) +
+                                  1;
+                          model.notifyListeners();
+                        }
+                      } else {
+                        bool val = await PostLikeModel()
+                            .unLikePostAPI(postId, likedById);
+                        if (val == true) {
+                          model.generalPostList[index].likedPost = 0;
+                          model.generalPostList[index].likesCount =
+                              (model.generalPostList[index].likesCount ?? 0) -
+                                  1;
+                          model.notifyListeners();
+                        }
+                      }
+                    },
             );
           },
           separatorBuilder: (context, index) =>
@@ -423,33 +457,39 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
           itemBuilder: (context, index) {
             return CustomExperienceTile(
               tileData: model.experiencePostList[index],
-              onClickLike: () async {
-                String postId =
-                    (model.experiencePostList[index].id ?? 0).toString();
-                String likedById =
-                    (prefs.getString(SharedPreferenceValues.id) ?? "0")
-                        .toString();
+              onClickLike: model.isMe == true
+                  ? () {}
+                  : () async {
+                      String postId =
+                          (model.experiencePostList[index].id ?? 0).toString();
+                      String likedById =
+                          (prefs.getString(SharedPreferenceValues.id) ?? "0")
+                              .toString();
 
-                if (model.experiencePostList[index].likedPost == 0) {
-                  bool val =
-                      await PostLikeModel().likePostAPI(postId, likedById);
-                  if (val == true) {
-                    model.experiencePostList[index].likedPost = 1;
-                    model.experiencePostList[index].likesCount =
-                        (model.experiencePostList[index].likesCount ?? 0) + 1;
-                    model.notifyListeners();
-                  }
-                } else {
-                  bool val =
-                      await PostLikeModel().unLikePostAPI(postId, likedById);
-                  if (val == true) {
-                    model.experiencePostList[index].likedPost = 0;
-                    model.experiencePostList[index].likesCount =
-                        (model.experiencePostList[index].likesCount ?? 0) - 1;
-                    model.notifyListeners();
-                  }
-                }
-              },
+                      if (model.experiencePostList[index].likedPost == 0) {
+                        bool val = await PostLikeModel()
+                            .likePostAPI(postId, likedById);
+                        if (val == true) {
+                          model.experiencePostList[index].likedPost = 1;
+                          model.experiencePostList[index].likesCount =
+                              (model.experiencePostList[index].likesCount ??
+                                      0) +
+                                  1;
+                          model.notifyListeners();
+                        }
+                      } else {
+                        bool val = await PostLikeModel()
+                            .unLikePostAPI(postId, likedById);
+                        if (val == true) {
+                          model.experiencePostList[index].likedPost = 0;
+                          model.experiencePostList[index].likesCount =
+                              (model.experiencePostList[index].likesCount ??
+                                      0) -
+                                  1;
+                          model.notifyListeners();
+                        }
+                      }
+                    },
             );
           },
           separatorBuilder: (context, index) =>
@@ -459,7 +499,7 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
     );
   }
 
-  void showShareProfileWidget() {
+  void showShareProfileWidget(PreviewProfileModel model) {
     showDialog(
       context: context,
       builder: (context) {
@@ -505,7 +545,7 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CommonImageView.roundNetworkImage(
-                              imgUrl: AppImages().dummyImage,
+                              imgUrl: model.profileImageUrl ?? "",
                               width: screenWidth * 0.22,
                               height: screenWidth * 0.22,
                             ),
@@ -520,7 +560,7 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
                                   // name
                                   TextView.headingText(
                                     context: context,
-                                    text: "Robert Luis",
+                                    text: model.nameText ?? "",
                                     color: AppColor.blackColor,
                                     fontSize: screenHeight * 0.022,
                                     maxLines: 1,
@@ -534,7 +574,11 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
                                   ),
                                   TextView.mediumText(
                                     context: context,
-                                    text: "2002",
+                                    text: model
+                                        .calculateYear(
+                                            y: model.hostSinceYear ?? "0",
+                                            m: model.hostSinceMonth ?? "0")
+                                        .toString(),
                                     textColor: AppColor.hintTextColor,
                                     textSize: 0.015,
                                     fontWeight: FontWeight.w400,
@@ -545,7 +589,8 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
                                   // Rating
                                   RatingBar.builder(
                                     wrapAlignment: WrapAlignment.start,
-                                    initialRating: 4.5,
+                                    initialRating:
+                                        double.parse(model.avgRating ?? "0"),
                                     minRating: 1,
                                     direction: Axis.horizontal,
                                     allowHalfRating: true,
@@ -577,7 +622,8 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
                         UiSpacer.verticalSpace(context: context, space: 0.01),
                         TextView.mediumText(
                           context: context,
-                          text: "This is dummy description",
+                          text: model.bioText ?? "",
+                          maxLines: 3,
                           textSize: 0.016,
                           textColor: AppColor.greyColor500,
                           textAlign: TextAlign.start,
@@ -588,11 +634,22 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
                 ),
                 UiSpacer.verticalSpace(context: context, space: 0.02),
                 Center(
-                  child: CommonImageView.rectangleNetworkImage(
+                  child: SizedBox(
+                    height: screenHeight * 0.12,
+                    width: screenHeight * 0.12,
+                    child: QrImageView(
+                      data: model.profileUrl ?? "",
+                      version: QrVersions.auto,
+                      size: screenHeight * 0.12,
+                      gapless: false,
+                    ),
+                  )
+                  /*CommonImageView.rectangleNetworkImage(
                     imgUrl: AppImages().dummyImage,
                     height: screenHeight * 0.12,
                     width: screenHeight * 0.12,
-                  ),
+                  )*/
+                  ,
                 ),
                 UiSpacer.verticalSpace(context: context, space: 0.02),
                 Center(
@@ -623,15 +680,26 @@ class _PreviewProfilePageState extends State<PreviewProfilePage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      TextView.mediumText(
-                        context: context,
-                        text: "ABCDEF",
-                        textSize: 0.018,
-                        textColor: AppColor.greyColor500,
+                      Expanded(
+                        child: TextView.mediumText(
+                          context: context,
+                          text: model.profileUrl ?? "",
+                          textSize: 0.018,
+                          maxLines: 1,
+                          textColor: AppColor.greyColor500,
+                        ),
                       ),
-                      Icon(
-                        Icons.copy,
-                        color: AppColor.greyColor500,
+                      InkWell(
+                        onTap: () {
+                          FlutterClipboard.copy(model.profileUrl ?? "")
+                              .then((value) {
+                            GlobalUtility.showToast(context, "Link copied!");
+                          });
+                        },
+                        child: Icon(
+                          Icons.copy,
+                          color: AppColor.greyColor500,
+                        ),
                       )
                     ],
                   ),

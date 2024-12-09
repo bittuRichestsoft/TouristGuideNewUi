@@ -15,8 +15,8 @@ import '../../../../custom_widgets/common_widgets.dart';
 import '../../../../view_models/gallery_general_experience_models/gallery_detail_model.dart';
 
 class GalleryDetailPage extends StatefulWidget {
-  const GalleryDetailPage({super.key, required this.galleryId});
-  final String galleryId;
+  const GalleryDetailPage({super.key, required this.argData});
+  final Map<String, dynamic> argData;
 
   @override
   State<GalleryDetailPage> createState() => _GalleryDetailPageState();
@@ -36,7 +36,8 @@ class _GalleryDetailPageState extends State<GalleryDetailPage> {
     screenWidth = MediaQuery.of(context).size.width;
 
     return ViewModelBuilder<GalleryDetailModel>.reactive(
-        viewModelBuilder: () => GalleryDetailModel(galleryId: widget.galleryId),
+        viewModelBuilder: () =>
+            GalleryDetailModel(galleryId: widget.argData["galleryId"]),
         builder: (context, model, child) {
           return Scaffold(
             // appbar
@@ -54,22 +55,24 @@ class _GalleryDetailPageState extends State<GalleryDetailPage> {
               title: TextView.headingWhiteText(
                   text: AppStrings.galleryDetails, context: context),
               actions: [
-                IconButton(
-                    onPressed: () async {
-                      var varData = await Navigator.pushNamed(
-                          context, AppRoutes.createPostPage, arguments: {
-                        "type": "gallery",
-                        "screenType": "edit",
-                        "galleryDetails": model.galleryDetails
-                      });
-                      if (varData != null) {
-                        model.getGalleryDetailAPI(widget.galleryId);
-                      }
-                    },
-                    icon: Icon(
-                      Icons.edit,
-                      size: 20,
-                    ))
+                if (widget.argData["otherPersonProfile"] == false)
+                  IconButton(
+                      onPressed: () async {
+                        var varData = await Navigator.pushNamed(
+                            context, AppRoutes.createPostPage, arguments: {
+                          "type": "gallery",
+                          "screenType": "edit",
+                          "galleryDetails": model.galleryDetails
+                        });
+                        if (varData != null) {
+                          model
+                              .getGalleryDetailAPI(widget.argData["galleryId"]);
+                        }
+                      },
+                      icon: Icon(
+                        Icons.edit,
+                        size: 20,
+                      ))
               ],
             ),
 
@@ -79,7 +82,7 @@ class _GalleryDetailPageState extends State<GalleryDetailPage> {
                 : model.status == Status.error
                     ? CommonWidgets()
                         .inAppErrorWidget(context: context, model.errorMsg, () {
-                        model.getGalleryDetailAPI(widget.galleryId);
+                        model.getGalleryDetailAPI(widget.argData["galleryId"]);
                       })
                     : ListView(
                         shrinkWrap: true,

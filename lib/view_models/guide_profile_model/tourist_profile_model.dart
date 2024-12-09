@@ -14,6 +14,8 @@ import '../../response_pojo/get_gallery_post_response.dart' as gallery_resp;
 import '../../response_pojo/get_guide_profile_response.dart';
 import '../../utility/globalUtility.dart';
 
+enum Status { error, loading, initialised }
+
 class TouristProfileModel extends BaseViewModel implements Initialisable {
   List<gallery_resp.Rows> galleryPostList = [];
   List<exp_resp.Rows> experiencePostList = [];
@@ -26,8 +28,14 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
   String? hostSinceYear;
   String? hostSinceMonth;
   String? avgRating;
+  String? profileUrl;
 
   bool showCreateGeneral = false;
+
+  Status _status = Status.loading;
+  Status get status => _status;
+
+  String errorMsg = "Some error occurred";
 
   @override
   void initialise() {
@@ -57,6 +65,9 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
     try {
       // GlobalUtility().showLoaderDialog(navigatorKey.currentContext!);
       if (await GlobalUtility.isConnected()) {
+        _status = Status.loading;
+        notifyListeners();
+
         final apiResponse = await ApiRequest()
             .getWithHeader(Api.guideGetProfile)
             .timeout(const Duration(seconds: 20));
@@ -67,6 +78,8 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
         String message = jsonData['message'] ?? "";
 
         if (status == 200) {
+          _status = Status.initialised;
+
           GetGuideProfileResponse getGuideProfileResponse =
               getGuideProfileResponseFromJson(apiResponse.body);
 
@@ -82,16 +95,31 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
           hostSinceMonth = getGuideProfileResponse
               .data!.guideDetails!.userDetail!.hostSinceMonths;
           avgRating = getGuideProfileResponse.data!.avgRatings ?? "0";
+          profileUrl = getGuideProfileResponse.data!.url ?? "";
         } else if (status == 400) {
+          errorMsg = "Some error occurred";
+          _status = Status.error;
+
           GlobalUtility.showToast(context, message);
         } else if (status == 401) {
+          errorMsg = "Session Expired";
+          _status = Status.error;
+
           GlobalUtility().handleSessionExpire(context);
-        } else {}
+        } else {
+          errorMsg = "Some error occurred";
+          _status = Status.error;
+        }
       } else {
+        _status = Status.error;
+        errorMsg = AppStrings().INTERNET;
+
         GlobalUtility.showToast(context, AppStrings().INTERNET);
       }
     } catch (e) {
+      _status = Status.error;
       debugPrint("$runtimeType error : $e");
+      errorMsg = "Some error occurred";
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
       // GlobalUtility().closeLoaderDialog(context);

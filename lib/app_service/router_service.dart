@@ -185,8 +185,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
 
     case AppRoutes.galleryDetailPage:
       return MaterialPageRoute(
-          builder: (context) =>
-              GalleryDetailPage(galleryId: settings.arguments as String));
+          builder: (context) => GalleryDetailPage(
+              argData: settings.arguments as Map<String, dynamic>));
 
     case AppRoutes.createPostPage:
       return MaterialPageRoute(

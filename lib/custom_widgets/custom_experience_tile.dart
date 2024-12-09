@@ -13,9 +13,13 @@ import '../response_pojo/custom_pojos/media_type_pojo.dart';
 
 class CustomExperienceTile extends StatefulWidget {
   const CustomExperienceTile(
-      {super.key, required this.tileData, required this.onClickLike});
+      {super.key,
+      required this.tileData,
+      required this.onClickLike,
+      this.otherPersonProfile = true});
   final Rows tileData;
   final VoidCallback onClickLike;
+  final bool otherPersonProfile;
 
   @override
   State<CustomExperienceTile> createState() => _CustomExperienceTileState();

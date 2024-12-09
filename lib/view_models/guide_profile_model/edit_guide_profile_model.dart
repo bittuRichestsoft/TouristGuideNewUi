@@ -125,10 +125,9 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
 
   Future<bool> getLocationApi(
       {BuildContext? viewContext, String? countryId, String? stateId}) async {
+    GlobalUtility().showLoaderDialog(viewContext!);
     try {
       if (await GlobalUtility.isConnected()) {
-        GlobalUtility().showLoaderDialog(viewContext!);
-
         Map map = {
           "countryName": countryId ?? "",
           "stateName": stateId ?? "",
@@ -136,8 +135,6 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
         final apiResponse =
             await ApiRequest().postWithMap(map, Api.getLocation);
         Map jsonData = jsonDecode(apiResponse.body);
-
-        GlobalUtility().closeLoaderDialog(viewContext);
 
         debugPrint("MAP --- $map ----- \n$jsonData");
         var status = jsonData['statusCode'];
@@ -178,22 +175,23 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
       }
     } catch (e) {
       GlobalUtility.showToast(viewContext!, AppStrings.someErrorOccurred);
+    } finally {
+      GlobalUtility().closeLoaderDialog(viewContext);
     }
     return false;
   }
 
   Future<void> getActivitiesAPI() async {
     BuildContext context = navigatorKey.currentContext!;
+
     try {
+      GlobalUtility().showLoaderDialog(context);
       if (await GlobalUtility.isConnected()) {
-        GlobalUtility().showLoaderDialog(context);
         final apiResponse = await ApiRequest()
             .getWithHeader(Api.getActivities)
             .timeout(Duration(seconds: 20));
 
         var jsonData = jsonDecode(apiResponse.body);
-
-        GlobalUtility().closeLoaderDialog(context);
 
         int status = jsonData['statusCode'] ?? 404;
         String message = jsonData['message'] ?? "";
@@ -217,22 +215,22 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
     } catch (e) {
       debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      GlobalUtility().closeLoaderDialog(context);
     }
   }
 
   Future<void> deleteDocumentAPI(
       {required int documentId, required int index}) async {
     BuildContext context = navigatorKey.currentContext!;
+    GlobalUtility().showLoaderDialog(context);
     try {
       if (await GlobalUtility.isConnected()) {
-        GlobalUtility().showLoaderDialog(context);
         final apiResponse = await ApiRequest()
             .deleteWithHeader(Api.deleteDocuments + "?document_id=$documentId")
             .timeout(Duration(seconds: 20));
 
         var jsonData = jsonDecode(apiResponse.body);
-
-        GlobalUtility().closeLoaderDialog(context);
 
         int status = jsonData['statusCode'] ?? 404;
         String message = jsonData['message'] ?? "";
@@ -251,23 +249,21 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
       debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
+      GlobalUtility().closeLoaderDialog(context);
       notifyListeners();
     }
   }
 
   Future<void> getProfileAPI() async {
     BuildContext context = navigatorKey.currentContext!;
+    GlobalUtility().showLoaderDialog(context);
     try {
       if (await GlobalUtility.isConnected()) {
-        GlobalUtility().showLoaderDialog(context);
-
         final apiResponse = await ApiRequest()
             .getWithHeader(Api.guideGetProfile)
             .timeout(const Duration(seconds: 20));
 
         var jsonData = jsonDecode(apiResponse.body);
-
-        GlobalUtility().closeLoaderDialog(context);
 
         int status = jsonData['statusCode'] ?? 404;
         String message = jsonData['message'] ?? "";
@@ -394,16 +390,16 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
       debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
+      GlobalUtility().closeLoaderDialog(context);
       notifyListeners();
     }
   }
 
   Future<void> updateGuideProfileAPI() async {
     BuildContext context = navigatorKey.currentContext!;
+    GlobalUtility().showLoaderDialog(context);
     try {
       if (await GlobalUtility.isConnected()) {
-        GlobalUtility().showLoaderDialog(context);
-
         List<int> selectedActivitiesId =
             activitiesList.where((e) => e.isSelect).map((e) => e.id).toList();
         Map<String, String> map = {
@@ -454,8 +450,6 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
 
         var apiResponse = await response.stream.bytesToString();
 
-        GlobalUtility().closeLoaderDialog(context);
-
         var jsonData = jsonDecode(apiResponse);
         int status = jsonData['statusCode'] ?? 404;
         String message = jsonData['message'] ?? "";
@@ -474,15 +468,16 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
     } catch (e) {
       debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      GlobalUtility().closeLoaderDialog(context);
     }
   }
 
   Future<void> updateCoverImageAPI() async {
     BuildContext context = navigatorKey.currentContext!;
+    GlobalUtility().showLoaderDialog(context);
     try {
       if (await GlobalUtility.isConnected()) {
-        GlobalUtility().showLoaderDialog(context);
-
         List<http.MultipartFile> field = [];
 
         if (coverImgLocal != null) {
@@ -496,8 +491,6 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
             {}, Api.updateCoverImage, field).timeout(Duration(seconds: 20));
 
         var apiResponse = await response.stream.bytesToString();
-
-        GlobalUtility().closeLoaderDialog(context);
 
         var jsonData = jsonDecode(apiResponse);
         debugPrint(apiResponse);
@@ -521,23 +514,22 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
       debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
+      GlobalUtility().closeLoaderDialog(context);
       notifyListeners();
     }
   }
 
   Future<void> removeCoverImageAPI() async {
     BuildContext context = navigatorKey.currentContext!;
+    GlobalUtility().showLoaderDialog(context);
+
     try {
       if (await GlobalUtility.isConnected()) {
-        GlobalUtility().showLoaderDialog(context);
-
         final apiResponse = await ApiRequest()
             .deleteWithHeader(
               Api.removeCoverImage,
             )
             .timeout(Duration(seconds: 20));
-
-        GlobalUtility().closeLoaderDialog(context);
 
         var jsonData = jsonDecode(apiResponse.body);
         int status = jsonData['statusCode'] ?? 404;
@@ -559,6 +551,7 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
       debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
+      GlobalUtility().closeLoaderDialog(context);
       notifyListeners();
     }
   }

@@ -19,10 +19,12 @@ class CustomGalleryTile extends StatefulWidget {
       {super.key,
       this.showDescription = true,
       required this.tileData,
-      required this.onClickLike});
+      required this.onClickLike,
+      this.otherPersonProfile = true});
   final bool showDescription;
   final Rows tileData;
   final VoidCallback onClickLike;
+  final bool otherPersonProfile;
 
   @override
   State<CustomGalleryTile> createState() => _CustomGalleryTileState();
@@ -49,8 +51,10 @@ class _CustomGalleryTileState extends State<CustomGalleryTile> {
 
     return InkWell(
       onTap: () {
-        Navigator.pushNamed(context, AppRoutes.galleryDetailPage,
-            arguments: (widget.tileData.id ?? 0).toString());
+        Navigator.pushNamed(context, AppRoutes.galleryDetailPage, arguments: {
+          "galleryId": (widget.tileData.id ?? 0).toString(),
+          "otherPersonProfile": widget.otherPersonProfile
+        });
       },
       child: Container(
         decoration: BoxDecoration(

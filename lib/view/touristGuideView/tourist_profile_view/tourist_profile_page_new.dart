@@ -4,8 +4,10 @@ import 'package:Siesta/custom_widgets/custom_experience_tile.dart';
 import 'package:Siesta/custom_widgets/custom_gallery_tile.dart';
 import 'package:Siesta/view_models/gallery_general_experience_models/post_like_model.dart';
 import 'package:Siesta/view_models/guide_profile_model/tourist_profile_model.dart';
+import 'package:clipboard/clipboard.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:stacked/stacked.dart';
 
 import '../../../app_constants/app_color.dart';
@@ -15,8 +17,10 @@ import '../../../common_widgets/common_button.dart';
 import '../../../common_widgets/common_imageview.dart';
 import '../../../common_widgets/common_textview.dart';
 import '../../../common_widgets/vertical_size_box.dart';
+import '../../../custom_widgets/common_widgets.dart';
 import '../../../custom_widgets/custom_general_tile.dart';
 import '../../../main.dart';
+import '../../../utility/globalUtility.dart';
 
 class TouristProfilePageNew extends StatefulWidget {
   const TouristProfilePageNew({super.key});
@@ -37,57 +41,68 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
         viewModelBuilder: () => TouristProfileModel(),
         builder: (context, model, child) {
           return Scaffold(
-            body: RefreshIndicator(
-              color: AppColor.appthemeColor,
-              onRefresh: () async {
-                model.initialise();
-              },
-              child: ListView(
-                shrinkWrap: true,
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  // Cover and profile photo
-                  profileImageView(model),
-                  UiSpacer.verticalSpace(
-                      space: AppSizes().widgetSize.normalPadding,
-                      context: context),
+            body: model.status == Status.loading
+                ? CommonWidgets().inPageLoader()
+                : model.status == Status.error
+                    ? CommonWidgets()
+                        .inAppErrorWidget(context: context, model.errorMsg, () {
+                        model.initialise();
+                      })
+                    : RefreshIndicator(
+                        color: AppColor.appthemeColor,
+                        onRefresh: () async {
+                          model.initialise();
+                        },
+                        child: ListView(
+                          shrinkWrap: true,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            // Cover and profile photo
+                            profileImageView(model),
+                            UiSpacer.verticalSpace(
+                                space: AppSizes().widgetSize.normalPadding,
+                                context: context),
 
-                  // Profile description
-                  Padding(
-                    padding: EdgeInsets.all(screenWidth * 0.04),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Profile desc
-                        profileDescription(model),
-                        UiSpacer.verticalSpace(context: context, space: 0.03),
+                            // Profile description
+                            Padding(
+                              padding: EdgeInsets.all(screenWidth * 0.04),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // Profile desc
+                                  profileDescription(model),
+                                  UiSpacer.verticalSpace(
+                                      context: context, space: 0.03),
 
-                        // Buttons view
-                        buttonsView(model),
-                        UiSpacer.verticalSpace(context: context, space: 0.05),
+                                  // Buttons view
+                                  buttonsView(model),
+                                  UiSpacer.verticalSpace(
+                                      context: context, space: 0.05),
 
-                        // Gallery view
-                        if (model.galleryPostList.isNotEmpty)
-                          galleryView(model),
-                        if (model.galleryPostList.isNotEmpty)
-                          UiSpacer.verticalSpace(context: context, space: 0.05),
+                                  // Gallery view
+                                  if (model.galleryPostList.isNotEmpty)
+                                    galleryView(model),
+                                  if (model.galleryPostList.isNotEmpty)
+                                    UiSpacer.verticalSpace(
+                                        context: context, space: 0.05),
 
-                        // general planner
-                        if (model.generalPostList.isNotEmpty)
-                          generalPlannerView(model),
-                        if (model.generalPostList.isNotEmpty)
-                          UiSpacer.verticalSpace(context: context, space: 0.05),
+                                  // general planner
+                                  if (model.generalPostList.isNotEmpty)
+                                    generalPlannerView(model),
+                                  if (model.generalPostList.isNotEmpty)
+                                    UiSpacer.verticalSpace(
+                                        context: context, space: 0.05),
 
-                        // special experience
-                        if (model.experiencePostList.isNotEmpty)
-                          specialExperienceView(model),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            ),
+                                  // special experience
+                                  if (model.experiencePostList.isNotEmpty)
+                                    specialExperienceView(model),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
+                      ),
           );
         });
   }
@@ -278,7 +293,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
           text: "Share profile",
           iconPath: AppImages().svgImages.icShare,
           onPressed: () {
-            showShareProfileWidget();
+            showShareProfileWidget(model);
           },
         ),
       ],
@@ -357,6 +372,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                   }
                 }
               },
+              otherPersonProfile: false,
             );
           },
           separatorBuilder: (context, index) =>
@@ -415,6 +431,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                   }
                 }
               },
+              otherPersonProfile: false,
             );
           },
           separatorBuilder: (context, index) =>
@@ -497,6 +514,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                   }
                 }
               },
+              otherPersonProfile: false,
             );
           },
           separatorBuilder: (context, index) =>
@@ -506,7 +524,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
     );
   }
 
-  void showShareProfileWidget() {
+  void showShareProfileWidget(TouristProfileModel model) {
     showDialog(
       context: context,
       builder: (context) {
@@ -552,7 +570,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             CommonImageView.roundNetworkImage(
-                              imgUrl: AppImages().dummyImage,
+                              imgUrl: model.profileImageUrl ?? "",
                               width: screenWidth * 0.22,
                               height: screenWidth * 0.22,
                             ),
@@ -567,7 +585,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                                   // name
                                   TextView.headingText(
                                     context: context,
-                                    text: "Robert Luis",
+                                    text: model.nameText ?? "",
                                     color: AppColor.blackColor,
                                     fontSize: screenHeight * 0.022,
                                     maxLines: 1,
@@ -581,7 +599,11 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                                   ),
                                   TextView.mediumText(
                                     context: context,
-                                    text: "2002",
+                                    text: model
+                                        .calculateYear(
+                                            y: model.hostSinceYear ?? "0",
+                                            m: model.hostSinceMonth ?? "0")
+                                        .toString(),
                                     textColor: AppColor.hintTextColor,
                                     textSize: 0.015,
                                     fontWeight: FontWeight.w400,
@@ -592,7 +614,8 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                                   // Rating
                                   RatingBar.builder(
                                     wrapAlignment: WrapAlignment.start,
-                                    initialRating: 4.5,
+                                    initialRating:
+                                        double.parse(model.avgRating ?? "0"),
                                     minRating: 1,
                                     direction: Axis.horizontal,
                                     allowHalfRating: true,
@@ -624,7 +647,8 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                         UiSpacer.verticalSpace(context: context, space: 0.01),
                         TextView.mediumText(
                           context: context,
-                          text: "This is dummy description",
+                          text: model.bioText ?? "",
+                          maxLines: 3,
                           textSize: 0.016,
                           textColor: AppColor.greyColor500,
                           textAlign: TextAlign.start,
@@ -635,11 +659,22 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                 ),
                 UiSpacer.verticalSpace(context: context, space: 0.02),
                 Center(
-                  child: CommonImageView.rectangleNetworkImage(
+                  child: SizedBox(
+                    height: screenHeight * 0.12,
+                    width: screenHeight * 0.12,
+                    child: QrImageView(
+                      data: model.profileUrl ?? "",
+                      version: QrVersions.auto,
+                      size: screenHeight * 0.12,
+                      gapless: false,
+                    ),
+                  )
+                  /*CommonImageView.rectangleNetworkImage(
                     imgUrl: AppImages().dummyImage,
                     height: screenHeight * 0.12,
                     width: screenHeight * 0.12,
-                  ),
+                  )*/
+                  ,
                 ),
                 UiSpacer.verticalSpace(context: context, space: 0.02),
                 Center(
@@ -670,15 +705,26 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      TextView.mediumText(
-                        context: context,
-                        text: "ABCDEF",
-                        textSize: 0.018,
-                        textColor: AppColor.greyColor500,
+                      Expanded(
+                        child: TextView.mediumText(
+                          context: context,
+                          text: model.profileUrl ?? "",
+                          textSize: 0.018,
+                          maxLines: 1,
+                          textColor: AppColor.greyColor500,
+                        ),
                       ),
-                      Icon(
-                        Icons.copy,
-                        color: AppColor.greyColor500,
+                      InkWell(
+                        onTap: () {
+                          FlutterClipboard.copy(model.profileUrl ?? "")
+                              .then((value) {
+                            GlobalUtility.showToast(context, "Link copied!");
+                          });
+                        },
+                        child: Icon(
+                          Icons.copy,
+                          color: AppColor.greyColor500,
+                        ),
                       )
                     ],
                   ),

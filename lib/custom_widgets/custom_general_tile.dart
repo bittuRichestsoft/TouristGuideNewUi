@@ -19,10 +19,12 @@ class CustomGeneralTile extends StatefulWidget {
       {super.key,
       this.showDescription = true,
       required this.tileData,
-      required this.onClickLike});
+      required this.onClickLike,
+      this.otherPersonProfile = true});
   final bool showDescription;
   final Rows tileData;
   final VoidCallback onClickLike;
+  final bool otherPersonProfile;
 
   @override
   State<CustomGeneralTile> createState() => _CustomGeneralTileState();
@@ -51,7 +53,8 @@ class _CustomGeneralTileState extends State<CustomGeneralTile> {
       onTap: () {
         Navigator.pushNamed(context, AppRoutes.postDetailPage, arguments: {
           "type": "general",
-          "postId": (widget.tileData.id ?? 0).toString()
+          "postId": (widget.tileData.id ?? 0).toString(),
+          "otherPersonProfile": widget.otherPersonProfile
         });
       },
       child: Container(

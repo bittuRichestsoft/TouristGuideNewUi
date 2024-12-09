@@ -8,11 +8,11 @@ import 'package:Siesta/view/notification_screen/notification_page.dart';
 import 'package:Siesta/view/touristGuideView/bookingHistory/booking_history_page.dart';
 import 'package:Siesta/view/touristGuideView/guide_bookings/guide_bookings_page.dart';
 import 'package:Siesta/view/touristGuideView/home/guide_drawer_page.dart';
-import 'package:Siesta/view/touristGuideView/tourist_profile_view/tourist_profile_page.dart';
 import 'package:Siesta/view/travellerView/message_screen/message_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../../app_link/app_link_controller.dart';
 import '../../../utility/preference_util.dart';
 import '../tourist_profile_view/tourist_profile_page_new.dart';
 
@@ -64,6 +64,9 @@ class _TravellerHomePageState extends State<TouristGuideHomePage> {
   @override
   void initState() {
     super.initState();
+    // Initialize app link controller
+    AppLinkController().initDeepLinks();
+
     getWaitingStatus();
 
     setState(() {
@@ -80,14 +83,23 @@ class _TravellerHomePageState extends State<TouristGuideHomePage> {
     });
   }
 
-  bool? isWaiting;
-  getWaitingStatus() async {
-    await PreferenceUtil().getWaitingStatus();
+  /*@override
+  void dispose() {
+    AppLinkController().dispose();
+    super.dispose();
+  }*/
 
-    debugPrint(
-        "WAITING STATUS ---- ${await PreferenceUtil().getWaitingStatus()}");
-    isWaiting = PreferenceUtil().getWaitingStatus();
-    setState(() {});
+  bool? isWaiting;
+
+  getWaitingStatus() async {
+    try {
+      await PreferenceUtil().getWaitingStatus();
+
+      debugPrint(
+          "WAITING STATUS ---- ${await PreferenceUtil().getWaitingStatus()}");
+      isWaiting = await PreferenceUtil().getWaitingStatus();
+      setState(() {});
+    } catch (e) {}
   }
 
   @override

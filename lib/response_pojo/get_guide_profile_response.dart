@@ -50,6 +50,8 @@ class Data {
   int? percentage1Ratings;
   int? moreReviews;
   GuideDetails? guideDetails;
+  String? url;
+  bool? isFollowed;
 
   Data(
       {this.reviews,
@@ -66,7 +68,9 @@ class Data {
       this.percentage2Ratings,
       this.percentage1Ratings,
       this.moreReviews,
-      this.guideDetails});
+      this.guideDetails,
+      this.url,
+      this.isFollowed});
 
   Data.fromJson(Map<String, dynamic> json) {
     reviews = json['Reviews'];
@@ -82,6 +86,8 @@ class Data {
     percentage3Ratings = json['percentage3Ratings'];
     percentage2Ratings = json['percentage2Ratings'];
     percentage1Ratings = json['percentage1Ratings'];
+    url = json['url'];
+    isFollowed = json['isFollowed'];
     moreReviews = json['moreReviews'];
     guideDetails = json['guideDetails'] != null
         ? new GuideDetails.fromJson(json['guideDetails'])
@@ -104,6 +110,8 @@ class Data {
     data['percentage2Ratings'] = this.percentage2Ratings;
     data['percentage1Ratings'] = this.percentage1Ratings;
     data['moreReviews'] = this.moreReviews;
+    data['url'] = this.url;
+    data['isFollowed'] = this.isFollowed;
     if (this.guideDetails != null) {
       data['guideDetails'] = this.guideDetails!.toJson();
     }

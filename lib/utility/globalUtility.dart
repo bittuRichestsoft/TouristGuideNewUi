@@ -165,15 +165,17 @@ class GlobalUtility {
         context, AppRoutes.loginPage, (route) => false);
   }
 
-  showLoaderDialog(BuildContext context) {
-    showDialog(
-      barrierDismissible: false,
-      useSafeArea: false,
-      context: context,
-      builder: (BuildContext context) {
-        return const CommonLoaderDialog();
-      },
-    );
+  void showLoaderDialog(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      showDialog(
+        barrierDismissible: false,
+        useSafeArea: false,
+        context: context,
+        builder: (BuildContext context) {
+          return const CommonLoaderDialog();
+        },
+      );
+    });
   }
 
   void closeLoaderDialog(BuildContext context) {

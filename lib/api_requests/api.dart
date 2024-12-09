@@ -142,6 +142,13 @@ class Api {
   // Update gallery, post
   static String updatePost = "guide/update-post";
   static String updateGallery = "guide/update-gallery";
+
+  // view other guide profile
+  static String getOtherGuideProfile = "user/get-guide-profile";
+
+  // follow and unfollow guide
+  static String followGuide = "guide/follow-guide";
+  static String unFollowGuide = "guide/unfollow-guide";
 }
 
 /// -- ---- --- ---- --- STATUS MEAN --- ---- - - - -- ---- - -- ---
