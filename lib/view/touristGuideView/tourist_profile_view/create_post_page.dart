@@ -20,6 +20,7 @@ import '../../../app_constants/app_fonts.dart';
 import '../../../app_constants/app_sizes.dart';
 import '../../../app_constants/app_strings.dart';
 import '../../../common_widgets/common_textview.dart';
+import '../../../custom_widgets/common_widgets.dart';
 import '../../../utility/globalUtility.dart';
 
 class CreatePostPage extends StatefulWidget {
@@ -80,275 +81,315 @@ class _CreatePostPageState extends State<CreatePostPage> {
               ),
 
               // save button
-              bottomNavigationBar: Container(
-                margin: EdgeInsets.all(screenWidth * 0.04),
-                child: CommonButton.commonBoldTextButton(
-                  context: context,
-                  text: "Save",
-                  onPressed: () async {
-                    debugPrint("Latutude : ${model.latitude}");
-                    if (widget.argData["screenType"] == "create") {
-                      if (widget.argData["type"] == "experience" &&
-                          model.validateExperience()) {
-                        // debugPrint(
-                        //     " ${File(model.documentsList[0].documentPath).readAsBytesSync()}");
-                        // model.createExperienceUsingDio();
-                        model.createExperienceAPI();
-                      } else if (widget.argData["type"] == "general" &&
-                          model.validateGeneral()) {
-                        model.createGeneralAPI();
-                      } else if (widget.argData["type"] == "gallery" &&
-                          model.validateGallery()) {
-                        model.createGalleryAPI();
-                      }
-                    } else {
-                      if (widget.argData["type"] == "experience" &&
-                          model.validateExperience()) {
-                        model.updateExperienceAPI();
-                      } else if (widget.argData["type"] == "general" &&
-                          model.validateGeneral()) {
-                        model.updateGeneralAPI();
-                      } else if (widget.argData["type"] == "gallery" &&
-                          model.validateGallery()) {
-                        model.updateGalleryAPI();
-                      }
-                    }
-                  },
-                  isButtonEnable: true,
-                ),
-              ),
+              bottomNavigationBar: model.initialised
+                  ? Container(
+                      margin: EdgeInsets.all(screenWidth * 0.04),
+                      child: CommonButton.commonBoldTextButton(
+                        context: context,
+                        text: "Save",
+                        onPressed: () async {
+                          debugPrint("Latutude : ${model.latitude}");
+                          debugPrint(
+                              "Screen type : ${widget.argData["screenType"]} ${widget.argData["type"]}");
+                          if (widget.argData["screenType"] == "create") {
+                            if (widget.argData["type"] == "experience" &&
+                                model.validateExperience()) {
+                              // debugPrint(
+                              //     " ${File(model.documentsList[0].documentPath).readAsBytesSync()}");
+                              // model.createExperienceUsingDio();
+                              model.createExperienceAPI();
+                            } else if (widget.argData["type"] == "general" &&
+                                model.validateGeneral()) {
+                              model.createGeneralAPI();
+                            } else if (widget.argData["type"] == "gallery" &&
+                                model.validateGallery()) {
+                              model.createGalleryAPI();
+                            }
+                          } else {
+                            if (widget.argData["type"] == "experience" &&
+                                model.validateExperience()) {
+                              model.updateExperienceAPI();
+                            } else if (widget.argData["type"] == "general" &&
+                                model.validateGeneral()) {
+                              model.updateGeneralAPI();
+                            } else if (widget.argData["type"] == "gallery" &&
+                                model.validateGallery()) {
+                              debugPrint("Update gallery");
+                              model.updateGalleryAPI();
+                            }
+                          }
+                        },
+                        isButtonEnable: true,
+                      ),
+                    )
+                  : SizedBox(),
 
               // body
-              body: ListView(
-                shrinkWrap: true,
-                padding: EdgeInsets.all(screenWidth * 0.04),
-                children: [
-                  // title text field
-                  CustomTextField(
-                    textEditingController: model.titleTEC,
-                    hintText: "Enter title",
-                    headingText: "Title",
-                  ),
-                  UiSpacer.verticalSpace(context: context, space: 0.02),
-
-                  if (widget.argData["type"] == "general" ||
-                      widget.argData["type"] == "experience")
-                    selectActivitiesDropdown(model),
-                  if (widget.argData["type"] == "general" ||
-                      widget.argData["type"] == "experience")
-                    UiSpacer.verticalSpace(context: context, space: 0.02),
-
-                  CustomTextField(
-                    textEditingController: model.locationTEC,
-                    hintText: "Enter location",
-                    headingText: "Location",
-                    suffixIconPath: AppImages().svgImages.icLocation,
-                    onTap: () {
-                      if (model.locationTEC.text.isNotEmpty) {
-                        model.isPlaceListShow = true;
-                        model.notifyListeners();
-                      }
-                    },
-                    onChange: (value) async {
-                      model.latitude = null;
-                      model.longitude = null;
-                      await model.searchLocation(value);
-                    },
-                  ),
-                  if (model.isPlaceListShow == true)
-                    Container(
-                      // height: 10,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: ListView.separated(
-                        shrinkWrap: true,
-                        padding: EdgeInsets.zero,
-                        itemCount: model.placeList.length,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemBuilder: (context, index) {
-                          return InkWell(
-                            onTap: () {
-                              model.onClickSuggestion(index);
-                            },
-                            child: Padding(
-                              padding: EdgeInsets.symmetric(
-                                  horizontal: screenWidth * 0.04, vertical: 6),
-                              child: TextView.mediumText(
-                                context: context,
-                                text: model.placeList[index]["description"],
-                                textAlign: TextAlign.start,
-                                textColor: AppColor.greyColor,
-                                textSize: 0.016,
-                              ),
+              body: model.hasError
+                  ? CommonWidgets()
+                      .inAppErrorWidget(model.modelError.toString(), () {
+                      model.initialise();
+                    }, context: context)
+                  : model.initialised == false
+                      ? Center(
+                          child: CircularProgressIndicator(),
+                        )
+                      : ListView(
+                          shrinkWrap: true,
+                          padding: EdgeInsets.all(screenWidth * 0.04),
+                          children: [
+                            // title text field
+                            CustomTextField(
+                              textEditingController: model.titleTEC,
+                              hintText: "Enter title",
+                              headingText: "Title",
                             ),
-                          );
-                        },
-                        separatorBuilder: (context, index) {
-                          return Divider(
-                            color: Colors.grey,
-                            height: 1,
-                            indent: screenWidth * 0.04,
-                            endIndent: screenWidth * 0.04,
-                          );
-                        },
-                      ),
-                    ),
-                  UiSpacer.verticalSpace(context: context, space: 0.02),
+                            UiSpacer.verticalSpace(
+                                context: context, space: 0.02),
 
-                  if (widget.argData["type"] == "general" ||
-                      widget.argData["type"] == "experience")
-                    priceView(model),
+                            if (widget.argData["type"] == "general" ||
+                                widget.argData["type"] == "experience")
+                              selectActivitiesDropdown(model),
+                            if (widget.argData["type"] == "general" ||
+                                widget.argData["type"] == "experience")
+                              UiSpacer.verticalSpace(
+                                  context: context, space: 0.02),
 
-                  // detailed schedule
-                  if (widget.argData["type"] == "experience")
-                    CustomTextField(
-                      textEditingController: model.scheduleTEC,
-                      hintText: "Enter schedule of the trip",
-                      headingText: "Detailed Schedule",
-                    ),
-                  if (widget.argData["type"] == "experience")
-                    UiSpacer.verticalSpace(context: context, space: 0.02),
+                            CustomTextField(
+                              textEditingController: model.locationTEC,
+                              hintText: "Enter location",
+                              headingText: "Location",
+                              suffixIconPath: AppImages().svgImages.icLocation,
+                              onTap: () {
+                                if (model.locationTEC.text.isNotEmpty) {
+                                  model.isPlaceListShow = true;
+                                  model.notifyListeners();
+                                }
+                              },
+                              onChange: (value) async {
+                                model.latitude = null;
+                                model.longitude = null;
+                                await model.searchLocation(value);
+                              },
+                            ),
+                            if (model.isPlaceListShow == true)
+                              Container(
+                                // height: 10,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  border: Border.all(color: Colors.grey),
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                child: ListView.separated(
+                                  shrinkWrap: true,
+                                  padding: EdgeInsets.zero,
+                                  itemCount: model.placeList.length,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  itemBuilder: (context, index) {
+                                    return InkWell(
+                                      onTap: () {
+                                        model.onClickSuggestion(index);
+                                      },
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: screenWidth * 0.04,
+                                            vertical: 6),
+                                        child: TextView.mediumText(
+                                          context: context,
+                                          text: model.placeList[index]
+                                              ["description"],
+                                          textAlign: TextAlign.start,
+                                          textColor: AppColor.greyColor,
+                                          textSize: 0.016,
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  separatorBuilder: (context, index) {
+                                    return Divider(
+                                      color: Colors.grey,
+                                      height: 1,
+                                      indent: screenWidth * 0.04,
+                                      endIndent: screenWidth * 0.04,
+                                    );
+                                  },
+                                ),
+                              ),
+                            UiSpacer.verticalSpace(
+                                context: context, space: 0.02),
 
-                  // Transport Type
-                  if (widget.argData["type"] == "experience")
-                    CustomTextField(
-                      textEditingController: model.transportTypeTEC,
-                      hintText: "Enter transport type",
-                      headingText: "Transport Type",
-                      suffixIconPath: AppImages().svgImages.icCar,
-                    ),
-                  if (widget.argData["type"] == "experience")
-                    UiSpacer.verticalSpace(context: context, space: 0.02),
+                            if (widget.argData["type"] == "general" ||
+                                widget.argData["type"] == "experience")
+                              priceView(model),
 
-                  // Accessibility
-                  if (widget.argData["type"] == "experience")
-                    CustomTextField(
-                      readOnly: true,
-                      hintText: "Select accessibility",
-                      headingText: "Accessibility",
-                      suffixWidget: Switch(
-                        value: model.accessibility,
-                        activeColor: AppColor.appthemeColor,
-                        onChanged: (value) {
-                          model.accessibility = value;
-                          model.notifyListeners();
-                        },
-                      ),
-                    ),
-                  if (widget.argData["type"] == "experience")
-                    UiSpacer.verticalSpace(context: context, space: 0.02),
+                            // detailed schedule
+                            if (widget.argData["type"] == "experience")
+                              CustomTextField(
+                                textEditingController: model.scheduleTEC,
+                                hintText: "Enter schedule of the trip",
+                                headingText: "Detailed Schedule",
+                              ),
+                            if (widget.argData["type"] == "experience")
+                              UiSpacer.verticalSpace(
+                                  context: context, space: 0.02),
 
-                  // Maximum People
-                  if (widget.argData["type"] == "experience")
-                    CustomTextField(
-                      textEditingController: model.maximumPeopleTEC,
-                      hintText: "Enter max no. of people",
-                      headingText: "Maximum People",
-                      keyboardType: TextInputType.number,
-                      maxLength: 5,
-                      inputFormatter: [FilteringTextInputFormatter.digitsOnly],
-                    ),
-                  if (widget.argData["type"] == "experience")
-                    UiSpacer.verticalSpace(context: context, space: 0.02),
+                            // Transport Type
+                            if (widget.argData["type"] == "experience")
+                              CustomTextField(
+                                textEditingController: model.transportTypeTEC,
+                                hintText: "Enter transport type",
+                                headingText: "Transport Type",
+                                suffixIconPath: AppImages().svgImages.icCar,
+                              ),
+                            if (widget.argData["type"] == "experience")
+                              UiSpacer.verticalSpace(
+                                  context: context, space: 0.02),
 
-                  // Minimum People
-                  if (widget.argData["type"] == "experience")
-                    CustomTextField(
-                      textEditingController: model.minimumPeopleTEC,
-                      hintText: "Enter min no. of people",
-                      headingText: "Minimum People",
-                      keyboardType: TextInputType.number,
-                      maxLength: 5,
-                      inputFormatter: [FilteringTextInputFormatter.digitsOnly],
-                    ),
-                  if (widget.argData["type"] == "experience")
-                    UiSpacer.verticalSpace(context: context, space: 0.02),
+                            // Accessibility
+                            if (widget.argData["type"] == "experience")
+                              CustomTextField(
+                                readOnly: true,
+                                hintText: "Select accessibility",
+                                headingText: "Accessibility",
+                                suffixWidget: Switch(
+                                  value: model.accessibility,
+                                  activeColor: AppColor.appthemeColor,
+                                  onChanged: (value) {
+                                    model.accessibility = value;
+                                    model.notifyListeners();
+                                  },
+                                ),
+                              ),
+                            if (widget.argData["type"] == "experience")
+                              UiSpacer.verticalSpace(
+                                  context: context, space: 0.02),
 
-                  // Starting Time
-                  if (widget.argData["type"] == "experience")
-                    CustomTextField(
-                      textEditingController: model.startingTimeTEC,
-                      hintText: "Select starting time",
-                      headingText: "Starting Time",
-                      readOnly: true,
-                      onTap: () async {
-                        // code for time picker
-                        TimeOfDay? pickedTime = await showTimePicker(
-                          context: context,
-                          initialTime: const TimeOfDay(hour: 10, minute: 00),
-                          initialEntryMode: TimePickerEntryMode.dial,
-                          builder: (context, child) {
-                            return MediaQuery(
-                              data: MediaQuery.of(context)
-                                  .copyWith(alwaysUse24HourFormat: true),
-                              child: child ?? Container(),
-                            );
-                          },
-                        );
+                            // Maximum People
+                            if (widget.argData["type"] == "experience")
+                              CustomTextField(
+                                textEditingController: model.maximumPeopleTEC,
+                                hintText: "Enter max no. of people",
+                                headingText: "Maximum People",
+                                keyboardType: TextInputType.number,
+                                maxLength: 5,
+                                inputFormatter: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
+                              ),
+                            if (widget.argData["type"] == "experience")
+                              UiSpacer.verticalSpace(
+                                  context: context, space: 0.02),
 
-                        if (pickedTime != null) {
-                          final now = DateTime.now();
-                          final dateTime = DateTime.utc(now.year, now.month,
-                              now.day, pickedTime.hour, pickedTime.minute);
-                          model.startingTimeValue = dateTime.toIso8601String();
+                            // Minimum People
+                            if (widget.argData["type"] == "experience")
+                              CustomTextField(
+                                textEditingController: model.minimumPeopleTEC,
+                                hintText: "Enter min no. of people",
+                                headingText: "Minimum People",
+                                keyboardType: TextInputType.number,
+                                maxLength: 5,
+                                inputFormatter: [
+                                  FilteringTextInputFormatter.digitsOnly
+                                ],
+                              ),
+                            if (widget.argData["type"] == "experience")
+                              UiSpacer.verticalSpace(
+                                  context: context, space: 0.02),
 
-                          final localizations =
-                              MaterialLocalizations.of(context);
-                          final formattedTimeOfDay =
-                              localizations.formatTimeOfDay(pickedTime);
-                          model.startingTimeTEC.text = formattedTimeOfDay;
-                        }
-                      },
-                    ),
-                  if (widget.argData["type"] == "experience")
-                    UiSpacer.verticalSpace(context: context, space: 0.02),
+                            // Starting Time
+                            if (widget.argData["type"] == "experience")
+                              CustomTextField(
+                                textEditingController: model.startingTimeTEC,
+                                hintText: "Select starting time",
+                                headingText: "Starting Time",
+                                readOnly: true,
+                                onTap: () async {
+                                  // code for time picker
+                                  TimeOfDay? pickedTime = await showTimePicker(
+                                    context: context,
+                                    initialTime:
+                                        const TimeOfDay(hour: 10, minute: 00),
+                                    initialEntryMode: TimePickerEntryMode.dial,
+                                    builder: (context, child) {
+                                      return MediaQuery(
+                                        data: MediaQuery.of(context).copyWith(
+                                            alwaysUse24HourFormat: true),
+                                        child: child ?? Container(),
+                                      );
+                                    },
+                                  );
 
-                  // Duration
-                  if (widget.argData["type"] == "experience")
-                    CustomTextField(
-                      textEditingController: model.durationTEC,
-                      hintText: "Enter duration",
-                      headingText: "Duration",
-                    ),
-                  if (widget.argData["type"] == "experience")
-                    UiSpacer.verticalSpace(context: context, space: 0.02),
+                                  if (pickedTime != null) {
+                                    final now = DateTime.now();
+                                    final dateTime = DateTime.utc(
+                                        now.year,
+                                        now.month,
+                                        now.day,
+                                        pickedTime.hour,
+                                        pickedTime.minute);
+                                    model.startingTimeValue =
+                                        dateTime.toIso8601String();
 
-                  // Meeting Point
-                  if (widget.argData["type"] == "experience")
-                    CustomTextField(
-                      textEditingController: model.meetingPointTEC,
-                      hintText: "Enter meeting point",
-                      headingText: "Meeting Point",
-                    ),
-                  if (widget.argData["type"] == "experience")
-                    UiSpacer.verticalSpace(context: context, space: 0.02),
+                                    final localizations =
+                                        MaterialLocalizations.of(context);
+                                    final formattedTimeOfDay = localizations
+                                        .formatTimeOfDay(pickedTime);
+                                    model.startingTimeTEC.text =
+                                        formattedTimeOfDay;
+                                  }
+                                },
+                              ),
+                            if (widget.argData["type"] == "experience")
+                              UiSpacer.verticalSpace(
+                                  context: context, space: 0.02),
 
-                  // Drop-off Point
-                  if (widget.argData["type"] == "experience")
-                    CustomTextField(
-                      textEditingController: model.dropOffPointTEC,
-                      hintText: "Enter drop-off point",
-                      headingText: "Drop-off Point",
-                    ),
-                  if (widget.argData["type"] == "experience")
-                    UiSpacer.verticalSpace(context: context, space: 0.02),
+                            // Duration
+                            if (widget.argData["type"] == "experience")
+                              CustomTextField(
+                                textEditingController: model.durationTEC,
+                                hintText: "Enter duration",
+                                headingText: "Duration",
+                              ),
+                            if (widget.argData["type"] == "experience")
+                              UiSpacer.verticalSpace(
+                                  context: context, space: 0.02),
 
-                  CustomTextField(
-                    textEditingController: model.descriptionTEC,
-                    hintText: "Enter description",
-                    headingText: "Description",
-                    minLines: 1,
-                    maxLines: 7,
-                  ),
-                  UiSpacer.verticalSpace(context: context, space: 0.02),
+                            // Meeting Point
+                            if (widget.argData["type"] == "experience")
+                              CustomTextField(
+                                textEditingController: model.meetingPointTEC,
+                                hintText: "Enter meeting point",
+                                headingText: "Meeting Point",
+                              ),
+                            if (widget.argData["type"] == "experience")
+                              UiSpacer.verticalSpace(
+                                  context: context, space: 0.02),
 
-                  // Upload Images view
-                  uploadImagesView(model),
-                ],
-              ));
+                            // Drop-off Point
+                            if (widget.argData["type"] == "experience")
+                              CustomTextField(
+                                textEditingController: model.dropOffPointTEC,
+                                hintText: "Enter drop-off point",
+                                headingText: "Drop-off Point",
+                              ),
+                            if (widget.argData["type"] == "experience")
+                              UiSpacer.verticalSpace(
+                                  context: context, space: 0.02),
+
+                            CustomTextField(
+                              textEditingController: model.descriptionTEC,
+                              hintText: "Enter description",
+                              headingText: "Description",
+                              minLines: 1,
+                              maxLines: 7,
+                            ),
+                            UiSpacer.verticalSpace(
+                                context: context, space: 0.02),
+
+                            // Upload Images view
+                            uploadImagesView(model),
+                          ],
+                        ));
         });
   }
 

@@ -4,9 +4,11 @@
 
 import 'dart:convert';
 
-GuideGetAccountDetailsPojo guideGetAccountDetailsPojoFromJson(String str) => GuideGetAccountDetailsPojo.fromJson(json.decode(str));
+GuideGetAccountDetailsPojo guideGetAccountDetailsPojoFromJson(String str) =>
+    GuideGetAccountDetailsPojo.fromJson(json.decode(str));
 
-String guideGetAccountDetailsPojoToJson(GuideGetAccountDetailsPojo data) => json.encode(data.toJson());
+String guideGetAccountDetailsPojoToJson(GuideGetAccountDetailsPojo data) =>
+    json.encode(data.toJson());
 
 class GuideGetAccountDetailsPojo {
   bool success;
@@ -21,19 +23,20 @@ class GuideGetAccountDetailsPojo {
     required this.message,
   });
 
-  factory GuideGetAccountDetailsPojo.fromJson(Map<String, dynamic> json) => GuideGetAccountDetailsPojo(
-    success: json["success"],
-    statusCode: json["statusCode"],
-    data: Data.fromJson(json["data"]),
-    message: json["message"],
-  );
+  factory GuideGetAccountDetailsPojo.fromJson(Map<String, dynamic> json) =>
+      GuideGetAccountDetailsPojo(
+        success: json["success"],
+        statusCode: json["statusCode"],
+        data: Data.fromJson(json["data"]),
+        message: json["message"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "success": success,
-    "statusCode": statusCode,
-    "data": data.toJson(),
-    "message": message,
-  };
+        "success": success,
+        "statusCode": statusCode,
+        "data": data.toJson(),
+        "message": message,
+      };
 }
 
 class Data {
@@ -48,14 +51,14 @@ class Data {
   });
 
   factory Data.fromJson(Map<String, dynamic> json) => Data(
-    key: json["key"],
-    value: json["value"],
-    status: json["status"],
-  );
+        key: json["key"],
+        value: json["value"],
+        status: json["status"],
+      );
 
   Map<String, dynamic> toJson() => {
-    "key": key,
-    "value": value,
-    "status": status,
-  };
+        "key": key,
+        "value": value,
+        "status": status,
+      };
 }

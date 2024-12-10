@@ -59,7 +59,9 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
 
   @override
   void initialise() {
+    setInitialised(true);
     if (argData!["type"] != "gallery") {
+      setInitialised(false);
       getActivitiesAPI().then((value) {
         if (argData!["screenType"] == "edit") {
           if (argData!["type"] == "experience" ||
@@ -68,6 +70,7 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
             getInitialPostData();
           }
         }
+        setInitialised(true);
       });
     } else if (argData!["screenType"] == "edit" &&
         argData!["type"] == "gallery") {
@@ -118,7 +121,6 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
       debugPrint(
           "Activity selected IDs : ${postDetail!.postsActivities!.length}");
     }
-
     notifyListeners();
   }
 
@@ -223,7 +225,7 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
     } else if (descriptionTEC.text.trim().isEmpty) {
       GlobalUtility.showToast(context, "Please enter the description");
       return false;
-    } else if (heroImageLocal == null) {
+    } else if (heroImageLocal == null && heroImageUrl == null) {
       GlobalUtility.showToast(context, "Please upload the hero image");
       return false;
     }
@@ -247,7 +249,7 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
     } else if (descriptionTEC.text.trim().isEmpty) {
       GlobalUtility.showToast(context, "Please enter the description");
       return false;
-    } else if (heroImageLocal == null) {
+    } else if (heroImageLocal == null && heroImageUrl == null) {
       GlobalUtility.showToast(context, "Please upload the hero image");
       return false;
     }
@@ -351,11 +353,13 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
           }
         }
 
+        debugPrint("My Map : $map");
+
         final response = await ApiRequest().postMultipartRequest(
             map, Api.createPost, field) /*.timeout(Duration(seconds: 20))*/;
 
         var apiResponse = await response.stream.bytesToString();
-        debugPrint("API Response : ${apiResponse}");
+        // debugPrint("API Response : ${apiResponse}");
 
         var jsonData = jsonDecode(apiResponse);
         int status = jsonData['statusCode'] ?? 404;
@@ -448,7 +452,6 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
             map, Api.updatePost, field) /*.timeout(Duration(seconds: 20))*/;
 
         var apiResponse = await response.stream.bytesToString();
-        debugPrint("API Response : ${apiResponse}");
 
         var jsonData = jsonDecode(apiResponse);
         int status = jsonData['statusCode'] ?? 404;
@@ -522,7 +525,6 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
             map, Api.createPost, field) /*.timeout(Duration(seconds: 20))*/;
 
         var apiResponse = await response.stream.bytesToString();
-        debugPrint("API Response : ${apiResponse}");
 
         var jsonData = jsonDecode(apiResponse);
         int status = jsonData['statusCode'] ?? 404;
@@ -607,7 +609,6 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
             map, Api.updatePost, field) /*.timeout(Duration(seconds: 20))*/;
 
         var apiResponse = await response.stream.bytesToString();
-        debugPrint("API Response : ${apiResponse}");
 
         var jsonData = jsonDecode(apiResponse);
         int status = jsonData['statusCode'] ?? 404;
@@ -669,7 +670,6 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
             map, Api.createGallery, field) /*.timeout(Duration(seconds: 20))*/;
 
         var apiResponse = await response.stream.bytesToString();
-        debugPrint("API Response : ${apiResponse}");
 
         var jsonData = jsonDecode(apiResponse);
         int status = jsonData['statusCode'] ?? 404;
@@ -717,7 +717,7 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
               filename: File(heroImageLocal!).path.split("/").last,
               contentType: MediaType('image', '*')));
         } else {
-          map["hero_image"] = postDetail!.heroImage ?? "";
+          map["hero_image"] = galleryDetail!.heroImage ?? "";
         }
 
         int j = 0;
@@ -742,7 +742,6 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
             map, Api.updateGallery, field) /*.timeout(Duration(seconds: 20))*/;
 
         var apiResponse = await response.stream.bytesToString();
-        debugPrint("API Response : ${apiResponse}");
 
         var jsonData = jsonDecode(apiResponse);
         int status = jsonData['statusCode'] ?? 404;
@@ -876,14 +875,14 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
     BuildContext context = navigatorKey.currentContext!;
     try {
       if (await GlobalUtility.isConnected()) {
-        GlobalUtility().showLoaderDialog(context);
+        // GlobalUtility().showLoaderDialog(context);
         final apiResponse = await ApiRequest()
             .getWithHeader(Api.getActivities)
             .timeout(Duration(seconds: 20));
 
         var jsonData = jsonDecode(apiResponse.body);
 
-        GlobalUtility().closeLoaderDialog(context);
+        // GlobalUtility().closeLoaderDialog(context);
 
         int status = jsonData['statusCode'] ?? 404;
         String message = jsonData['message'] ?? "";
@@ -896,15 +895,20 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
           activitiesList = getActivitiesPojo.data!.rows!.map((e) {
             return ActivitiesModel(id: e.id!, title: e.name ?? "");
           }).toList();
+          setError(null);
         } else if (status == 400) {
+          setError(message);
           GlobalUtility.showToast(context, message);
         } else if (status == 401) {
+          setError(message);
           GlobalUtility().handleSessionExpire(context);
         }
       } else {
+        setError(AppStrings().INTERNET);
         GlobalUtility.showToast(context, AppStrings().INTERNET);
       }
     } catch (e) {
+      setError(AppStrings.someErrorOccurred);
       debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {

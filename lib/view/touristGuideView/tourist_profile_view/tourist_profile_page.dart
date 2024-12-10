@@ -151,7 +151,7 @@ class _ProfilePageState extends State<TouristProfilePage> {
                                 InkWell(
                                     onTap: () {
                                       Navigator.pushNamed(context,
-                                          AppRoutes.touristBankingDetails);
+                                          AppRoutes.guideBankingDetails);
                                     },
                                     child: bankDetailContainer()),
                                 GestureDetector(
@@ -1983,6 +1983,7 @@ class _ProfilePageState extends State<TouristProfilePage> {
     String currentPassword = model.currentPasswordController.text;
     String newPassword = model.newPasswordController.text;
     String newPasswordAgain = model.newPasswordAgainController.text;
+
     if (currentPassword == "") {
       GlobalUtility.showToastBottom(context, AppStrings().enterCurrentPassword);
       return false;
@@ -1992,8 +1993,7 @@ class _ProfilePageState extends State<TouristProfilePage> {
     }
 
     if (newPasswordAgain == "") {
-      GlobalUtility.showToastBottom(
-          context, AppStrings().enterNewPasswordAgain);
+      GlobalUtility.showToastBottom(context, AppStrings().enterConfirmPassword);
     }
     return true;
   }

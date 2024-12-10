@@ -25,7 +25,7 @@ class ApiRequest {
     if (apiResult.statusCode == 401) {
       return Response(
         json.encode({
-          "status": 401,
+          "statusCode": 401,
           "message": "Session Expired",
         }),
         401,
@@ -52,7 +52,34 @@ class ApiRequest {
     if (apiResult.statusCode == 401) {
       return Response(
         json.encode({
-          "status": 401,
+          "statusCode": 401,
+          "message": "Session Expired",
+        }),
+        401,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      );
+    }
+
+    return apiResult;
+  }
+
+  /// Put Method With Header
+  Future<Response> putWithMap(Map map, String url) async {
+    Map<String, String> header = await PreferenceUtil().getAuthHeader();
+    var postUrl = Api.baseUrl + url;
+    Uri myUri = Uri.parse(postUrl);
+    debugPrint("map data : ${jsonEncode(map)}");
+    final apiResult = await put(myUri, headers: header, body: jsonEncode(map));
+
+    debugPrint(Api.baseUrl + url);
+    debugPrint("$url apiResult---- ${apiResult.body}");
+
+    if (apiResult.statusCode == 401) {
+      return Response(
+        json.encode({
+          "statusCode": 401,
           "message": "Session Expired",
         }),
         401,
@@ -86,8 +113,6 @@ class ApiRequest {
     var postUrl = Api.baseUrl + url;
     Uri myUri = Uri.parse(postUrl);
 
-    debugPrint("Api : $url --> ${fields.toString()}  --> ${files.toString()}");
-
     var request = MultipartRequest('POST', myUri)
       ..headers.addAll(header)
       ..fields.addAll(fields);
@@ -103,9 +128,9 @@ class ApiRequest {
 
     final streamedResponse = await request.send();
 
-    streamedResponse.stream.transform(utf8.decoder).listen((value) {
+    /*streamedResponse.stream.transform(utf8.decoder).listen((value) {
       debugPrint("response: $value");
-    });
+    });*/
     if (streamedResponse.statusCode == 401) {
       GlobalUtility().handleSessionExpire(navigatorKey.currentContext!);
     }
@@ -160,7 +185,7 @@ class ApiRequest {
     if (apiResult.statusCode == 401) {
       return Response(
         json.encode({
-          "status": 401,
+          "statusCode": 401,
           "message": "Session Expired",
         }),
         401,

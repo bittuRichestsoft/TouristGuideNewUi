@@ -97,7 +97,7 @@ class CreateProfileViewModel extends BaseViewModel implements Initialisable {
   Future<bool> getLocationApi(
       {BuildContext? viewContext, String? countryId, String? stateId}) async {
     try {
-      GlobalUtility().showLoaderDialog(viewContext!);
+      GlobalUtility().showLoader(navigatorKey.currentContext!);
       if (await GlobalUtility.isConnected()) {
         Map map = {
           "countryName": countryId ?? "",
@@ -107,12 +107,11 @@ class CreateProfileViewModel extends BaseViewModel implements Initialisable {
 
         Map jsonData = jsonDecode(apiResponse.body);
 
-        GlobalUtility().closeLoaderDialog(viewContext!);
-
         debugPrint("MAP --- $map ----- \n$jsonData");
         var status = jsonData['statusCode'];
         var message = jsonData['message'];
         // Navigator.pop(viewContext);
+
         if (status == 200) {
           CountryResponse countryResponse =
               countryResponseFromJson(apiResponse.body);
@@ -140,18 +139,21 @@ class CreateProfileViewModel extends BaseViewModel implements Initialisable {
         } else if (status == 400) {
           setBusy(false);
           notifyListeners();
-          GlobalUtility.showToast(viewContext, message);
+          GlobalUtility.showToast(navigatorKey.currentContext!, message);
         } else if (status == 401) {
           setBusy(false);
           notifyListeners();
-          GlobalUtility.showToast(viewContext, message);
-          GlobalUtility().handleSessionExpire(viewContext);
+          GlobalUtility.showToast(navigatorKey.currentContext!, message);
+          GlobalUtility().handleSessionExpire(navigatorKey.currentContext!);
         }
       } else {
-        GlobalUtility.showToast(viewContext, AppStrings().INTERNET);
+        GlobalUtility.showToast(viewContext!, AppStrings().INTERNET);
       }
     } catch (e) {
       GlobalUtility.showToast(viewContext!, AppStrings.someErrorOccurred);
+    } finally {
+      debugPrint("I got the locations");
+      GlobalUtility().closeLoaderDialog(navigatorKey.currentContext!);
     }
     return false;
   }

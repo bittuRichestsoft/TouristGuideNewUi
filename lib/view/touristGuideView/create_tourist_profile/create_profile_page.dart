@@ -601,64 +601,78 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                             viewContext: context, countryId: "", stateId: "")
                         .then((value) {
                       if (value == true) {
+                        List<String> tempCountryList = model.countryList;
+
                         showModalBottomSheet(
                           context: context,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
+                          isScrollControlled: true,
                           builder: (cxt) {
                             return Padding(
-                                padding:
-                                    EdgeInsets.only(top: screenHeight * 0.03),
-                                child: Scaffold(
-                                    /*   appBar: AppBar(
-                                    elevation: 0,
-                                    backgroundColor: Colors.white,
-                                    automaticallyImplyLeading: false,
-                                    title: Column(
-                                      children: [
-                                        Container(
-                                          height: screenHeight * 0.06,
-                                          width: screenWidth,
-                                          alignment: Alignment.bottomLeft,
-                                          decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: AppColor.disableColor)),
-                                          child: TextFormField(
-                                            maxLines: 1,
-                                            maxLength: 60,
-                                            onChanged: (value) {},
-                                            textAlign: TextAlign.start,
-                                            decoration: const InputDecoration(
-                                                hintText: "Search country...",
-                                                counterText: "",
-                                                border: InputBorder.none,
-                                                prefixIcon: Icon(Icons.search)),
-                                          ),
-                                        )
-                                      ],
+                                padding: EdgeInsets.only(
+                                    bottom: MediaQuery.of(context)
+                                        .viewInsets
+                                        .bottom),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      height: screenHeight * 0.06,
+                                      width: screenWidth,
+                                      alignment: Alignment.bottomLeft,
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: AppColor.disableColor)),
+                                      child: TextFormField(
+                                        maxLines: 1,
+                                        maxLength: 60,
+                                        onChanged: (value) {
+                                          tempCountryList = model.countryList
+                                              .where((element) => element
+                                                  .toLowerCase()
+                                                  .contains(value
+                                                      .trim()
+                                                      .toLowerCase()))
+                                              .toList();
+                                          setState(() {});
+                                        },
+                                        textAlign: TextAlign.start,
+                                        decoration: const InputDecoration(
+                                            hintText: "Search country...",
+                                            counterText: "",
+                                            border: InputBorder.none,
+                                            prefixIcon: Icon(Icons.search)),
+                                      ),
                                     ),
-                                  ),*/
-                                    body: ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: model.countryList.length,
-                                  itemBuilder: (context, index) => ListTile(
-                                    onTap: () {
-                                      if (model.countryNameController.text !=
-                                          model.countryList[index]) {
-                                        model.countryNameController.text =
-                                            model.countryList[index];
-                                        model.stateNameController.clear();
-                                        model.cityNameController.clear();
-                                      } else {
-                                        model.countryNameController.text =
-                                            model.countryList[index];
-                                      }
+                                    UiSpacer.verticalSpace(
+                                        context: context, space: 0.02),
+                                    SizedBox(
+                                      height: screenHeight * 0.5,
+                                      child: ListView.builder(
+                                        shrinkWrap: true,
+                                        itemCount: tempCountryList.length,
+                                        itemBuilder: (context, index) =>
+                                            ListTile(
+                                          onTap: () {
+                                            if (model.countryNameController
+                                                    .text !=
+                                                tempCountryList[index]) {
+                                              model.countryNameController.text =
+                                                  tempCountryList[index];
+                                              model.stateNameController.clear();
+                                              model.cityNameController.clear();
+                                            } else {
+                                              model.countryNameController.text =
+                                                  tempCountryList[index];
+                                            }
 
-                                      Navigator.pop(cxt);
-                                    },
-                                    title: Text(model.countryList[index]),
-                                  ),
-                                )));
+                                            Navigator.pop(cxt);
+                                          },
+                                          title: Text(tempCountryList[index]),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ));
                           },
                         ).whenComplete(() {
                           onCreateProfileValueChanged(model);
@@ -712,58 +726,78 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                               stateId: "")
                           .then((value) {
                         if (value == true) {
+                          List<String> tempStateList = model.stateList;
                           showModalBottomSheet(
                             context: context,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
+                            isScrollControlled: true,
+
+                            // constraints:
+                            //     BoxConstraints(maxHeight: screenHeight * 0.5),
                             builder: (cxt) {
                               return Padding(
-                                  padding:
-                                      EdgeInsets.only(top: screenHeight * 0.03),
-                                  child: Scaffold(
-                                      /* appBar: AppBar(
-                                      elevation: 0,
-                                      backgroundColor: Colors.white,
-                                      automaticallyImplyLeading: false,
-                                      title: Column(
-                                        children: [
-                                          Container(
-                                            height: screenHeight * 0.06,
-                                            width: screenWidth,
-                                            alignment: Alignment.bottomLeft,
-                                            decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: AppColor.disableColor)),
-                                            child: TextFormField(
-                                              maxLines: 1,
-                                              maxLength: 60,
-                                              textAlign: TextAlign.start,
-                                              decoration: const InputDecoration(
-                                                  hintText: "Search state...",
-                                                  counterText: "",
-                                                  border: InputBorder.none,
-                                                  prefixIcon: Icon(Icons.search)),
-                                            ),
-                                          )
-                                        ],
+                                  padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(context)
+                                          .viewInsets
+                                          .bottom),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // search field
+                                      Container(
+                                        height: screenHeight * 0.06,
+                                        width: screenWidth,
+                                        alignment: Alignment.bottomLeft,
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: AppColor.disableColor)),
+                                        child: TextFormField(
+                                          maxLines: 1,
+                                          maxLength: 60,
+                                          textAlign: TextAlign.start,
+                                          onChanged: (value) {
+                                            tempStateList = model.stateList
+                                                .where((element) => element
+                                                    .toLowerCase()
+                                                    .contains(value
+                                                        .trim()
+                                                        .toLowerCase()))
+                                                .toList();
+                                            setState(() {});
+                                          },
+                                          decoration: const InputDecoration(
+                                              hintText: "Search state...",
+                                              counterText: "",
+                                              border: InputBorder.none,
+                                              prefixIcon: Icon(Icons.search)),
+                                        ),
                                       ),
-                                    ),*/
-                                      body: ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: model.stateList.length,
-                                    itemBuilder: (context, index) => ListTile(
-                                      onTap: () {
-                                        if (model.stateNameController.text !=
-                                            model.stateList[index]) {
-                                          model.stateNameController.text =
-                                              model.stateList[index];
-                                          model.cityNameController.clear();
-                                        }
-                                        Navigator.pop(cxt);
-                                      },
-                                      title: Text(model.stateList[index]),
-                                    ),
-                                  )));
+                                      UiSpacer.verticalSpace(
+                                          context: context, space: 0.02),
+
+                                      SizedBox(
+                                        height: screenHeight * 0.5,
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          itemCount: tempStateList.length,
+                                          itemBuilder: (context, index) =>
+                                              ListTile(
+                                            onTap: () {
+                                              if (model.stateNameController
+                                                      .text !=
+                                                  tempStateList[index]) {
+                                                model.stateNameController.text =
+                                                    tempStateList[index];
+                                                model.cityNameController
+                                                    .clear();
+                                              }
+                                              Navigator.pop(cxt);
+                                            },
+                                            title: Text(tempStateList[index]),
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ));
                             },
                           ).whenComplete(() {
                             onCreateProfileValueChanged(model);
@@ -820,57 +854,71 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                               stateId: model.stateNameController.text)
                           .then((value) {
                         if (value == true) {
+                          List<String> tempCityList = model.cityList;
+
                           showModalBottomSheet(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
                             context: context,
                             enableDrag: true,
+                            isScrollControlled: true,
                             builder: (cxt) {
                               return Padding(
-                                  padding:
-                                      EdgeInsets.only(top: screenHeight * 0.03),
-                                  child: Scaffold(
-                                      /*     appBar: AppBar(
-                                      elevation: 0,
-                                      backgroundColor: Colors.white,
-                                      automaticallyImplyLeading: false,
-                                      title: Column(
-                                        children: [
-                                          Container(
-                                            height: screenHeight * 0.06,
-                                            width: screenWidth,
-                                            alignment: Alignment.bottomLeft,
-                                            decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: AppColor.disableColor)),
-                                            child: TextFormField(
-                                              maxLines: 1,
-                                              maxLength: 60,
-                                              textAlign: TextAlign.start,
-                                              decoration: const InputDecoration(
-                                                  hintText: "Search city...",
-                                                  counterText: "",
-                                                  border: InputBorder.none,
-                                                  prefixIcon: Icon(Icons.search)),
-                                            ),
-                                          )
-                                        ],
+                                  padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(context)
+                                          .viewInsets
+                                          .bottom),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        height: screenHeight * 0.06,
+                                        width: screenWidth,
+                                        alignment: Alignment.bottomLeft,
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: AppColor.disableColor)),
+                                        child: TextFormField(
+                                          maxLines: 1,
+                                          maxLength: 60,
+                                          onChanged: (value) {
+                                            tempCityList = model.cityList
+                                                .where((element) => element
+                                                    .toLowerCase()
+                                                    .contains(value
+                                                        .trim()
+                                                        .toLowerCase()))
+                                                .toList();
+                                            setState(() {});
+                                          },
+                                          textAlign: TextAlign.start,
+                                          decoration: const InputDecoration(
+                                              hintText: "Search country...",
+                                              counterText: "",
+                                              border: InputBorder.none,
+                                              prefixIcon: Icon(Icons.search)),
+                                        ),
                                       ),
-                                    ),*/
-                                      body: ListView.builder(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    shrinkWrap: true,
-                                    itemCount: model.cityList.length,
-                                    itemBuilder: (context, index) => ListTile(
-                                      onTap: () {
-                                        model.cityNameController.text =
-                                            model.cityList[index];
-                                        Navigator.pop(cxt);
-                                      },
-                                      title: Text(model.cityList[index]),
-                                    ),
-                                  )));
+                                      UiSpacer.verticalSpace(
+                                          context: context, space: 0.02),
+                                      SizedBox(
+                                        height: screenHeight * 0.5,
+                                        child: ListView.builder(
+                                          physics:
+                                              const AlwaysScrollableScrollPhysics(),
+                                          shrinkWrap: true,
+                                          itemCount: tempCityList.length,
+                                          itemBuilder: (context, index) =>
+                                              ListTile(
+                                            onTap: () {
+                                              model.cityNameController.text =
+                                                  tempCityList[index];
+                                              Navigator.pop(cxt);
+                                            },
+                                            title: Text(tempCityList[index]),
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ));
                             },
                           ).whenComplete(() {
                             onCreateProfileValueChanged(model);

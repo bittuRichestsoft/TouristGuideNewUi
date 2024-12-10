@@ -1,16 +1,14 @@
 import 'package:Siesta/app_constants/app_color.dart';
 import 'package:Siesta/app_constants/app_images.dart';
-import 'package:Siesta/app_constants/app_routes.dart';
 import 'package:Siesta/app_constants/app_sizes.dart';
 import 'package:Siesta/app_constants/app_strings.dart';
 import 'package:Siesta/common_widgets/common_textview.dart';
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
-import 'package:Siesta/utility/globalUtility.dart';
-import 'package:Siesta/view/all_dialogs/dialog_with_twoButton.dart';
-import 'package:Siesta/view_models/guide_models/guideUpdateProfileModel.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
+
+import '../../../view_models/guide_drawer_model/guide_drawer_model.dart';
 
 class GuideDrawerPage extends StatefulWidget {
   const GuideDrawerPage({Key? key}) : super(key: key);
@@ -21,53 +19,25 @@ class GuideDrawerPage extends StatefulWidget {
 
 class _DrawerPageState extends State<GuideDrawerPage> {
   double screenWidth = 0.0, screenHeight = 0.0;
-  bool isEnableAvailbility = false;
-  List<String> titleString = [
-    AppStrings().receivedBookings,
-    AppStrings().bookingsHistory,
-    AppStrings().messages,
-    AppStrings().transactions,
-    AppStrings().gallery,
-    AppStrings().notification,
-    AppStrings().availability,
-    AppStrings().aboutUs,
-    //AppStrings().wallet,
-    AppStrings().logout,
-    //  AppStrings().deleteAcc
-  ];
-
-  List<String> iconPath = [
-    AppImages().pngImages.icCalendar,
-    AppImages().pngImages.icitinary,
-    AppImages().pngImages.icMessage,
-    AppImages().pngImages.icTransaction,
-    AppImages().pngImages.icGallery,
-    AppImages().pngImages.icNotification,
-    AppImages().pngImages.icAvailbility,
-    // AppImages().pngImages.icWallet,
-    AppImages().pngImages.icAbout,
-    AppImages().pngImages.icLogout,
-    //  AppImages().pngImages.icDelete,
-  ];
 
   @override
   Widget build(BuildContext context) {
     screenWidth = MediaQuery.of(context).size.width;
     screenHeight = MediaQuery.of(context).size.height;
-    return ViewModelBuilder<GuideUpdateProfileModel>.reactive(
-        viewModelBuilder: () => GuideUpdateProfileModel(),
+    return ViewModelBuilder<GuideDrawerModel>.reactive(
+        viewModelBuilder: () => GuideDrawerModel(),
         onViewModelReady: (model) => model.initialised,
         builder: (context, model, child) {
-          return ListView(
-            shrinkWrap: true,
-            padding: EdgeInsets.zero,
-            physics: const NeverScrollableScrollPhysics(),
-            children: [profileContainer(model), menuContainer(model)],
+          return Column(
+            children: [
+              profileContainer(model),
+              Expanded(child: menuContainer(model)),
+            ],
           );
         });
   }
 
-  Widget profileContainer(model) {
+  Widget profileContainer(GuideDrawerModel model) {
     return Container(
       width: screenWidth * 0.8,
       height: MediaQuery.of(context).size.height * 0.28,
@@ -84,10 +54,11 @@ class _DrawerPageState extends State<GuideDrawerPage> {
           children: [
             UiSpacer.verticalSpace(
                 space: AppSizes().widgetSize.verticalPadding, context: context),
-            profilePic(model.profileImage),
+            profilePic(model.profileImageUrl ?? ""),
             UiSpacer.verticalSpace(
                 space: AppSizes().widgetSize.smallPadding, context: context),
-            TextView.headingWhiteText(text: model.username, context: context),
+            TextView.headingWhiteText(
+                text: model.guideName ?? "", context: context),
             /*  UiSpacer.verticalSpace(space: 0.01, context: context),
             Text(
               model.email,
@@ -104,11 +75,11 @@ class _DrawerPageState extends State<GuideDrawerPage> {
     );
   }
 
-  Widget menuContainer(model) {
+  Widget menuContainer(GuideDrawerModel model) {
     return Container(
       color: AppColor.whiteColor,
       width: screenWidth * 0.85,
-      height: screenHeight * 0.75,
+      // height: screenHeight * 0.75,
       child: ListView.separated(
         padding:
             EdgeInsets.all(screenWidth * AppSizes().widgetSize.normalPadding18),
@@ -117,15 +88,15 @@ class _DrawerPageState extends State<GuideDrawerPage> {
         separatorBuilder: (context, index) => Divider(
           color: AppColor.textfieldborderColor,
         ),
-        itemCount: titleString.length,
+        itemCount: model.titleString.length,
         itemBuilder: (context, index) {
           return ListTile(
             onTap: () {
-              onTapListTile(index);
+              model.onTapListTile(context, index);
             },
-            trailing: titleString[index] == AppStrings().notification
+            trailing: model.titleString[index] == AppStrings().notification
                 ? notificationSwitch(model)
-                : titleString[index] == AppStrings().availability
+                : model.titleString[index] == AppStrings().availability
                     ? availbilitySwitch(model)
                     : const SizedBox(),
             minVerticalPadding: 0.0,
@@ -133,11 +104,11 @@ class _DrawerPageState extends State<GuideDrawerPage> {
             minLeadingWidth: 20,
             visualDensity: const VisualDensity(vertical: -3),
             title: TextView.semiBoldText(
-                text: titleString[index].toString(),
+                text: model.titleString[index].toString(),
                 context: context,
                 textColor: AppColor.textfieldColor),
             leading: Image.asset(
-              iconPath[index],
+              model.iconPath[index],
               width: AppSizes().widgetSize.iconWidth,
               height: AppSizes().widgetSize.iconHeight,
               color: AppColor.appthemeColor,
@@ -164,7 +135,7 @@ class _DrawerPageState extends State<GuideDrawerPage> {
     );
   }
 
-  Widget notificationSwitch(GuideUpdateProfileModel model) {
+  Widget notificationSwitch(GuideDrawerModel model) {
     return CupertinoSwitch(
       activeColor: Colors.green,
       trackColor: AppColor.disableColor,
@@ -174,12 +145,12 @@ class _DrawerPageState extends State<GuideDrawerPage> {
     );
   }
 
-  Widget availbilitySwitch(GuideUpdateProfileModel model) {
+  Widget availbilitySwitch(GuideDrawerModel model) {
     return CupertinoSwitch(
         activeColor: Colors.green,
         trackColor: AppColor.disableColor,
         thumbColor: Colors.white,
-        value: model.isEnableAvailbility,
+        value: model.isEnableAvailability,
         onChanged: (value) =>
             // setState(() => {
             // model.isEnableAvailbility = value;
@@ -188,58 +159,5 @@ class _DrawerPageState extends State<GuideDrawerPage> {
 
         // }),
         );
-  }
-
-  onTapListTile(int index) {
-    switch (index) {
-      case 0:
-        Navigator.pushReplacementNamed(context, AppRoutes.touristGuideHome);
-        break;
-
-      case 1:
-        Navigator.pushReplacementNamed(context, AppRoutes.touristGuideHome1);
-        break;
-
-      case 2:
-        Navigator.pushReplacementNamed(context, AppRoutes.touristGuideHome2);
-        break;
-
-      case 3:
-        Navigator.pushReplacementNamed(
-            context, AppRoutes.transactionHistoryGuide);
-        break;
-
-      case 4:
-        Navigator.pushReplacementNamed(context, AppRoutes.galleryListingPage);
-        break;
-
-      case 7:
-        Map map = {"from": "drawer", "role": "GUIDE"};
-        Navigator.pushReplacementNamed(context, AppRoutes.commonWebViewPage,
-            arguments: map);
-        break;
-
-      case 8:
-        GlobalUtility.showDialogFunction(
-            context,
-            DialogWithTwoButton(
-                from: "guide_logout",
-                cancelText: AppStrings().logoutNo,
-                headingText: AppStrings().logout,
-                okayText: AppStrings().logoutYes,
-                subContent: AppStrings().logoutHeading));
-        break;
-
-      /*  case 9:
-        GlobalUtility.showDialogFunction(
-            context,
-            DialogDeleteAccount(
-                from: "guide_delete",
-                cancelText: AppStrings().logoutNo,
-                headingText: AppStrings().deleteAcc,
-                okayText: AppStrings().logoutYes,
-                subContent: AppStrings().deleteHeading));
-        break;*/
-    }
   }
 }

@@ -29,9 +29,9 @@ import '../view/wait_list_screen.dart';
 
 class LoginViewModel extends BaseViewModel {
   TextEditingController emailController =
-      TextEditingController(text: "ekthaguide33@yopmail.com");
+      TextEditingController(text: "test4@yopmail.com");
   TextEditingController passwordController =
-      TextEditingController(text: "Admin@12345");
+      TextEditingController(text: "Test@123");
   TextEditingController captchaController = TextEditingController();
   final AuthRequest _authRequest = AuthRequest();
   BuildContext? viewContext;

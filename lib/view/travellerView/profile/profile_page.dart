@@ -1,5 +1,7 @@
 // ignore_for_file: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member, unnecessary_null_comparison
 
+import 'dart:io';
+
 import 'package:Siesta/app_constants/app_color.dart';
 import 'package:Siesta/app_constants/app_fonts.dart';
 import 'package:Siesta/app_constants/app_images.dart';
@@ -10,15 +12,15 @@ import 'package:Siesta/common_widgets/common_button.dart';
 import 'package:Siesta/common_widgets/common_textview.dart';
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
 import 'package:Siesta/response_pojo/getTravellerProfileResponse.dart';
+import 'package:Siesta/utility/globalUtility.dart';
+import 'package:Siesta/view_models/updateTravellerProfileModel.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:stacked/stacked.dart';
-import 'package:Siesta/view_models/updateTravellerProfileModel.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import 'package:Siesta/utility/globalUtility.dart';
+import 'package:stacked/stacked.dart';
+
 import '../../../app_constants/app_routes.dart';
 import '../delete_account.dart';
 
@@ -1489,8 +1491,7 @@ Widget countryCityField(UpdateTravellerProfileViewModel model) {
     }
 
     if (newPasswordAgain == "") {
-      GlobalUtility.showToastBottom(
-          context, AppStrings().enterNewPasswordAgain);
+      GlobalUtility.showToastBottom(context, AppStrings().enterConfirmPassword);
     }
     return true;
   }

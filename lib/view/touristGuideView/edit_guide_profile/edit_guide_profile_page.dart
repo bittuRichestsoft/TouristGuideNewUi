@@ -21,6 +21,7 @@ import '../../../common_widgets/common_imageview.dart';
 import '../../../common_widgets/common_textview.dart';
 import '../../../common_widgets/vertical_size_box.dart';
 import '../../../utility/globalUtility.dart';
+import '../../travellerView/delete_account.dart';
 
 class EditGuideProfilePage extends StatefulWidget {
   const EditGuideProfilePage({super.key});
@@ -148,6 +149,29 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
                                 model.updateGuideProfileAPI();
                               }
                             },
+                          ),
+                        ),
+                        UiSpacer.verticalSpace(context: context, space: 0.02),
+
+                        // delete account button
+                        SizedBox(
+                          height: screenHeight * 0.06,
+                          width: screenWidth,
+                          child: CommonButton.commonBoldTextButton(
+                            context: context,
+                            text: "Delete Account",
+                            isButtonEnable: true,
+                            onPressed: () {
+                              GlobalUtility.showDialogFunction(
+                                  context,
+                                  DialogDeleteAccount(
+                                      from: "guide_delete",
+                                      cancelText: AppStrings().logoutNo,
+                                      headingText: AppStrings().deleteAcc,
+                                      okayText: AppStrings().logoutYes,
+                                      subContent: AppStrings().deleteHeading));
+                            },
+                            bgColor: Colors.red,
                           ),
                         )
                       ],

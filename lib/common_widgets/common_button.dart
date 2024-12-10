@@ -9,7 +9,8 @@ class CommonButton {
           {String? text,
           BuildContext? context,
           VoidCallback? onPressed,
-          bool? isButtonEnable}) =>
+          bool? isButtonEnable,
+          Color? bgColor}) =>
       SizedBox(
         height: MediaQuery.of(context!).size.height *
             AppSizes().widgetSize.buttonHeight,
@@ -19,7 +20,7 @@ class CommonButton {
               splashFactory: NoSplash.splashFactory,
               elevation: 0,
               backgroundColor: isButtonEnable == true && isButtonEnable != null
-                  ? AppColor.appthemeColor
+                  ? bgColor ?? AppColor.appthemeColor
                   : AppColor.buttonDisableColor,
               shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(

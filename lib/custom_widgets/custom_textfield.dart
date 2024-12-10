@@ -27,7 +27,8 @@ class CustomTextField extends StatefulWidget {
       this.borderRadius,
       this.maxLength,
       this.inputFormatter,
-      this.prefixWidget});
+      this.prefixWidget,
+      this.obscureText = false});
   final TextEditingController? textEditingController;
   final Function(String)? onChange;
   final Function()? onTap;
@@ -45,12 +46,15 @@ class CustomTextField extends StatefulWidget {
   final Widget? prefixWidget;
   final int? maxLength;
   final List<TextInputFormatter>? inputFormatter;
+  final bool obscureText;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
 }
 
 class _CustomTextFieldState extends State<CustomTextField> {
+  bool makePasswordVisible = false;
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -74,9 +78,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
           textAlignVertical: TextAlignVertical.center,
           textAlign: TextAlign.start,
           minLines: widget.minLines,
-          maxLines: widget.maxLines,
+          maxLines: widget.obscureText == true ? 1 : widget.maxLines,
           onTap: widget.onTap,
           maxLength: widget.maxLength,
+          obscureText: (widget.obscureText) ? !makePasswordVisible : false,
           style: TextStyle(
               color: AppColor.lightBlack,
               fontFamily: AppFonts.nunitoRegular,
@@ -97,7 +102,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
                           color: AppColor.greyColor,
                         ),
                       )
-                    : null,
+                    : _getSuffixWidget(),
             hintStyle: TextStyle(
                 color: AppColor.hintTextColor,
                 fontFamily: AppFonts.nunitoRegular,
@@ -141,5 +146,33 @@ class _CustomTextFieldState extends State<CustomTextField> {
         ),
       ],
     );
+  }
+
+  Widget _getSuffixWidget() {
+    if (widget.obscureText) {
+      return ButtonTheme(
+        minWidth: 30,
+        height: 30,
+        padding: const EdgeInsets.only(right: 5),
+        child: TextButton(
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.only(right: 0),
+          ),
+          onPressed: () {
+            setState(() {
+              makePasswordVisible = !makePasswordVisible;
+            });
+          },
+          child: Icon(
+            (!makePasswordVisible)
+                ? Icons.visibility_off_outlined
+                : Icons.visibility_outlined,
+            color: Colors.grey,
+          ),
+        ),
+      );
+    } else {
+      return const SizedBox.shrink();
+    }
   }
 }

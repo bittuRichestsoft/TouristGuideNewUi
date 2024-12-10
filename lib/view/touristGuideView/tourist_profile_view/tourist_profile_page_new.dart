@@ -216,7 +216,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
           onPressed: () async {
             var backData = await Navigator.pushNamed(
                 context, AppRoutes.createPostPage,
-                arguments: {"type": "experience"});
+                arguments: {"type": "experience", "screenType": "create"});
             if (backData != null) {
               model.getExperiencePosts();
             }
@@ -233,7 +233,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
             onPressed: () async {
               var backData = await Navigator.pushNamed(
                   context, AppRoutes.createPostPage,
-                  arguments: {"type": "general"});
+                  arguments: {"type": "general", "screenType": "create"});
               if (backData != null) {
                 model.getGeneralPosts();
               }
@@ -250,7 +250,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
           onPressed: () async {
             var backData = await Navigator.pushNamed(
                 context, AppRoutes.createPostPage,
-                arguments: {"type": "gallery"});
+                arguments: {"type": "gallery", "screenType": "create"});
             if (backData != null) {
               model.getGalleryPosts();
             }

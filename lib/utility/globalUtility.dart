@@ -3,13 +3,14 @@
 import 'package:Siesta/app_constants/app_color.dart';
 import 'package:Siesta/app_constants/app_routes.dart';
 import 'package:Siesta/common_widgets/common_loader_dialog.dart';
-import 'package:Siesta/utility/preference_util.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animated_dialog/flutter_animated_dialog.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import '../main.dart';
 
 class GlobalUtility {
   static isConnected() async {
@@ -166,20 +167,20 @@ class GlobalUtility {
   }
 
   void showLoaderDialog(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      showDialog(
-        barrierDismissible: false,
-        useSafeArea: false,
-        context: context,
-        builder: (BuildContext context) {
-          return const CommonLoaderDialog();
-        },
-      );
-    });
+    // WidgetsBinding.instance.addPostFrameCallback((_) {
+    showDialog(
+      barrierDismissible: true,
+      useSafeArea: false,
+      context: context,
+      builder: (BuildContext context) {
+        return const CommonLoaderDialog();
+      },
+    );
+    // });
   }
 
   void closeLoaderDialog(BuildContext context) {
-    if (ModalRoute.of(context)?.isCurrent != true) {
+    if (Navigator.canPop(context)) {
       debugPrint("Dialog closed");
       Navigator.of(context).pop();
     }
@@ -227,7 +228,8 @@ class GlobalUtility {
 
   handleSessionExpire(BuildContext context) {
     GlobalUtility.showToast(context, "Session Expired");
-    PreferenceUtil().logout();
+    // PreferenceUtil().logout();
+    prefs.clear();
     Navigator.pushNamedAndRemoveUntil(
         context, AppRoutes.loginPage, (route) => false);
   }

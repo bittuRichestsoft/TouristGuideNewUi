@@ -47,9 +47,28 @@ void main() async {
   SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
     statusBarColor: AppColor.appthemeColor,
   ));
-  await Firebase.initializeApp();
-  await FirebaseMessaging.instance.requestPermission();
-  await FirebaseMessaging.instance.getToken();
+  try {
+    await Firebase.initializeApp();
+    await FirebaseMessaging.instance.requestPermission();
+    await FirebaseMessaging.instance.getToken();
+
+    FirebaseMessaging.onMessage.listen((RemoteMessage? message) {
+      debugPrint("onMessage-- ${message?.data}");
+      if (message != null) {
+        checkNotification(message, "onMessage");
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage? message) {
+      if (message != null) {
+        setNavigationOnNotification(message);
+      }
+    });
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  } catch (e) {
+    debugPrint("Error on main: $e");
+  }
   prefs = await SharedPreferences.getInstance();
 
   debugPrint(
@@ -61,6 +80,7 @@ void main() async {
 var role;
 var token;
 var isTravellerProfileComplete;
+
 getTokenData() async {
   role = await PreferenceUtil().getRoleName();
   token = await PreferenceUtil().getToken();
@@ -80,108 +100,6 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyApp> {
-  Future<void> _firebaseMessagingBackgroundHandler(
-      RemoteMessage message) async {
-    debugPrint("checkNotification check Notification checkNotification");
-    if (message.notification != null) {
-      cancelNotification(1);
-      checkNotification(message, "background");
-    }
-    return;
-  }
-
-  cancelNotification(int notifiTypeId) async {
-    final fln = FlutterLocalNotificationsPlugin();
-    await fln.cancelAll();
-  }
-
-  setNavigationOnNotification(RemoteMessage message) async {
-    if (message.data["typeMode"] == "CHAT_MESSAGE") {
-      if (role.toString().toLowerCase() == 'GUIDE'.toLowerCase()) {
-        navigatorKey.currentState!.pushNamed(AppRoutes.touristGuideHome2);
-      } else {
-        navigatorKey.currentState!.pushNamed(AppRoutes.travellerHomePageTab3);
-      }
-    } else if (message.data["typeMode"] == "BOOKING") {
-      navigatorKey.currentState!.pushNamed(AppRoutes.travellerHomePageTab4);
-    } else if (message.data["typeMode"] == "PAYMENT") {
-      if (role.toString().toLowerCase() == 'GUIDE'.toLowerCase()) {
-        navigatorKey.currentState!.pushNamed(AppRoutes.transactionHistoryGuide);
-      } else {
-        navigatorKey.currentState!.pushNamed(AppRoutes.transactionHistory);
-      }
-    } else if (message.data["typeMode"] == "RECIEVED_BOOKING") {
-      navigatorKey.currentState!.pushNamed(AppRoutes.touristGuideHome);
-    } else if (message.data["typeMode"] == "BOOKING_HISTORY") {
-      navigatorKey.currentState!.pushNamed(AppRoutes.touristGuideHome1);
-    }
-  }
-
-  checkNotification(RemoteMessage message, String from) {
-    showNotification(message);
-  }
-
-  void showNotification(Message) async {
-    role = await PreferenceUtil().getRoleName();
-    debugPrint("ON TAP NOTIFICATION ---- $role");
-    String notificationIcon = "@mipmap/ic_launcher";
-    String? title;
-    String? body;
-    title = Message.notification!.title.toString();
-    body = Message.notification!.body.toString();
-    FlutterLocalNotificationsPlugin fltNotification =
-        FlutterLocalNotificationsPlugin();
-    var androidInit = AndroidInitializationSettings(notificationIcon);
-    var iosInit = const DarwinInitializationSettings();
-    var initSetting =
-        InitializationSettings(android: androidInit, iOS: iosInit);
-    fltNotification.initialize(initSetting,
-        onDidReceiveNotificationResponse: (payload) async {
-      debugPrint("onSelectNotificationonSelectNotification>>>");
-      if (Message.data["typeMode"] == "CHAT_MESSAGE") {
-        if (role.toString().toLowerCase() == 'GUIDE'.toString().toLowerCase()) {
-          navigatorKey.currentState!.pushNamed(AppRoutes.touristGuideHome2);
-        } else {
-          navigatorKey.currentState!.pushNamed(AppRoutes.travellerHomePageTab3);
-        }
-      } else if (Message.data["typeMode"] == "BOOKING") {
-        navigatorKey.currentState!.pushNamed(AppRoutes.travellerHomePageTab4);
-      } else if (Message.data["typeMode"] == "PAYMENT") {
-        if (role.toString().toLowerCase() == 'GUIDE'.toString().toLowerCase()) {
-          navigatorKey.currentState!
-              .pushNamed(AppRoutes.transactionHistoryGuide);
-        } else {
-          navigatorKey.currentState!.pushNamed(AppRoutes.transactionHistory);
-        }
-      } else if (Message.data["typeMode"] == "RECIEVED_BOOKING") {
-        navigatorKey.currentState!.pushNamed(AppRoutes.touristGuideHome);
-      } else if (Message.data["typeMode"] == "BOOKING_HISTORY") {
-        navigatorKey.currentState!.pushNamed(AppRoutes.touristGuideHome1);
-      }
-    });
-
-    var androidDetails = AndroidNotificationDetails(
-      "1",
-      'channelName',
-      channelDescription: 'channel Description',
-      importance: Importance.high,
-      priority: Priority.high,
-      largeIcon: DrawableResourceAndroidBitmap(notificationIcon),
-      icon: notificationIcon,
-      enableLights: true,
-      enableVibration: true,
-      visibility: NotificationVisibility.public,
-    );
-
-    var iosDetails = const DarwinNotificationDetails(
-        sound: '', presentAlert: true, presentBadge: true, presentSound: true);
-
-    var generalNotificationDetails =
-        NotificationDetails(android: androidDetails, iOS: iosDetails);
-    await fltNotification.show(0, title, body, generalNotificationDetails,
-        payload: 'Notification');
-  }
-
   var role;
   var token;
 
@@ -193,24 +111,14 @@ class _MyHomePageState extends State<MyApp> {
   }
 
   _asyncMethod() async {
-    FirebaseMessaging.instance.getInitialMessage().then(
+    /* FirebaseMessaging.instance.getInitialMessage().then(
           (value) => setState(
             () {
               debugPrint(
                   'getInitial Message getInitialMessage getInitialMessage');
             },
           ),
-        );
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      debugPrint("onMessage-- ${message.data}");
-      checkNotification(message, "onMessage");
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      setNavigationOnNotification(message);
-    });
-
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+        );*/
 
     if (await PreferenceUtil().getToken() != null) {
       String val2 = await PreferenceUtil().getToken();
@@ -228,7 +136,7 @@ class _MyHomePageState extends State<MyApp> {
       if (token != null && role == "TRAVELLER") {
         waitingStatusApi();
       }
-      debugPrint("USER WAITING LIST API ==>>  $email --- $id");
+      debugPrint("USER WAITING LIST API ==>>  $email --- $id ---$token");
     }
   }
 
@@ -288,4 +196,103 @@ class _MyHomePageState extends State<MyApp> {
       onGenerateRoute: router.generateRoute,
     );
   }
+}
+
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage? message) async {
+  debugPrint("checkNotification check Notification checkNotification");
+  if (message != null) {
+    cancelNotification(1);
+    checkNotification(message, "background");
+  }
+  return;
+}
+
+cancelNotification(int notifiTypeId) async {
+  final fln = FlutterLocalNotificationsPlugin();
+  await fln.cancelAll();
+}
+
+setNavigationOnNotification(RemoteMessage message) async {
+  if (message.data["typeMode"] == "CHAT_MESSAGE") {
+    if (role.toString().toLowerCase() == 'GUIDE'.toLowerCase()) {
+      navigatorKey.currentState!.pushNamed(AppRoutes.touristGuideHome2);
+    } else {
+      navigatorKey.currentState!.pushNamed(AppRoutes.travellerHomePageTab3);
+    }
+  } else if (message.data["typeMode"] == "BOOKING") {
+    navigatorKey.currentState!.pushNamed(AppRoutes.travellerHomePageTab4);
+  } else if (message.data["typeMode"] == "PAYMENT") {
+    if (role.toString().toLowerCase() == 'GUIDE'.toLowerCase()) {
+      navigatorKey.currentState!.pushNamed(AppRoutes.transactionHistoryGuide);
+    } else {
+      navigatorKey.currentState!.pushNamed(AppRoutes.transactionHistory);
+    }
+  } else if (message.data["typeMode"] == "RECIEVED_BOOKING") {
+    navigatorKey.currentState!.pushNamed(AppRoutes.touristGuideHome);
+  } else if (message.data["typeMode"] == "BOOKING_HISTORY") {
+    navigatorKey.currentState!.pushNamed(AppRoutes.touristGuideHome1);
+  }
+}
+
+checkNotification(RemoteMessage message, String from) {
+  showNotification(message);
+}
+
+void showNotification(Message) async {
+  role = await PreferenceUtil().getRoleName();
+  debugPrint("ON TAP NOTIFICATION ---- $role");
+  String notificationIcon = "@mipmap/ic_launcher";
+  String? title;
+  String? body;
+  title = Message.notification!.title.toString();
+  body = Message.notification!.body.toString();
+  FlutterLocalNotificationsPlugin fltNotification =
+      FlutterLocalNotificationsPlugin();
+  var androidInit = AndroidInitializationSettings(notificationIcon);
+  var iosInit = const DarwinInitializationSettings();
+  var initSetting = InitializationSettings(android: androidInit, iOS: iosInit);
+  fltNotification.initialize(initSetting,
+      onDidReceiveNotificationResponse: (payload) async {
+    debugPrint("onSelectNotificationonSelectNotification>>>");
+    if (Message.data["typeMode"] == "CHAT_MESSAGE") {
+      if (role.toString().toLowerCase() == 'GUIDE'.toString().toLowerCase()) {
+        navigatorKey.currentState!.pushNamed(AppRoutes.touristGuideHome2);
+      } else {
+        navigatorKey.currentState!.pushNamed(AppRoutes.travellerHomePageTab3);
+      }
+    } else if (Message.data["typeMode"] == "BOOKING") {
+      navigatorKey.currentState!.pushNamed(AppRoutes.travellerHomePageTab4);
+    } else if (Message.data["typeMode"] == "PAYMENT") {
+      if (role.toString().toLowerCase() == 'GUIDE'.toString().toLowerCase()) {
+        navigatorKey.currentState!.pushNamed(AppRoutes.transactionHistoryGuide);
+      } else {
+        navigatorKey.currentState!.pushNamed(AppRoutes.transactionHistory);
+      }
+    } else if (Message.data["typeMode"] == "RECIEVED_BOOKING") {
+      navigatorKey.currentState!.pushNamed(AppRoutes.touristGuideHome);
+    } else if (Message.data["typeMode"] == "BOOKING_HISTORY") {
+      navigatorKey.currentState!.pushNamed(AppRoutes.touristGuideHome1);
+    }
+  });
+
+  var androidDetails = AndroidNotificationDetails(
+    "1",
+    'channelName',
+    channelDescription: 'channel Description',
+    importance: Importance.high,
+    priority: Priority.high,
+    largeIcon: DrawableResourceAndroidBitmap(notificationIcon),
+    icon: notificationIcon,
+    enableLights: true,
+    enableVibration: true,
+    visibility: NotificationVisibility.public,
+  );
+
+  var iosDetails = const DarwinNotificationDetails(
+      sound: '', presentAlert: true, presentBadge: true, presentSound: true);
+
+  var generalNotificationDetails =
+      NotificationDetails(android: androidDetails, iOS: iosDetails);
+  await fltNotification.show(0, title, body, generalNotificationDetails,
+      payload: 'Notification');
 }

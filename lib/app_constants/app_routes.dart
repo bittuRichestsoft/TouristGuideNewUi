@@ -29,7 +29,7 @@ class AppRoutes {
   static const String withdrawRequestGuide = "withdrawRequestGuide";
   static const String reviewListPage = "reviewListPage";
   static const String commonWebViewPage = "CommonWebViewPage";
-  static const String touristBankingDetails = "TouristBankingDetails";
+  static const String guideBankingDetails = "guideBankingDetails";
   static const String travellerHomeMessagePage = "travellerHomeMessagePage";
 
   static const String findGuideScreenNew = "findGuideScreenNew";

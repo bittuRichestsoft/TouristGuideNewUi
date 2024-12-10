@@ -7,10 +7,10 @@ import 'package:Siesta/view/signIn/login_page.dart';
 import 'package:Siesta/view/signUp/registration_page.dart';
 import 'package:Siesta/view/touristGuideView/bookingHistory/booking_history_detail.dart';
 import 'package:Siesta/view/touristGuideView/create_tourist_profile/create_profile_page.dart';
+import 'package:Siesta/view/touristGuideView/guide_banking_details/guide_banking_detail.dart';
 import 'package:Siesta/view/touristGuideView/guide_transaction_history/guidetransactions_history_screen.dart';
 import 'package:Siesta/view/touristGuideView/guide_transaction_history/withdraw_request_screen.dart';
 import 'package:Siesta/view/touristGuideView/home/guide_home_page.dart';
-import 'package:Siesta/view/touristGuideView/tourist_profile_view/banking_detail.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/create_post_page.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/experience/experience_listing_page.dart';
 import 'package:Siesta/view/touristGuideView/tourist_profile_view/experience/post_detail_page.dart';
@@ -166,9 +166,9 @@ Route<dynamic> generateRoute(RouteSettings settings) {
     case AppRoutes.reviewListPage:
       return MaterialPageRoute(builder: (context) => const ReviewPage());
 
-    case AppRoutes.touristBankingDetails:
+    case AppRoutes.guideBankingDetails:
       return MaterialPageRoute(
-          builder: (context) => const TouristBankingDetails());
+          builder: (context) => const GuideBankingDetails());
 
     case AppRoutes.commonWebViewPage:
       return MaterialPageRoute(

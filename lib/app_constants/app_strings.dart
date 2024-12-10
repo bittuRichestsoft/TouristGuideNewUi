@@ -5,17 +5,23 @@ class AppStrings {
   String enterEmail = "Enter Email Address";
   String enterReason = "Enter Your Reason";
   String enterTitle = "Enter Title";
-  String enterCurrentPassword = "Enter current Password";
+  String enterCurrentPassword = "Enter Current Password";
   String enterNewPassword = "Enter New Password";
-  String enterNewPasswordAgain = "Enter New Password Again";
+  String enterConfirmPassword = "Enter Confirm Password";
+  String newPasswordAndConfirmMustBeSame =
+      "New password and confirm password must be same";
   String enterAdvanceAmount = "Enter Advance Amount";
   String enterCreateItinerary = "Enter Create Itenerary";
   String enterBankName = "Enter Bank Name";
   static String completed = "Completed";
   static String pending = "Pending";
   String enterCardNumber = "Enter Account Number";
-  String enterCustomerName = "Enter Bank Name";
-  String enterIfscCode = "Enter Routing number";
+  String enterAccountHolderName = "Enter Account Holder Name";
+  static String accountHolderName = "Account Holder Name";
+  static String bankName = "Bank Name";
+  static String accountNumber = "Account Number";
+  static String routingNumber = "Routing Number";
+  String enterIfscCode = "Enter Routing Number";
   String enterValidEmail = "Enter valid Email Address";
   String enterValidPassword = "Enter valid Password";
   String enterName = "Enter your first name";

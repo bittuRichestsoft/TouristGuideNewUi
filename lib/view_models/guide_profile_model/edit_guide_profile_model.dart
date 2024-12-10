@@ -185,7 +185,7 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
     BuildContext context = navigatorKey.currentContext!;
 
     try {
-      GlobalUtility().showLoaderDialog(context);
+      // GlobalUtility().showLoaderDialog(context);
       if (await GlobalUtility.isConnected()) {
         final apiResponse = await ApiRequest()
             .getWithHeader(Api.getActivities)
@@ -216,7 +216,7 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
       debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
-      GlobalUtility().closeLoaderDialog(context);
+      // GlobalUtility().closeLoaderDialog(context);
     }
   }
 
