@@ -13,6 +13,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_widget_from_html/flutter_widget_from_html.dart';
 import 'package:http/http.dart';
 import 'package:url_launcher/url_launcher.dart';
+
 import '../api_requests/auth.request.dart';
 import '../app_constants/app_fonts.dart';
 import '../app_constants/app_routes.dart';
@@ -48,6 +49,7 @@ class _WaitListScreenState extends State<WaitListScreen> {
     description = waitingData != null
         ? "<div style='text-align: center;'>${waitingData!.description!}</div>"
         : "";
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -59,10 +61,15 @@ class _WaitListScreenState extends State<WaitListScreen> {
       body: waitingData != null
           ? ListView(
               children: [
+                UiSpacer.verticalSpace(context: context, space: 0.04),
                 Center(
-                  child: Image.asset(
-                    AppImages().pngImages.icAppLogo,
-                    height: screenHeight * 0.12,
+                  child: FittedBox(
+                    fit: BoxFit.fitHeight,
+                    child: Image.asset(
+                      AppImages().pngImages.icAppLogo,
+                      height: screenHeight * 0.08,
+                      // width: screenWidth * 0.4,
+                    ),
                   ),
                 ),
                 UiSpacer.verticalSpace(context: context, space: 0.05),

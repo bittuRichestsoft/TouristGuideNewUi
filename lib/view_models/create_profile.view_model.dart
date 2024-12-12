@@ -68,7 +68,8 @@ class CreateProfileViewModel extends BaseViewModel implements Initialisable {
 
   @override
   void initialise() async {
-    debugPrint("Model Initialized");
+    setInitialised(false);
+    setError(null);
     // fetchSocialLinksApi(context);
     setBusy(true);
     getActivitiesAPI(navigatorKey.currentContext!);
@@ -344,13 +345,13 @@ class CreateProfileViewModel extends BaseViewModel implements Initialisable {
   Future<void> getActivitiesAPI(BuildContext context) async {
     try {
       if (await GlobalUtility.isConnected()) {
-        GlobalUtility().showLoaderDialog(context);
+        // GlobalUtility().showLoaderDialog(context);
         final apiResponse = await ApiRequest()
             .getWithHeader(Api.getActivities)
             .timeout(Duration(seconds: 20));
 
         var jsonData = jsonDecode(apiResponse.body);
-        GlobalUtility().closeLoaderDialog(context);
+        // GlobalUtility().closeLoaderDialog(context);
         int status = jsonData['statusCode'] ?? 404;
         String message = jsonData['message'] ?? "";
 
@@ -362,15 +363,22 @@ class CreateProfileViewModel extends BaseViewModel implements Initialisable {
           activitiesList = getActivitiesPojo.data!.rows!.map((e) {
             return ActivitiesModel(id: e.id!, title: e.name ?? "");
           }).toList();
+          setInitialised(true);
         } else if (status == 400) {
+          setError(message);
           GlobalUtility.showToast(context, message);
         } else if (status == 401) {
+          setError(message);
           GlobalUtility().handleSessionExpire(context);
+        } else {
+          setError(AppStrings.someErrorOccurred);
         }
       } else {
+        setError(AppStrings().INTERNET);
         GlobalUtility.showToast(context, AppStrings().INTERNET);
       }
     } catch (e) {
+      setError(AppStrings.someErrorOccurred);
       debugPrint("Get Activities error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {

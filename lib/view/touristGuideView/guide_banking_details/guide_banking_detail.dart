@@ -62,9 +62,7 @@ class _GuideBankingDetailsState extends State<GuideBankingDetails> {
                     model.initialise();
                   }, context: context)
                 : model.initialised == false
-                    ? Center(
-                        child: CircularProgressIndicator(),
-                      )
+                    ? CommonWidgets().inPageLoader()
                     : ListView(
                         shrinkWrap: true,
                         padding: EdgeInsets.symmetric(

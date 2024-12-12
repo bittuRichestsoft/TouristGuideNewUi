@@ -32,7 +32,7 @@ class AppRoutes {
   static const String guideBankingDetails = "guideBankingDetails";
   static const String travellerHomeMessagePage = "travellerHomeMessagePage";
 
-  static const String findGuideScreenNew = "findGuideScreenNew";
+  static const String finfExperienceScreen = "finfExperienceScreen";
   static const String galleryDetailPage = "galleryDetailPage";
   static const String postDetailPage = "postDetailPage";
   static const String createPostPage = "createPostPage";

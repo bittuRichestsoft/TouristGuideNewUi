@@ -11,7 +11,8 @@ import 'package:Siesta/view/travellerView/message_screen/message_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-import '../find_guide/find_guide_screen_new.dart';
+import '../find_guide/find_experience_screen.dart';
+import '../find_guide/find_guide_page.dart';
 import '../itinerary/itineary_page.dart';
 
 // ignore: must_be_immutable
@@ -34,7 +35,7 @@ class TravellerHomePage extends StatefulWidget {
 String fromWhere = "";
 List<Widget> _widgetOptions = <Widget>[
   // const FindGuidePage(),
-  const FindGuideScreenNew(),
+  const FindExperienceScreen(),
   const BookingPage(),
   MessagePage(fromWhere: fromWhere),
   ItineraryPage(fromWhere: ""),
@@ -44,7 +45,7 @@ setWidgetOptions() {
     _widgetOptions.clear();
     _widgetOptions = [
       // const FindGuidePage(),
-      const FindGuideScreenNew(),
+      const FindExperienceScreen(),
       const BookingPage(),
       MessagePage(fromWhere: fromWhere),
       ItineraryPage(fromWhere: ""),
@@ -53,7 +54,7 @@ setWidgetOptions() {
     _widgetOptions.clear();
     _widgetOptions = [
       // const FindGuidePage(),
-      const FindGuideScreenNew(),
+      const FindExperienceScreen(),
       const BookingPage(),
       MessagePage(fromWhere: ""),
       ItineraryPage(fromWhere: ""),

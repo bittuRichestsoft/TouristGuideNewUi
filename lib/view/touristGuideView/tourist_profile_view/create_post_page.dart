@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:Siesta/app_constants/app_images.dart';
-import 'package:Siesta/app_constants/decimal_formatter.dart';
 import 'package:Siesta/common_widgets/common_button.dart';
 import 'package:Siesta/common_widgets/common_imageview.dart';
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
@@ -420,8 +419,10 @@ class _CreatePostPageState extends State<CreatePostPage> {
           hintText: "Enter price",
           suffixIconPath: AppImages().svgImages.icDollar,
           keyboardType: TextInputType.number,
+          maxLength: 7,
           inputFormatter: [
-            DecimalTextInputFormatter(decimalRange: 2, integerRange: 7)
+            FilteringTextInputFormatter.digitsOnly,
+            // DecimalTextInputFormatter(decimalRange: 0, integerRange: 7)
           ],
         ),
         UiSpacer.verticalSpace(context: context, space: 0.02),
@@ -456,7 +457,9 @@ class _CreatePostPageState extends State<CreatePostPage> {
             ),
             value: model.activitiesList.isEmpty
                 ? null
-                : model.activitiesList.last.id.toString(),
+                : model.activitiesList.any((activity) => activity.isSelect)
+                    ? model.activitiesList.last.id.toString()
+                    : null,
             onChanged: (value) {
               // selectedValue = value;
               setState(() {});
@@ -524,27 +527,31 @@ class _CreatePostPageState extends State<CreatePostPage> {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: AppColor.fieldBorderColor),
             )),
-            selectedItemBuilder: (context) {
-              return model.activitiesList.map(
-                (item) {
-                  return Container(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      model.activitiesList
-                          .where((activity) =>
-                              activity.isSelect) // Filter selected activities
-                          .map((activity) => activity.title) // Extract titles
-                          .join(', '),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      maxLines: 1,
-                    ),
-                  );
-                },
-              ).toList();
-            },
+            selectedItemBuilder:
+                model.activitiesList.any((activity) => activity.isSelect)
+                    ? (context) {
+                        return model.activitiesList.map(
+                          (item) {
+                            return Container(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                model.activitiesList
+                                    .where((activity) => activity
+                                        .isSelect) // Filter selected activities
+                                    .map((activity) =>
+                                        activity.title) // Extract titles
+                                    .join(', '),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                maxLines: 1,
+                              ),
+                            );
+                          },
+                        ).toList();
+                      }
+                    : null,
           ),
         ),
       ],

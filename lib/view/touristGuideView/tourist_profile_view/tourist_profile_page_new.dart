@@ -228,7 +228,7 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
         if (model.showCreateGeneral == true)
           CommonButton.commonOutlineButtonWithIconText(
             context: context,
-            text: "Create General",
+            text: "Miscellaneous Services",
             iconPath: AppImages().svgImages.icAdd,
             onPressed: () async {
               var backData = await Navigator.pushNamed(

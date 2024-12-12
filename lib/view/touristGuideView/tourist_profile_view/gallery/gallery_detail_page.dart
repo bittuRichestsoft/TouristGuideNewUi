@@ -138,7 +138,7 @@ class _GalleryDetailPageState extends State<GalleryDetailPage> {
           context: context,
           text: model.galleryDetails?.title ?? "",
           color: AppColor.blackColor,
-          fontSize: screenHeight * 0.026,
+          fontSize: screenHeight * 0.035,
           textAlign: TextAlign.start,
         ),
         UiSpacer.verticalSpace(context: context, space: 0.01),

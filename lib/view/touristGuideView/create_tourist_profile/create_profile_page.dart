@@ -17,6 +17,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:stacked/stacked.dart';
 
+import '../../../custom_widgets/common_widgets.dart';
+
 // FOR LOCALITE(GUIDE) create profile
 class CreateTouristProfileScreen extends StatefulWidget {
   const CreateTouristProfileScreen({Key? key}) : super(key: key);
@@ -44,28 +46,37 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
         builder: (context, model, child) {
           return Scaffold(
             backgroundColor: AppColor.whiteColor,
-            body: ListView(
-              shrinkWrap: true,
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: EdgeInsets.symmetric(
-                  horizontal:
-                      screenWidth * AppSizes().widgetSize.horizontalPadding),
-              children: [
-                UiSpacer.verticalSpace(space: 0.06, context: context),
-                firstTextView(),
-                enrollmentAndNote(model),
-                UiSpacer.verticalSpace(space: 0.015, context: context),
-                profilePic(model),
-                UiSpacer.verticalSpace(space: 0.01, context: context),
-                Center(
-                    child: normalTitleText("${AppStrings().uploadProfile}  ",
-                        AppFonts.nunitoSemiBold)),
-                UiSpacer.verticalSpace(space: 0.03, context: context),
-                detailFields(model),
-                UiSpacer.verticalSpace(space: 0.04, context: context),
-                buttonContainer(model),
-              ],
-            ),
+            body: model.hasError
+                ? CommonWidgets().inAppErrorWidget(model.modelError.toString(),
+                    () {
+                    model.initialise();
+                  }, context: context)
+                : model.initialised == false
+                    ? CommonWidgets().inPageLoader()
+                    : ListView(
+                        shrinkWrap: true,
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth *
+                                AppSizes().widgetSize.horizontalPadding),
+                        children: [
+                          UiSpacer.verticalSpace(space: 0.06, context: context),
+                          firstTextView(),
+                          enrollmentAndNote(model),
+                          UiSpacer.verticalSpace(
+                              space: 0.015, context: context),
+                          profilePic(model),
+                          UiSpacer.verticalSpace(space: 0.01, context: context),
+                          Center(
+                              child: normalTitleText(
+                                  "${AppStrings().uploadProfile}  ",
+                                  AppFonts.nunitoSemiBold)),
+                          UiSpacer.verticalSpace(space: 0.03, context: context),
+                          detailFields(model),
+                          UiSpacer.verticalSpace(space: 0.04, context: context),
+                          buttonContainer(model),
+                        ],
+                      ),
           );
         });
   }
@@ -891,7 +902,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                                           },
                                           textAlign: TextAlign.start,
                                           decoration: const InputDecoration(
-                                              hintText: "Search country...",
+                                              hintText: "Search city...",
                                               counterText: "",
                                               border: InputBorder.none,
                                               prefixIcon: Icon(Icons.search)),
@@ -1239,7 +1250,9 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
             ),
             value: model.activitiesList.isEmpty
                 ? null
-                : model.activitiesList.last.id.toString(),
+                : model.activitiesList.any((activity) => activity.isSelect)
+                    ? model.activitiesList.last.id.toString()
+                    : null,
             onChanged: (value) {},
             style: TextStyle(
                 color: AppColor.lightBlack,
@@ -1304,27 +1317,31 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: AppColor.fieldBorderColor),
             )),
-            selectedItemBuilder: (context) {
-              return model.activitiesList.map(
-                (item) {
-                  return Container(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      model.activitiesList
-                          .where((activity) =>
-                              activity.isSelect) // Filter selected activities
-                          .map((activity) => activity.title) // Extract titles
-                          .join(', '),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      maxLines: 1,
-                    ),
-                  );
-                },
-              ).toList();
-            },
+            selectedItemBuilder:
+                model.activitiesList.any((activity) => activity.isSelect)
+                    ? (context) {
+                        return model.activitiesList.map(
+                          (item) {
+                            return Container(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                model.activitiesList
+                                    .where((activity) => activity
+                                        .isSelect) // Filter selected activities
+                                    .map((activity) =>
+                                        activity.title) // Extract titles
+                                    .join(', '),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                maxLines: 1,
+                              ),
+                            );
+                          },
+                        ).toList();
+                      }
+                    : null,
           ),
         ),
       ],
@@ -1744,7 +1761,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
 
     if (model.checkBoxVal == false) {
       GlobalUtility.showToast(context,
-          "Read note and agree with the enrollment as a guide with Siesta");
+          "Read note and agree with the enrollment as a guide with Imerzn");
       return false;
     }
     if (model.profilePicture == null) {

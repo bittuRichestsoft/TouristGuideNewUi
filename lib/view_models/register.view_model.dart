@@ -2,11 +2,13 @@
 
 import 'dart:convert';
 import 'dart:math';
+
 import 'package:Siesta/utility/globalUtility.dart';
 import 'package:Siesta/view/signUp/registration_page.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:stacked/stacked.dart';
+
 import '../api_requests/auth.request.dart';
 import '../app_constants/app_images.dart';
 import '../app_constants/app_strings.dart';
@@ -30,23 +32,24 @@ class RegisterViewModel extends BaseViewModel {
 
   final counterNotifier = ValueNotifier<int>(0);
   TextEditingController userPhoneController = TextEditingController();
-  String countryCode = "";
-  String countryCodeIso = "";
+  String countryCode = "+1";
+  String countryCodeIso = "US";
   bool isVerified = false;
   int? firstNumber;
   int? secNumber;
+
   TextEditingController captchaController = TextEditingController();
 
   generateRandomNumber() {
     var rng = Random();
-    for (var i = 0; i < 1; i++) {
-      firstNumber = rng.nextInt(100);
-      debugPrint("firstNumber --- $firstNumber");
-    }
-    for (var i = 1; i < 2; i++) {
-      secNumber = rng.nextInt(100);
-      debugPrint("secNumber --- $secNumber");
-    }
+    // for (var i = 0; i < 1; i++) {
+    firstNumber = rng.nextInt(19) + 1;
+    debugPrint("firstNumber --- $firstNumber");
+    // }
+    // for (var i = 1; i < 2; i++) {
+    secNumber = rng.nextInt(19) + 1;
+    debugPrint("secNumber --- $secNumber");
+    // }
     notifyListeners();
   }
 

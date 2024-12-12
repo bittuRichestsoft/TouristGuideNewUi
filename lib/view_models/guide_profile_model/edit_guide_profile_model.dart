@@ -55,9 +55,12 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
 
   @override
   void initialise() {
+    setError(null);
+    setInitialised(false);
     // get Activities
     getActivitiesAPI().then((value) {
       getProfileAPI();
+      setInitialised(true);
     });
   }
 
@@ -205,15 +208,19 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
             return ActivitiesModel(id: e.id!, title: e.name ?? "");
           }).toList();
         } else if (status == 400) {
+          setError(message);
           GlobalUtility.showToast(context, message);
         } else if (status == 401) {
+          setError(message);
           GlobalUtility().handleSessionExpire(context);
         }
       } else {
+        setError(AppStrings().INTERNET);
         GlobalUtility.showToast(context, AppStrings().INTERNET);
       }
     } catch (e) {
       debugPrint("$runtimeType error : $e");
+      setError(AppStrings.someErrorOccurred);
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
       // GlobalUtility().closeLoaderDialog(context);
@@ -238,15 +245,21 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
         if (status == 200) {
           documentsList.removeAt(index);
         } else if (status == 400) {
+          setError(message);
           GlobalUtility.showToast(context, message);
         } else if (status == 401) {
+          setError(message);
           GlobalUtility().handleSessionExpire(context);
+        } else {
+          setError(AppStrings.someErrorOccurred);
         }
       } else {
+        setError(AppStrings().INTERNET);
         GlobalUtility.showToast(context, AppStrings().INTERNET);
       }
     } catch (e) {
       debugPrint("$runtimeType error : $e");
+      setError(AppStrings.someErrorOccurred);
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
       GlobalUtility().closeLoaderDialog(context);
@@ -379,14 +392,20 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
                 : "0",
           );
         } else if (status == 400) {
+          setError(message);
           GlobalUtility.showToast(context, message);
         } else if (status == 401) {
+          setError(message);
           GlobalUtility().handleSessionExpire(context);
-        } else {}
+        } else {
+          setError(AppStrings.someErrorOccurred);
+        }
       } else {
+        setError(AppStrings().INTERNET);
         GlobalUtility.showToast(context, AppStrings().INTERNET);
       }
     } catch (e) {
+      setError(AppStrings.someErrorOccurred);
       debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
@@ -456,6 +475,7 @@ class EditGuideProfileModel extends BaseViewModel implements Initialisable {
 
         if (status == 200) {
           getProfileAPI();
+          Navigator.pop(context);
           GlobalUtility.showToast(context, message);
         } else if (status == 400) {
           GlobalUtility.showToast(context, message);

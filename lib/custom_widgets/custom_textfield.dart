@@ -14,6 +14,7 @@ class CustomTextField extends StatefulWidget {
       this.textEditingController,
       this.onChange,
       this.isFilled,
+      this.fillColor,
       this.hintText,
       this.keyboardType,
       this.validator,
@@ -28,11 +29,13 @@ class CustomTextField extends StatefulWidget {
       this.maxLength,
       this.inputFormatter,
       this.prefixWidget,
-      this.obscureText = false});
+      this.obscureText = false,
+      this.showCounterText = false});
   final TextEditingController? textEditingController;
   final Function(String)? onChange;
   final Function()? onTap;
   final bool? isFilled;
+  final Color? fillColor;
   final String? hintText;
   final TextInputType? keyboardType;
   final String Function(String?)? validator;
@@ -47,6 +50,7 @@ class CustomTextField extends StatefulWidget {
   final int? maxLength;
   final List<TextInputFormatter>? inputFormatter;
   final bool obscureText;
+  final bool showCounterText;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -88,6 +92,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
               fontSize: MediaQuery.of(context).size.height *
                   AppSizes().fontSize.simpleFontSize),
           decoration: InputDecoration(
+            counterText: widget.showCounterText == true ? null : "",
             hintText: widget.hintText,
             prefixIcon: widget.prefixWidget,
             suffixIcon: widget.suffixWidget != null
@@ -113,29 +118,45 @@ class _CustomTextFieldState extends State<CustomTextField> {
               bottom: 0,
               left: 10,
             ),
-            fillColor: AppColor.textfieldFilledColor,
+            fillColor: widget.fillColor ?? AppColor.textfieldFilledColor,
             filled: widget.isFilled,
             enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: AppColor.textfieldborderColor),
+              borderRadius: BorderRadius.all(Radius.circular(
+                  widget.borderRadius ??
+                      MediaQuery.of(context).size.width *
+                          AppSizes().widgetSize.smallBorderRadius)),
+            ),
+            focusedBorder: OutlineInputBorder(
                 borderSide: BorderSide(color: AppColor.textfieldborderColor),
                 borderRadius: BorderRadius.all(Radius.circular(
                     widget.borderRadius ??
                         MediaQuery.of(context).size.width *
                             AppSizes().widgetSize.smallBorderRadius))),
-            focusedBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColor.textfieldborderColor),
-            ),
             disabledBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColor.textfieldborderColor),
-            ),
+                borderSide: BorderSide(color: AppColor.textfieldborderColor),
+                borderRadius: BorderRadius.all(Radius.circular(
+                    widget.borderRadius ??
+                        MediaQuery.of(context).size.width *
+                            AppSizes().widgetSize.smallBorderRadius))),
             border: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColor.textfieldborderColor),
-            ),
+                borderSide: BorderSide(color: AppColor.textfieldborderColor),
+                borderRadius: BorderRadius.all(Radius.circular(
+                    widget.borderRadius ??
+                        MediaQuery.of(context).size.width *
+                            AppSizes().widgetSize.smallBorderRadius))),
             errorBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColor.errorBorderColor),
-            ),
+                borderSide: BorderSide(color: AppColor.errorBorderColor),
+                borderRadius: BorderRadius.all(Radius.circular(
+                    widget.borderRadius ??
+                        MediaQuery.of(context).size.width *
+                            AppSizes().widgetSize.smallBorderRadius))),
             focusedErrorBorder: OutlineInputBorder(
-              borderSide: BorderSide(color: AppColor.errorBorderColor),
-            ),
+                borderSide: BorderSide(color: AppColor.errorBorderColor),
+                borderRadius: BorderRadius.all(Radius.circular(
+                    widget.borderRadius ??
+                        MediaQuery.of(context).size.width *
+                            AppSizes().widgetSize.smallBorderRadius))),
           ),
           enableInteractiveSelection: true,
           textInputAction: TextInputAction.next,

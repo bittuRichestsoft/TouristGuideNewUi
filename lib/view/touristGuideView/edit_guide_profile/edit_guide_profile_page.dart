@@ -20,6 +20,7 @@ import '../../../common_widgets/common_button.dart';
 import '../../../common_widgets/common_imageview.dart';
 import '../../../common_widgets/common_textview.dart';
 import '../../../common_widgets/vertical_size_box.dart';
+import '../../../custom_widgets/common_widgets.dart';
 import '../../../utility/globalUtility.dart';
 import '../../travellerView/delete_account.dart';
 
@@ -64,121 +65,142 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
               ),
 
               // body
-              body: ListView(
-                shrinkWrap: true,
-                physics: const AlwaysScrollableScrollPhysics(),
-                children: [
-                  // Cover and profile photo
-                  profileImageView(model),
-                  UiSpacer.verticalSpace(
-                      space: AppSizes().widgetSize.normalPadding,
-                      context: context),
+              body: model.hasError
+                  ? CommonWidgets()
+                      .inAppErrorWidget(model.modelError.toString(), () {
+                      model.initialise();
+                    }, context: context)
+                  : model.initialised == false
+                      ? CommonWidgets().inPageLoader()
+                      : ListView(
+                          shrinkWrap: true,
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            // Cover and profile photo
+                            profileImageView(model),
+                            UiSpacer.verticalSpace(
+                                space: AppSizes().widgetSize.normalPadding,
+                                context: context),
 
-                  Padding(
-                    padding: EdgeInsets.all(screenWidth * 0.04),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // name view
-                        nameView(model),
-                        UiSpacer.verticalSpace(
-                            space: AppSizes().widgetSize.normalPadding,
-                            context: context),
+                            Padding(
+                              padding: EdgeInsets.all(screenWidth * 0.04),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  // name view
+                                  nameView(model),
+                                  UiSpacer.verticalSpace(
+                                      space:
+                                          AppSizes().widgetSize.normalPadding,
+                                      context: context),
 
-                        // phone field
-                        phoneField(model),
-                        UiSpacer.verticalSpace(
-                            space: AppSizes().widgetSize.normalPadding,
-                            context: context),
+                                  // phone field
+                                  phoneField(model),
+                                  UiSpacer.verticalSpace(
+                                      space:
+                                          AppSizes().widgetSize.normalPadding,
+                                      context: context),
 
-                        // Host since view
-                        hostSinceView(model),
-                        UiSpacer.verticalSpace(
-                            space: AppSizes().widgetSize.normalPadding,
-                            context: context),
+                                  // Host since view
+                                  hostSinceView(model),
+                                  UiSpacer.verticalSpace(
+                                      space:
+                                          AppSizes().widgetSize.normalPadding,
+                                      context: context),
 
-                        pronounView(model),
-                        UiSpacer.verticalSpace(
-                            space: AppSizes().widgetSize.normalPadding,
-                            context: context),
+                                  pronounView(model),
+                                  UiSpacer.verticalSpace(
+                                      space:
+                                          AppSizes().widgetSize.normalPadding,
+                                      context: context),
 
-                        describeYourself(model),
-                        UiSpacer.verticalSpace(
-                            space: AppSizes().widgetSize.normalPadding,
-                            context: context),
+                                  describeYourself(model),
+                                  UiSpacer.verticalSpace(
+                                      space:
+                                          AppSizes().widgetSize.normalPadding,
+                                      context: context),
 
-                        // activities
-                        activitiesView(model),
-                        UiSpacer.verticalSpace(
-                            space: AppSizes().widgetSize.normalPadding,
-                            context: context),
+                                  // activities
+                                  activitiesView(model),
+                                  UiSpacer.verticalSpace(
+                                      space:
+                                          AppSizes().widgetSize.normalPadding,
+                                      context: context),
 
-                        // country state city
-                        countryCityField(model),
-                        UiSpacer.verticalSpace(
-                            space: AppSizes().widgetSize.normalPadding,
-                            context: context),
+                                  // country state city
+                                  countryCityField(model),
+                                  UiSpacer.verticalSpace(
+                                      space:
+                                          AppSizes().widgetSize.normalPadding,
+                                      context: context),
 
-                        // Zipcode
-                        CustomTextField(
-                          textEditingController: model.zipcodeTEC,
-                          headingText: "Zipcode",
-                          hintText: "Enter zipcode",
+                                  // Zipcode
+                                  CustomTextField(
+                                    textEditingController: model.zipcodeTEC,
+                                    headingText: "Zipcode",
+                                    hintText: "Enter zipcode",
+                                  ),
+                                  UiSpacer.verticalSpace(
+                                      space:
+                                          AppSizes().widgetSize.normalPadding,
+                                      context: context),
+
+                                  // upload ID proof
+                                  uploadIdProofView(model),
+                                  UiSpacer.verticalSpace(
+                                      space:
+                                          AppSizes().widgetSize.normalPadding,
+                                      context: context),
+
+                                  // save button
+                                  SizedBox(
+                                    height: screenHeight * 0.06,
+                                    width: screenWidth,
+                                    child: CommonButton.commonBoldTextButton(
+                                      context: context,
+                                      text: "Save",
+                                      isButtonEnable: true,
+                                      onPressed: () {
+                                        if (model.validate()) {
+                                          model.updateGuideProfileAPI();
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  UiSpacer.verticalSpace(
+                                      context: context, space: 0.02),
+
+                                  // delete account button
+                                  SizedBox(
+                                    height: screenHeight * 0.06,
+                                    width: screenWidth,
+                                    child: CommonButton.commonBoldTextButton(
+                                      context: context,
+                                      text: "Delete Account",
+                                      isButtonEnable: true,
+                                      onPressed: () {
+                                        GlobalUtility.showDialogFunction(
+                                            context,
+                                            DialogDeleteAccount(
+                                                from: "guide_delete",
+                                                cancelText:
+                                                    AppStrings().logoutNo,
+                                                headingText:
+                                                    AppStrings().deleteAcc,
+                                                okayText:
+                                                    AppStrings().logoutYes,
+                                                subContent: AppStrings()
+                                                    .deleteHeading));
+                                      },
+                                      bgColor: Colors.red,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            )
+                          ],
                         ),
-                        UiSpacer.verticalSpace(
-                            space: AppSizes().widgetSize.normalPadding,
-                            context: context),
-
-                        // upload ID proof
-                        uploadIdProofView(model),
-                        UiSpacer.verticalSpace(
-                            space: AppSizes().widgetSize.normalPadding,
-                            context: context),
-
-                        // save button
-                        SizedBox(
-                          height: screenHeight * 0.06,
-                          width: screenWidth,
-                          child: CommonButton.commonBoldTextButton(
-                            context: context,
-                            text: "Save",
-                            isButtonEnable: true,
-                            onPressed: () {
-                              if (model.validate()) {
-                                model.updateGuideProfileAPI();
-                              }
-                            },
-                          ),
-                        ),
-                        UiSpacer.verticalSpace(context: context, space: 0.02),
-
-                        // delete account button
-                        SizedBox(
-                          height: screenHeight * 0.06,
-                          width: screenWidth,
-                          child: CommonButton.commonBoldTextButton(
-                            context: context,
-                            text: "Delete Account",
-                            isButtonEnable: true,
-                            onPressed: () {
-                              GlobalUtility.showDialogFunction(
-                                  context,
-                                  DialogDeleteAccount(
-                                      from: "guide_delete",
-                                      cancelText: AppStrings().logoutNo,
-                                      headingText: AppStrings().deleteAcc,
-                                      okayText: AppStrings().logoutYes,
-                                      subContent: AppStrings().deleteHeading));
-                            },
-                            bgColor: Colors.red,
-                          ),
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
             ),
           );
         });
@@ -656,7 +678,9 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
             ),
             value: model.activitiesList.isEmpty
                 ? null
-                : model.activitiesList.last.id.toString(),
+                : model.activitiesList.any((activity) => activity.isSelect)
+                    ? model.activitiesList.last.id.toString()
+                    : null,
             onChanged: (value) {},
             style: TextStyle(
                 color: AppColor.lightBlack,
@@ -721,27 +745,31 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
               borderRadius: BorderRadius.circular(10),
               border: Border.all(color: AppColor.fieldBorderColor),
             )),
-            selectedItemBuilder: (context) {
-              return model.activitiesList.map(
-                (item) {
-                  return Container(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      model.activitiesList
-                          .where((activity) =>
-                              activity.isSelect) // Filter selected activities
-                          .map((activity) => activity.title) // Extract titles
-                          .join(', '),
-                      style: const TextStyle(
-                        fontSize: 14,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      maxLines: 1,
-                    ),
-                  );
-                },
-              ).toList();
-            },
+            selectedItemBuilder:
+                model.activitiesList.any((activity) => activity.isSelect)
+                    ? (context) {
+                        return model.activitiesList.map(
+                          (item) {
+                            return Container(
+                              alignment: Alignment.centerLeft,
+                              child: Text(
+                                model.activitiesList
+                                    .where((activity) => activity
+                                        .isSelect) // Filter selected activities
+                                    .map((activity) =>
+                                        activity.title) // Extract titles
+                                    .join(', '),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                maxLines: 1,
+                              ),
+                            );
+                          },
+                        ).toList();
+                      }
+                    : null,
           ),
         ),
       ],
@@ -775,64 +803,77 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
                             viewContext: context, countryId: "", stateId: "")
                         .then((value) {
                       if (value == true) {
+                        List<String> tempCountryList = model.countryList;
+
                         showModalBottomSheet(
                           context: context,
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30)),
+                          isScrollControlled: true,
                           builder: (cxt) {
                             return Padding(
-                                padding:
-                                    EdgeInsets.only(top: screenHeight * 0.03),
-                                child: Scaffold(
-                                    /*   appBar: AppBar(
-                                    elevation: 0,
-                                    backgroundColor: Colors.white,
-                                    automaticallyImplyLeading: false,
-                                    title: Column(
-                                      children: [
-                                        Container(
-                                          height: screenHeight * 0.06,
-                                          width: screenWidth,
-                                          alignment: Alignment.bottomLeft,
-                                          decoration: BoxDecoration(
-                                              border: Border.all(
-                                                  color: AppColor.disableColor)),
-                                          child: TextFormField(
-                                            maxLines: 1,
-                                            maxLength: 60,
-                                            onChanged: (value) {},
-                                            textAlign: TextAlign.start,
-                                            decoration: const InputDecoration(
-                                                hintText: "Search country...",
-                                                counterText: "",
-                                                border: InputBorder.none,
-                                                prefixIcon: Icon(Icons.search)),
-                                          ),
-                                        )
-                                      ],
+                                padding: EdgeInsets.only(
+                                  bottom:
+                                      MediaQuery.of(context).viewInsets.bottom,
+                                ),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      height: screenHeight * 0.06,
+                                      width: screenWidth,
+                                      alignment: Alignment.bottomLeft,
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: AppColor.disableColor)),
+                                      child: TextFormField(
+                                        maxLines: 1,
+                                        maxLength: 60,
+                                        onChanged: (value) {
+                                          tempCountryList = model.countryList
+                                              .where((element) => element
+                                                  .toLowerCase()
+                                                  .contains(value
+                                                      .trim()
+                                                      .toLowerCase()))
+                                              .toList();
+                                          setState(() {});
+                                        },
+                                        textAlign: TextAlign.start,
+                                        decoration: const InputDecoration(
+                                            hintText: "Search country...",
+                                            counterText: "",
+                                            border: InputBorder.none,
+                                            prefixIcon: Icon(Icons.search)),
+                                      ),
                                     ),
-                                  ),*/
-                                    body: ListView.builder(
-                                  shrinkWrap: true,
-                                  itemCount: model.countryList.length,
-                                  itemBuilder: (context, index) => ListTile(
-                                    onTap: () {
-                                      if (model.countryNameTEC.text !=
-                                          model.countryList[index]) {
-                                        model.countryNameTEC.text =
-                                            model.countryList[index];
-                                        model.stateNameTEC.clear();
-                                        model.cityNameTEC.clear();
-                                      } else {
-                                        model.countryNameTEC.text =
-                                            model.countryList[index];
-                                      }
-
-                                      Navigator.pop(cxt);
-                                    },
-                                    title: Text(model.countryList[index]),
-                                  ),
-                                )));
+                                    UiSpacer.verticalSpace(
+                                        context: context, space: 0.02),
+                                    SizedBox(
+                                      height: screenHeight * 0.5,
+                                      child: ListView.builder(
+                                        shrinkWrap: true,
+                                        itemCount: tempCountryList.length,
+                                        itemBuilder: (context, index) =>
+                                            ListTile(
+                                          onTap: () {
+                                            if (model.countryNameTEC.text !=
+                                                tempCountryList[index]) {
+                                              model.countryNameTEC.text =
+                                                  tempCountryList[index];
+                                              model.stateNameTEC.clear();
+                                              model.cityNameTEC.clear();
+                                            } else {
+                                              model.countryNameTEC.text =
+                                                  tempCountryList[index];
+                                            }
+                                            model.notifyListeners();
+                                            Navigator.pop(cxt);
+                                          },
+                                          title: Text(tempCountryList[index]),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ));
                           },
                         ).whenComplete(() {
                           // onCreateProfileValueChanged(model);
@@ -891,58 +932,76 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
                               stateId: "")
                           .then((value) {
                         if (value == true) {
+                          List<String> tempStateList = model.stateList;
+
                           showModalBottomSheet(
                             context: context,
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
+                            isScrollControlled: true,
                             builder: (cxt) {
                               return Padding(
-                                  padding:
-                                      EdgeInsets.only(top: screenHeight * 0.03),
-                                  child: Scaffold(
-                                      /* appBar: AppBar(
-                                      elevation: 0,
-                                      backgroundColor: Colors.white,
-                                      automaticallyImplyLeading: false,
-                                      title: Column(
-                                        children: [
-                                          Container(
-                                            height: screenHeight * 0.06,
-                                            width: screenWidth,
-                                            alignment: Alignment.bottomLeft,
-                                            decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: AppColor.disableColor)),
-                                            child: TextFormField(
-                                              maxLines: 1,
-                                              maxLength: 60,
-                                              textAlign: TextAlign.start,
-                                              decoration: const InputDecoration(
-                                                  hintText: "Search state...",
-                                                  counterText: "",
-                                                  border: InputBorder.none,
-                                                  prefixIcon: Icon(Icons.search)),
-                                            ),
-                                          )
-                                        ],
+                                  padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(context)
+                                          .viewInsets
+                                          .bottom),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        height: screenHeight * 0.06,
+                                        width: screenWidth,
+                                        alignment: Alignment.bottomLeft,
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: AppColor.disableColor)),
+                                        child: TextFormField(
+                                          maxLines: 1,
+                                          maxLength: 60,
+                                          onChanged: (value) {
+                                            tempStateList = model.stateList
+                                                .where((element) => element
+                                                    .toLowerCase()
+                                                    .contains(value
+                                                        .trim()
+                                                        .toLowerCase()))
+                                                .toList();
+                                            setState(() {});
+                                          },
+                                          textAlign: TextAlign.start,
+                                          decoration: const InputDecoration(
+                                              hintText: "Search state...",
+                                              counterText: "",
+                                              border: InputBorder.none,
+                                              prefixIcon: Icon(Icons.search)),
+                                        ),
                                       ),
-                                    ),*/
-                                      body: ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: model.stateList.length,
-                                    itemBuilder: (context, index) => ListTile(
-                                      onTap: () {
-                                        if (model.stateNameTEC.text !=
-                                            model.stateList[index]) {
-                                          model.stateNameTEC.text =
-                                              model.stateList[index];
-                                          model.cityNameTEC.clear();
-                                        }
-                                        Navigator.pop(cxt);
-                                      },
-                                      title: Text(model.stateList[index]),
-                                    ),
-                                  )));
+                                      UiSpacer.verticalSpace(
+                                          context: context, space: 0.02),
+                                      SizedBox(
+                                        height: screenHeight * 0.5,
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          itemCount: tempStateList.length,
+                                          itemBuilder: (context, index) =>
+                                              ListTile(
+                                            onTap: () {
+                                              if (model.stateNameTEC.text !=
+                                                  tempStateList[index]) {
+                                                model.stateNameTEC.text =
+                                                    tempStateList[index];
+                                                model.cityNameTEC.clear();
+                                              } else {
+                                                model.stateNameTEC.text =
+                                                    tempStateList[index];
+                                              }
+                                              model.notifyListeners();
+                                              Navigator.pop(cxt);
+                                            },
+                                            title: Text(tempStateList[index]),
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ));
                             },
                           ).whenComplete(() {
                             // onCreateProfileValueChanged(model);
@@ -1004,57 +1063,72 @@ class _EditGuideProfilePageState extends State<EditGuideProfilePage> {
                               stateId: model.stateNameTEC.text)
                           .then((value) {
                         if (value == true) {
+                          List<String> tempCityList = model.cityList;
+
                           showModalBottomSheet(
-                            shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30)),
+                            isScrollControlled: true,
                             context: context,
                             enableDrag: true,
                             builder: (cxt) {
                               return Padding(
-                                  padding:
-                                      EdgeInsets.only(top: screenHeight * 0.03),
-                                  child: Scaffold(
-                                      /*     appBar: AppBar(
-                                      elevation: 0,
-                                      backgroundColor: Colors.white,
-                                      automaticallyImplyLeading: false,
-                                      title: Column(
-                                        children: [
-                                          Container(
-                                            height: screenHeight * 0.06,
-                                            width: screenWidth,
-                                            alignment: Alignment.bottomLeft,
-                                            decoration: BoxDecoration(
-                                                border: Border.all(
-                                                    color: AppColor.disableColor)),
-                                            child: TextFormField(
-                                              maxLines: 1,
-                                              maxLength: 60,
-                                              textAlign: TextAlign.start,
-                                              decoration: const InputDecoration(
-                                                  hintText: "Search city...",
-                                                  counterText: "",
-                                                  border: InputBorder.none,
-                                                  prefixIcon: Icon(Icons.search)),
-                                            ),
-                                          )
-                                        ],
+                                  padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(context)
+                                          .viewInsets
+                                          .bottom),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        height: screenHeight * 0.06,
+                                        width: screenWidth,
+                                        alignment: Alignment.bottomLeft,
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: AppColor.disableColor)),
+                                        child: TextFormField(
+                                          maxLines: 1,
+                                          maxLength: 60,
+                                          onChanged: (value) {
+                                            tempCityList = model.cityList
+                                                .where((element) => element
+                                                    .toLowerCase()
+                                                    .contains(value
+                                                        .trim()
+                                                        .toLowerCase()))
+                                                .toList();
+                                            setState(() {});
+                                          },
+                                          textAlign: TextAlign.start,
+                                          decoration: const InputDecoration(
+                                              hintText: "Search city...",
+                                              counterText: "",
+                                              border: InputBorder.none,
+                                              prefixIcon: Icon(Icons.search)),
+                                        ),
                                       ),
-                                    ),*/
-                                      body: ListView.builder(
-                                    physics:
-                                        const AlwaysScrollableScrollPhysics(),
-                                    shrinkWrap: true,
-                                    itemCount: model.cityList.length,
-                                    itemBuilder: (context, index) => ListTile(
-                                      onTap: () {
-                                        model.cityNameTEC.text =
-                                            model.cityList[index];
-                                        Navigator.pop(cxt);
-                                      },
-                                      title: Text(model.cityList[index]),
-                                    ),
-                                  )));
+                                      UiSpacer.verticalSpace(
+                                          context: context, space: 0.02),
+                                      SizedBox(
+                                        height: screenHeight * 0.5,
+                                        child: ListView.builder(
+                                          physics:
+                                              const AlwaysScrollableScrollPhysics(),
+                                          shrinkWrap: true,
+                                          itemCount: tempCityList.length,
+                                          itemBuilder: (context, index) =>
+                                              ListTile(
+                                            onTap: () {
+                                              model.cityNameTEC.text =
+                                                  tempCityList[index];
+                                              model.notifyListeners();
+                                              Navigator.pop(cxt);
+                                            },
+                                            title: Text(tempCityList[index]),
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ));
                             },
                           ).whenComplete(() {
                             // onCreateProfileValueChanged(model);

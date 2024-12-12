@@ -18,6 +18,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_pw_validator/flutter_pw_validator.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:stacked/stacked.dart';
+
 import '../../app_constants/app_images.dart';
 import '../../app_constants/app_routes.dart';
 import '../../app_constants/textfield_decoration.dart';
@@ -156,7 +157,7 @@ class _SignUpPageState extends State<SignUpPage> {
         model.isPwValShow = false;
         model.notifyListeners();
       },
-      onChanged: onTextFieldValueChanged(model),
+      // onChanged: onTextFieldValueChanged(model),
       textAlignVertical: TextAlignVertical.center,
       textAlign: TextAlign.start,
       autovalidateMode: AutovalidateMode.disabled,
@@ -193,7 +194,7 @@ class _SignUpPageState extends State<SignUpPage> {
         model.notifyListeners();
       },
       textCapitalization: TextCapitalization.words,
-      onChanged: onTextFieldValueChanged(model),
+      // onChanged: onTextFieldValueChanged(model),
       textAlignVertical: TextAlignVertical.center,
       textAlign: TextAlign.start,
       maxLength: 50,
@@ -234,7 +235,7 @@ class _SignUpPageState extends State<SignUpPage> {
         model.notifyListeners();
       },
       maxLength: 50,
-      onChanged: onTextFieldValueChanged(model),
+      // onChanged: onTextFieldValueChanged(model),
       textAlignVertical: TextAlignVertical.center,
       textAlign: TextAlign.start,
       autovalidateMode: AutovalidateMode.disabled,
@@ -370,7 +371,7 @@ class _SignUpPageState extends State<SignUpPage> {
             validator: (value) {
               return GlobalUtility().validatePassword(value!);
             },
-            onChanged: onTextFieldValueChanged(model),
+            // onChanged: onTextFieldValueChanged(model),
           ),
         ),
       ],
@@ -393,7 +394,7 @@ class _SignUpPageState extends State<SignUpPage> {
           color: AppColor.lightBlack,
           fontFamily: AppFonts.nunitoRegular,
           fontSize: screenHeight * AppSizes().fontSize.simpleFontSize),
-      onChanged: onTextFieldValueChanged(model),
+      // onChanged: onTextFieldValueChanged(model),
       decoration: InputDecoration(
         suffixIcon: IconButton(
           onPressed: () {
@@ -536,7 +537,7 @@ class _SignUpPageState extends State<SignUpPage> {
         ),
         const SizedBox(width: 5),
         Flexible(
-          child: Text("I consent to receiving SMS text messages from Siesta.",
+          child: Text("I consent to receiving SMS text messages from Imerzn.",
               maxLines: 2,
               style: TextStyle(
                   fontFamily: AppFonts.nunitoRegular,
@@ -563,7 +564,8 @@ class _SignUpPageState extends State<SignUpPage> {
                 }
               }
             },
-            isButtonEnable: model.isSigunUpButtonEnable)
+            isButtonEnable: true,
+          )
         : SizedBox(
             width: screenWidth * 0.1,
             child: Center(
@@ -746,7 +748,7 @@ class _SignUpPageState extends State<SignUpPage> {
     Navigator.pushNamed(context, AppRoutes.loginPage);
   }
 
-  onTextFieldValueChanged(RegisterViewModel model) {
+  /*onTextFieldValueChanged(RegisterViewModel model) {
     if (model.emailController.text.isNotEmpty &&
         model.passwordController.text.isNotEmpty &&
         model.firstNameController.text.isNotEmpty &&
@@ -756,8 +758,8 @@ class _SignUpPageState extends State<SignUpPage> {
     } else {
       model.isSigunUpButtonEnable = false;
     }
-    model.notifyListeners();
-  }
+    // model.notifyListeners();
+  }*/
 
   bool validate(RegisterViewModel model) {
     String firstName = model.firstNameController.text;
@@ -891,146 +893,134 @@ class _SignUpPageState extends State<SignUpPage> {
   }
 
   Widget contactField(RegisterViewModel model) {
-    return ValueListenableBuilder(
-        valueListenable: model.counterNotifier,
-        builder: (context, current, child) {
-          return SizedBox(
-            child: TextFormField(
-              controller: model.userPhoneController,
-              autovalidateMode: AutovalidateMode.onUserInteraction,
-              validator: (value) {
-                if (value == "" || value == null) {
-                  model.isSigunUpButtonEnable = false;
-                  model.notifyListeners();
-                  return AppStrings().enterPhoneNumber;
-                } else if (value.trim().isEmpty) {
-                  model.isSigunUpButtonEnable = false;
-                  model.notifyListeners();
-                  return AppStrings().blankSpace;
-                } else if (value.length < 6) {
-                  model.isSigunUpButtonEnable = false;
-                  model.notifyListeners();
-                }
-                return null;
-              },
-              onChanged: (value) {
-                setState(() {
-                  if (value.replaceAll(" ", "") == "") {
-                    model.isSigunUpButtonEnable = false;
-                  } else {
-                    model.isSigunUpButtonEnable = true;
-                  }
-                  onTextFieldValueChanged(model);
-                });
-                model.notifyListeners();
-              },
-              textAlignVertical: TextAlignVertical.center,
-              textAlign: TextAlign.start,
-              maxLength: 16,
-              style: TextStyle(
-                  color: AppColor.lightBlack,
-                  fontFamily: AppFonts.nunitoRegular,
-                  fontSize: screenHeight * AppSizes().fontSize.simpleFontSize),
-              decoration: InputDecoration(
-                hintText: AppStrings().contactNumber,
-                prefixIcon: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          showCountryPicker(
-                            context: context,
-                            showPhoneCode: true,
-                            countryListTheme: CountryListThemeData(
-                              flagSize: 25,
-                              backgroundColor: Colors.white,
-                              textStyle: const TextStyle(
-                                  fontSize: 16, color: Colors.blueGrey),
-                              bottomSheetHeight: 500,
-                              borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(20.0),
-                                topRight: Radius.circular(20.0),
-                              ),
-                              inputDecoration: InputDecoration(
-                                labelText: 'Search',
-                                hintText: 'Start typing to search',
-                                prefixIcon: const Icon(Icons.search),
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: const Color(0xFF8C98A8)
-                                        .withOpacity(0.2),
-                                  ),
-                                ),
-                              ),
-                            ),
-                            onSelect: (Country country) {
-                              model.countryCode = model.countryCode == ""
-                                  ? "+1"
-                                  : '+ ${country.phoneCode}';
-
-                              model.countryCodeIso = model.countryCodeIso == ""
-                                  ? "In"
-                                  : '+ ${country.countryCode}';
-                              model.counterNotifier.notifyListeners();
-                              debugPrint(
-                                  "country.phoneCode --- ${country.phoneCode}-- ${country.countryCode}");
-                            },
-                          );
-                        },
-                        child: Row(
-                          children: [
-                            Padding(
-                              padding:
-                                  const EdgeInsets.only(left: 15, right: 8),
-                              child: Text(model.countryCode == ""
-                                  ? "+1"
-                                  : model.countryCode),
-                            ),
-                            Padding(
-                                padding: const EdgeInsets.only(right: 10),
-                                child: SvgPicture.asset(
-                                    AppImages().svgImages.chevronDown)),
-                          ],
+    return TextFormField(
+      controller: model.userPhoneController,
+      autovalidateMode: AutovalidateMode.onUserInteraction,
+      validator: (value) {
+        if (value == "" || value == null) {
+          model.isSigunUpButtonEnable = false;
+          model.notifyListeners();
+          return AppStrings().enterPhoneNumber;
+        } else if (value.trim().isEmpty) {
+          model.isSigunUpButtonEnable = false;
+          model.notifyListeners();
+          return AppStrings().blankSpace;
+        } else if (value.length < 6) {
+          model.isSigunUpButtonEnable = false;
+          model.notifyListeners();
+        }
+        return null;
+      },
+      onChanged: (value) {
+        setState(() {
+          if (value.replaceAll(" ", "") == "") {
+            model.isSigunUpButtonEnable = false;
+          } else {
+            model.isSigunUpButtonEnable = true;
+          }
+          // onTextFieldValueChanged(model);
+        });
+        model.notifyListeners();
+      },
+      textAlignVertical: TextAlignVertical.center,
+      textAlign: TextAlign.start,
+      maxLength: 16,
+      style: TextStyle(
+          color: AppColor.lightBlack,
+          fontFamily: AppFonts.nunitoRegular,
+          fontSize: screenHeight * AppSizes().fontSize.simpleFontSize),
+      decoration: InputDecoration(
+        hintText: AppStrings().contactNumber,
+        prefixIcon: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              InkWell(
+                onTap: () {
+                  showCountryPicker(
+                    context: context,
+                    showPhoneCode: true,
+                    countryListTheme: CountryListThemeData(
+                      flagSize: 25,
+                      backgroundColor: Colors.white,
+                      textStyle:
+                          const TextStyle(fontSize: 16, color: Colors.blueGrey),
+                      bottomSheetHeight: 500,
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(20.0),
+                        topRight: Radius.circular(20.0),
+                      ),
+                      inputDecoration: InputDecoration(
+                        labelText: 'Search',
+                        hintText: 'Start typing to search',
+                        prefixIcon: const Icon(Icons.search),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: const Color(0xFF8C98A8).withOpacity(0.2),
+                          ),
                         ),
                       ),
-                    ]),
-                counterText: "",
-                hintStyle: TextStyle(
-                    color: AppColor.hintTextColor,
-                    fontFamily: AppFonts.nunitoRegular,
-                    fontSize: MediaQuery.of(context).size.height *
-                        AppSizes().fontSize.simpleFontSize),
-                contentPadding: const EdgeInsets.only(top: 20, bottom: 2),
-                enabledBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: AppColor.fieldBorderColor),
-                    borderRadius: BorderRadius.all(Radius.circular(
-                        MediaQuery.of(context).size.width *
-                            AppSizes().widgetSize.smallBorderRadius))),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColor.fieldEnableColor),
-                ),
-                disabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColor.fieldBorderColor),
-                ),
-                border: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColor.fieldBorderColor),
-                ),
-                errorBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColor.errorBorderColor),
-                ),
-                focusedErrorBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: AppColor.errorBorderColor),
+                    ),
+                    onSelect: (Country country) {
+                      model.countryCode = '+${country.phoneCode}';
+
+                      model.countryCodeIso = country.countryCode;
+
+                      model.notifyListeners();
+                      debugPrint(
+                          "country.phoneCode --- ${country.phoneCode}-- ${country.countryCode}");
+                    },
+                  );
+                },
+                child: Row(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(left: 15, right: 8),
+                      child: Text(
+                          model.countryCode == "" ? "+1" : model.countryCode),
+                    ),
+                    Padding(
+                        padding: const EdgeInsets.only(right: 10),
+                        child: SvgPicture.asset(
+                            AppImages().svgImages.chevronDown)),
+                  ],
                 ),
               ),
-              inputFormatters: <TextInputFormatter>[
-                FilteringTextInputFormatter.digitsOnly
-              ],
-              enableInteractiveSelection: true,
-              textInputAction: TextInputAction.next,
-              keyboardType: TextInputType.number,
-            ),
-          );
-        });
+            ]),
+        counterText: "",
+        hintStyle: TextStyle(
+            color: AppColor.hintTextColor,
+            fontFamily: AppFonts.nunitoRegular,
+            fontSize: MediaQuery.of(context).size.height *
+                AppSizes().fontSize.simpleFontSize),
+        contentPadding: const EdgeInsets.only(top: 20, bottom: 2),
+        enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: AppColor.fieldBorderColor),
+            borderRadius: BorderRadius.all(Radius.circular(
+                MediaQuery.of(context).size.width *
+                    AppSizes().widgetSize.smallBorderRadius))),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColor.fieldEnableColor),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColor.fieldBorderColor),
+        ),
+        border: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColor.fieldBorderColor),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColor.errorBorderColor),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: AppColor.errorBorderColor),
+        ),
+      ),
+      inputFormatters: <TextInputFormatter>[
+        FilteringTextInputFormatter.digitsOnly
+      ],
+      enableInteractiveSelection: true,
+      textInputAction: TextInputAction.next,
+      keyboardType: TextInputType.number,
+    );
   }
 }

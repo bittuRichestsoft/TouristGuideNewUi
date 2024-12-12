@@ -301,10 +301,10 @@ class AppStrings {
   static String generalPlannerDetails = "General Planner Details";
   static String galleryDetails = "Gallery Details";
   static String specialExperience = "Special Experience";
-  static String createGeneral = "Create General";
+  static String createGeneral = "Create Services";
   static String createGallery = "Create Gallery";
   static String createExperience = "Create Experience";
-  static String editGeneral = "Edit General";
+  static String editGeneral = "Edit Services";
   static String editGallery = "Edit Gallery";
   static String editExperience = "Edit Experience";
 

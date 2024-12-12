@@ -1,6 +1,8 @@
+import 'package:Siesta/common_widgets/common_button.dart';
 import 'package:Siesta/view_models/gallery_general_experience_models/post_detail_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:stacked/stacked.dart';
 
@@ -61,7 +63,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                         : AppStrings.specialExperience,
                     context: context),
                 actions: [
-                  if (widget.argData["otherPersonProfile"] == false)
+                  if (widget.argData["otherPersonProfile"] != true)
                     IconButton(
                         onPressed: () async {
                           if (model.postDetail != null) {
@@ -101,6 +103,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
                             // general heading
                             if (type == "general") generalHeadingView(),
 
+                            // guide detail view
+                            guideDetailView(model),
+
                             // title, location
                             titleLocationView(model),
                             UiSpacer.verticalSpace(
@@ -119,9 +124,96 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
                             // description view
                             descriptionView(model),
+
+                            // Meet your localite view
+                            meetLocaliteView(model),
+
+                            // rating and review
+                            reviewAndRating(model),
                           ],
                         ));
         });
+  }
+
+  Widget guideDetailView(PostDetailModel model) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // image
+            CommonImageView.roundNetworkImage(
+              imgUrl: AppImages().dummyImage,
+              height: screenHeight * 0.13,
+              width: screenHeight * 0.13,
+            ),
+            UiSpacer.horizontalSpace(context: context, space: 0.04),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  TextView.headingText(
+                    context: context,
+                    text: "Keria james",
+                    color: AppColor.greyColor600,
+                    textAlign: TextAlign.left,
+                    maxLines: 1,
+                  ),
+                  UiSpacer.verticalSpace(context: context, space: 0.01),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      TextView.mediumText(
+                        context: context,
+                        text: "4.93 (97)",
+                        textColor: AppColor.greyColor600,
+                        textAlign: TextAlign.left,
+                        maxLines: 1,
+                        fontWeight: FontWeight.w400,
+                        textSize: 0.017,
+                      ),
+                      UiSpacer.horizontalSpace(context: context, space: 0.02),
+                      RatingBar.builder(
+                        initialRating: 3,
+                        minRating: 1,
+                        direction: Axis.horizontal,
+                        allowHalfRating: true,
+                        itemCount: 5,
+                        itemSize: screenHeight * 0.023,
+                        unratedColor: Colors.white,
+                        itemBuilder: (context, _) => Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                          size: 10,
+                        ),
+                        onRatingUpdate: (rating) {
+                          print(rating);
+                        },
+                      )
+                    ],
+                  ),
+                  UiSpacer.verticalSpace(context: context, space: 0.01),
+                  TextView.mediumText(
+                    context: context,
+                    text: "Related 4.93 out of 5 from 97 reviews.",
+                    textColor: AppColor.greyColor600,
+                    textAlign: TextAlign.left,
+                    maxLines: 2,
+                    fontWeight: FontWeight.w400,
+                    textSize: 0.017,
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+        UiSpacer.verticalSpace(context: context, space: 0.03),
+      ],
+    );
   }
 
   Widget titleLocationView(PostDetailModel model) {
@@ -133,7 +225,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
           context: context,
           text: model.postDetail?.title ?? "",
           color: AppColor.blackColor,
-          fontSize: screenHeight * 0.026,
+          fontSize: screenHeight * 0.035,
           textAlign: TextAlign.start,
         ),
         UiSpacer.verticalSpace(context: context, space: 0.01),
@@ -298,7 +390,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
           TextView.headingText(
             context: context,
             text: "What you’ll do",
-            color: AppColor.greyColor,
+            color: AppColor.greyColor600,
+            fontSize: screenHeight * 0.028,
           ),
         if (type == "experience")
           UiSpacer.verticalSpace(context: context, space: 0.01),
@@ -310,6 +403,244 @@ class _PostDetailPageState extends State<PostDetailPage> {
           fontWeight: FontWeight.w400,
           textAlign: TextAlign.start,
         ),
+      ],
+    );
+  }
+
+  Widget reviewAndRating(PostDetailModel model) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        UiSpacer.verticalSpace(context: context, space: 0.02),
+
+        TextView.headingText(
+          context: context,
+          text: "Review & Ratings",
+          color: AppColor.greyColor600,
+          fontSize: screenHeight * 0.028,
+        ),
+        UiSpacer.verticalSpace(context: context, space: 0.02),
+
+        // listing
+        ListView.separated(
+          shrinkWrap: true,
+          itemCount: 5,
+          physics: const NeverScrollableScrollPhysics(),
+          itemBuilder: (context, index) => ratingReviewWidget(model),
+          separatorBuilder: (context, index) =>
+              UiSpacer.verticalSpace(context: context, space: 0.02),
+        )
+      ],
+    );
+  }
+
+  Widget ratingReviewWidget(PostDetailModel model) {
+    return Container(
+      padding: EdgeInsets.all(screenWidth * 0.04),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(
+          color: AppColor.greyColor500,
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CommonImageView.roundNetworkImage(
+            imgUrl: AppImages().dummyImage,
+            height: screenHeight * 0.08,
+            width: screenHeight * 0.08,
+          ),
+          UiSpacer.horizontalSpace(context: context, space: 0.04),
+          Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextView.headingText(
+                  context: context,
+                  text: "Keria james",
+                  color: AppColor.greyColor600,
+                  textAlign: TextAlign.left,
+                  maxLines: 1,
+                  fontSize: screenHeight * 0.026,
+                ),
+                UiSpacer.verticalSpace(context: context, space: 0.006),
+                TextView.mediumText(
+                  context: context,
+                  text: "May 2024",
+                  textColor: AppColor.greyColor500,
+                  textSize: 0.016,
+                ),
+                UiSpacer.verticalSpace(context: context, space: 0.006),
+                RatingBar.builder(
+                  initialRating: 3,
+                  minRating: 1,
+                  direction: Axis.horizontal,
+                  allowHalfRating: true,
+                  itemCount: 5,
+                  itemSize: screenHeight * 0.023,
+                  unratedColor: Colors.white,
+                  itemBuilder: (context, _) => Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                    size: 10,
+                  ),
+                  onRatingUpdate: (rating) {
+                    print(rating);
+                  },
+                ),
+                UiSpacer.verticalSpace(context: context, space: 0.006),
+                TextView.mediumText(
+                  context: context,
+                  text: AppStrings().dummyText,
+                  textColor: AppColor.greyColor500,
+                  fontWeight: FontWeight.w400,
+                  maxLines: 6,
+                  textSize: 0.018,
+                  textAlign: TextAlign.left,
+                ),
+                UiSpacer.verticalSpace(context: context, space: 0.02),
+                Text(
+                  "Show more",
+                  style: TextStyle(
+                    fontSize: MediaQuery.of(context).size.height * 0.02,
+                    color: AppColor.greyColor600,
+                    fontWeight: FontWeight.w500,
+                    decoration: TextDecoration.underline,
+                  ),
+                )
+              ],
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget meetLocaliteView(PostDetailModel model) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        UiSpacer.verticalSpace(context: context, space: 0.02),
+
+        Divider(
+          color: AppColor.greyColor500,
+        ),
+        UiSpacer.verticalSpace(context: context, space: 0.02),
+
+        // content
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // image
+            CommonImageView.roundNetworkImage(
+              imgUrl: AppImages().dummyImage,
+              height: screenHeight * 0.1,
+              width: screenHeight * 0.1,
+            ),
+            UiSpacer.horizontalSpace(context: context, space: 0.04),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextView.headingText(
+                    context: context,
+                    text: "Meet your localite, Keria james",
+                    color: AppColor.greyColor600,
+                    textAlign: TextAlign.left,
+                    maxLines: 2,
+                  ),
+                  UiSpacer.verticalSpace(context: context, space: 0.01),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      TextView.mediumText(
+                        context: context,
+                        text: "hosted since 2016",
+                        textColor: AppColor.greyColor500,
+                        textAlign: TextAlign.left,
+                        maxLines: 1,
+                        fontWeight: FontWeight.w400,
+                        textSize: 0.017,
+                      ),
+                      UiSpacer.horizontalSpace(context: context, space: 0.02),
+                      Icon(
+                        Icons.star_rounded,
+                        color: AppColor.greyColor500,
+                        size: 17,
+                      ),
+                      TextView.mediumText(
+                        context: context,
+                        text: " 4.9",
+                        textColor: AppColor.greyColor500,
+                        textAlign: TextAlign.left,
+                        maxLines: 1,
+                        fontWeight: FontWeight.w400,
+                        textSize: 0.017,
+                      ),
+                      UiSpacer.horizontalSpace(context: context, space: 0.02),
+                      Container(
+                        width: 5,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColor.greyColor500,
+                        ),
+                      ),
+                      UiSpacer.horizontalSpace(context: context, space: 0.02),
+                      Expanded(
+                        child: TextView.mediumText(
+                          context: context,
+                          text: " 4 hour",
+                          textColor: AppColor.greyColor500,
+                          textAlign: TextAlign.left,
+                          maxLines: 1,
+                          fontWeight: FontWeight.w500,
+                          textSize: 0.017,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            )
+          ],
+        ),
+        UiSpacer.verticalSpace(context: context, space: 0.02),
+
+        // bio
+        TextView.mediumText(
+          context: context,
+          text: AppStrings().dummyText,
+          textColor: AppColor.greyColor500,
+          textAlign: TextAlign.left,
+          fontWeight: FontWeight.w400,
+          textSize: 0.018,
+        ),
+        UiSpacer.verticalSpace(context: context, space: 0.02),
+
+        // join the experience
+        SizedBox(
+          width: screenWidth,
+          height: screenHeight * 0.06,
+          child: CommonButton.commonNormalButton(
+            context: context,
+            onPressed: () {},
+            text: "Join the Experience",
+            borderRadius: 50,
+            backColor: AppColor.appthemeColor,
+          ),
+        ),
+        UiSpacer.verticalSpace(context: context, space: 0.02),
+        Divider(
+          color: AppColor.greyColor500,
+        )
       ],
     );
   }

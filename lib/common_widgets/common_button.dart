@@ -39,6 +39,28 @@ class CommonButton {
         ),
       );
 
+  static Widget commonLoadingButton({
+    BuildContext? context,
+  }) =>
+      Container(
+        height: MediaQuery.of(context!).size.height *
+            AppSizes().widgetSize.buttonHeight,
+        decoration: BoxDecoration(
+            color: AppColor.appthemeColor,
+            borderRadius: BorderRadius.circular(
+                MediaQuery.of(context).size.width *
+                    AppSizes().widgetSize.smallBorderRadius)),
+        child: Center(
+          child: SizedBox(
+            height: MediaQuery.of(context!).size.height * 0.02,
+            width: MediaQuery.of(context!).size.height * 0.02,
+            child: CircularProgressIndicator(
+              color: Colors.white,
+            ),
+          ),
+        ),
+      );
+
   static Widget commonSendButton(
           {String? text,
           BuildContext? context,
@@ -104,7 +126,8 @@ class CommonButton {
           BuildContext? context,
           VoidCallback? onPressed,
           Color? backColor,
-          Color? textColor}) =>
+          Color? textColor,
+          double? borderRadius}) =>
       SizedBox(
         width: MediaQuery.of(context!).size.width * 0.8,
         height: MediaQuery.of(context).size.height *
@@ -116,7 +139,7 @@ class CommonButton {
               backgroundColor: backColor,
               splashFactory: NoSplash.splashFactory,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(
+                  borderRadius: BorderRadius.circular(borderRadius ??
                       MediaQuery.of(context).size.width *
                           AppSizes().widgetSize.smallBorderRadius))),
           child: Text(
@@ -320,13 +343,15 @@ class CommonButton {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                SvgPicture.asset(
-                  iconPath!,
-                  color: AppColor.hintTextColor,
-                ),
-                SizedBox(
-                  width: 10,
-                ),
+                if (iconPath != null)
+                  SvgPicture.asset(
+                    iconPath,
+                    color: AppColor.hintTextColor,
+                  ),
+                if (iconPath != null)
+                  SizedBox(
+                    width: 10,
+                  ),
                 Text(
                   text.toString(),
                   style: TextStyle(

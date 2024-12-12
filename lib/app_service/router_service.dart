@@ -20,7 +20,7 @@ import 'package:Siesta/view/touristGuideView/tourist_profile_view/review_page.da
 import 'package:Siesta/view/travellerView/about_us/about_us_page.dart';
 import 'package:Siesta/view/travellerView/bookTrip/book_your_trip_page.dart';
 import 'package:Siesta/view/travellerView/create_profile/create_traveller_profile.dart';
-import 'package:Siesta/view/travellerView/find_guide/find_guide_screen_new.dart';
+import 'package:Siesta/view/travellerView/find_guide/find_experience_screen.dart';
 import 'package:Siesta/view/travellerView/find_guide/guide_detail_page.dart';
 import 'package:Siesta/view/travellerView/home/traveller_homepage.dart';
 import 'package:Siesta/view/travellerView/itinerary/itinerary_detail_page.dart';
@@ -174,8 +174,8 @@ Route<dynamic> generateRoute(RouteSettings settings) {
       return MaterialPageRoute(
           builder: (context) => CommonWebViewPage(from: settings.arguments));
 
-    case AppRoutes.findGuideScreenNew:
-      return MaterialPageRoute(builder: (context) => FindGuideScreenNew());
+    case AppRoutes.finfExperienceScreen:
+      return MaterialPageRoute(builder: (context) => FindExperienceScreen());
 
     case AppRoutes.postDetailPage:
       return MaterialPageRoute(
