@@ -161,6 +161,7 @@ class _MyHomePageState extends State<MyApp> {
 
         PreferenceUtil().setWaitingStatus(status);
       } else if (status == 400) {
+        isWaitingS = true;
         GlobalUtility.showToast(context, message);
       } else if (status == 401) {
         GlobalUtility().handleSessionExpire(context);

@@ -9,6 +9,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:shimmer/shimmer.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 
 import '../app_constants/app_fonts.dart';
@@ -45,7 +46,13 @@ class CommonImageView {
             image: DecorationImage(image: imageProvider, fit: BoxFit.cover),
           ),
         ),
-        // placeholder: (context, url) => GlobalUtility.showLoader(context),
+        placeholder: (context, url) => Shimmer.fromColors(
+          baseColor: AppColor.greyColor500.withOpacity(0.2),
+          highlightColor: AppColor.greyColor500,
+          child: Container(
+            color: AppColor.greyColor500,
+          ),
+        ),
         errorWidget: (context, url, error) => Container(
           width: width,
           height: height,
@@ -85,10 +92,14 @@ class CommonImageView {
           height: height,
           decoration: BoxDecoration(
             color: AppColor.appthemeColor,
+            shape: BoxShape.circle,
           ),
           child: Padding(
-            padding: const EdgeInsets.all(30.0),
-            child: SvgPicture.asset(AppImages().svgImages.ivProfilePlaceholder),
+            padding: const EdgeInsets.all(20.0),
+            child: SvgPicture.asset(
+              AppImages().svgImages.ivProfilePlaceholder,
+              color: Colors.white,
+            ),
           ),
         ),
       );

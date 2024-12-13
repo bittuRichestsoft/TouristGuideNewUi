@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:Siesta/app_constants/shared_preferences.dart';
 import 'package:Siesta/response_pojo/custom_pojos/media_type_pojo.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
@@ -14,9 +15,13 @@ import '../../utility/globalUtility.dart';
 enum Status { error, loading, initialised }
 
 class PostDetailModel extends BaseViewModel implements Initialisable {
-  PostDetails? postDetail;
   final String postid;
   PostDetailModel({required this.postid});
+
+  PostDetails? postDetail;
+  List<Rows> similarExperienceList = [];
+
+  String userType = prefs.getString(SharedPreferenceValues.roleName) ?? "";
 
   Status _status = Status.loading;
   Status get status => _status;
@@ -59,6 +64,11 @@ class PostDetailModel extends BaseViewModel implements Initialisable {
               mediaUrl: e.url ?? "",
               mediaType: e.mediaType ?? "image",
               id: e.id!)));
+
+          if (userType == "TRAVELLER") {
+            similarExperienceList =
+                getPostDetailResponse.data?.similarPosts?.rows ?? [];
+          }
         } else if (status == 400) {
           _status = Status.error;
           errorMsg = "Some error occurred";
@@ -87,5 +97,19 @@ class PostDetailModel extends BaseViewModel implements Initialisable {
     } finally {
       notifyListeners();
     }
+  }
+
+  int calculateYear({required String y, required String m}) {
+    int years = int.parse(y);
+    int months = int.parse(m);
+    // Get the current date
+    DateTime now = DateTime.now();
+
+    // Subtract the years and months
+    DateTime updatedDate =
+        DateTime(now.year - years, now.month - months, now.day);
+
+    // Return the year
+    return updatedDate.year;
   }
 }

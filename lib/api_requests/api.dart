@@ -4,10 +4,10 @@
 
 class Api {
   static String get baseUrl {
-    return "https://indeedtraining.in:5006/";
+    // return "https://indeedtraining.in:5006/";
     //  return "https://indeedtraining.in:2223/"; // FOR CHANGES
-    //  return "http://192.168.1.41:3003/";
-    // return "https://imerzn.com:2525/"; // LIVE IP
+    return "http://192.168.1.11:3003/";
+    // return "https://imerzn.com:2525/"; // LIVE BASE URL
   }
 
   // usertype for api request
@@ -149,6 +149,9 @@ class Api {
   // follow and unfollow guide
   static String followGuide = "guide/follow-guide";
   static String unFollowGuide = "guide/unfollow-guide";
+
+  // User search experience
+  static String searchExperience = "user/search-experience";
 }
 
 /// -- ---- --- ---- --- STATUS MEAN --- ---- - - - -- ---- - -- ---

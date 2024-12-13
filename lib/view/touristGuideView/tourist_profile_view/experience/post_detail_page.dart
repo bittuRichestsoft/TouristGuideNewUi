@@ -1,4 +1,5 @@
 import 'package:Siesta/common_widgets/common_button.dart';
+import 'package:Siesta/custom_widgets/custom_textfield.dart';
 import 'package:Siesta/view_models/gallery_general_experience_models/post_detail_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -104,7 +105,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
                             if (type == "general") generalHeadingView(),
 
                             // guide detail view
-                            guideDetailView(model),
+                            if (model.userType == "TRAVELLER")
+                              guideDetailView(model),
 
                             // title, location
                             titleLocationView(model),
@@ -130,6 +132,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
                             // rating and review
                             reviewAndRating(model),
+
+                            // similar experience
+                            similarExperienceView(model),
                           ],
                         ));
         });
@@ -144,7 +149,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
           children: [
             // image
             CommonImageView.roundNetworkImage(
-              imgUrl: AppImages().dummyImage,
+              imgUrl: model.postDetail?.user?.userDetail?.profilePicture ?? "",
               height: screenHeight * 0.13,
               width: screenHeight * 0.13,
             ),
@@ -157,7 +162,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 children: [
                   TextView.headingText(
                     context: context,
-                    text: "Keria james",
+                    text:
+                        "${model.postDetail?.user?.name} ${model.postDetail?.user?.lastName ?? ""}",
                     color: AppColor.greyColor600,
                     textAlign: TextAlign.left,
                     maxLines: 1,
@@ -169,7 +175,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     children: [
                       TextView.mediumText(
                         context: context,
-                        text: "4.93 (97)",
+                        text:
+                            "${double.parse(model.postDetail?.user?.avgRating ?? "0.0").toStringAsFixed(1)} (${model.postDetail?.user?.ratingAndReviews?.length})",
                         textColor: AppColor.greyColor600,
                         textAlign: TextAlign.left,
                         maxLines: 1,
@@ -178,7 +185,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       ),
                       UiSpacer.horizontalSpace(context: context, space: 0.02),
                       RatingBar.builder(
-                        initialRating: 3,
+                        initialRating: double.parse(
+                            model.postDetail?.user?.avgRating ?? "0.0"),
                         minRating: 1,
                         direction: Axis.horizontal,
                         allowHalfRating: true,
@@ -190,22 +198,23 @@ class _PostDetailPageState extends State<PostDetailPage> {
                           color: Colors.amber,
                           size: 10,
                         ),
-                        onRatingUpdate: (rating) {
-                          print(rating);
-                        },
+                        onRatingUpdate: (rating) {},
                       )
                     ],
                   ),
                   UiSpacer.verticalSpace(context: context, space: 0.01),
-                  TextView.mediumText(
-                    context: context,
-                    text: "Related 4.93 out of 5 from 97 reviews.",
-                    textColor: AppColor.greyColor600,
-                    textAlign: TextAlign.left,
-                    maxLines: 2,
-                    fontWeight: FontWeight.w400,
-                    textSize: 0.017,
-                  ),
+                  if ((model.postDetail?.user?.ratingAndReviews!.length ?? 0) >
+                      0)
+                    TextView.mediumText(
+                      context: context,
+                      text:
+                          "Related ${double.parse(model.postDetail?.user?.avgRating ?? "0.0")} out of 5 from ${model.postDetail?.user?.ratingAndReviews!.length ?? "0"} reviews.",
+                      textColor: AppColor.greyColor600,
+                      textAlign: TextAlign.left,
+                      maxLines: 2,
+                      fontWeight: FontWeight.w400,
+                      textSize: 0.017,
+                    ),
                 ],
               ),
             )
@@ -425,9 +434,26 @@ class _PostDetailPageState extends State<PostDetailPage> {
         // listing
         ListView.separated(
           shrinkWrap: true,
-          itemCount: 5,
+          itemCount: model.postDetail?.user?.ratingAndReviews?.length ?? 0,
           physics: const NeverScrollableScrollPhysics(),
-          itemBuilder: (context, index) => ratingReviewWidget(model),
+          itemBuilder: (context, index) => ratingReviewWidget(
+            profileImg: model.postDetail?.user?.ratingAndReviews?[index]
+                    .profilePicture ??
+                "",
+            avgRating: double.parse(
+                (model.postDetail?.user?.ratingAndReviews?[index].ratings ?? 0)
+                    .toString()),
+            fullName:
+                model.postDetail?.user?.ratingAndReviews?[index].userName ?? "",
+            hostSince:
+                "2025" /*model.calculateYear(
+                y: model.postDetail?.user?.userDetail?.hostSinceYears ?? "0",
+                m: model.postDetail?.user?.userDetail?.hostSinceMonths ?? "0")*/
+            ,
+            reviewText: model
+                    .postDetail?.user?.ratingAndReviews?[index].reviewMessage ??
+                "",
+          ),
           separatorBuilder: (context, index) =>
               UiSpacer.verticalSpace(context: context, space: 0.02),
         )
@@ -435,7 +461,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
     );
   }
 
-  Widget ratingReviewWidget(PostDetailModel model) {
+  Widget ratingReviewWidget(
+      {required String profileImg,
+      required String fullName,
+      required String hostSince,
+      required double avgRating,
+      required String reviewText}) {
     return Container(
       padding: EdgeInsets.all(screenWidth * 0.04),
       decoration: BoxDecoration(
@@ -448,7 +479,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           CommonImageView.roundNetworkImage(
-            imgUrl: AppImages().dummyImage,
+            imgUrl: profileImg,
             height: screenHeight * 0.08,
             width: screenHeight * 0.08,
           ),
@@ -460,7 +491,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
               children: [
                 TextView.headingText(
                   context: context,
-                  text: "Keria james",
+                  text: fullName,
                   color: AppColor.greyColor600,
                   textAlign: TextAlign.left,
                   maxLines: 1,
@@ -469,13 +500,13 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 UiSpacer.verticalSpace(context: context, space: 0.006),
                 TextView.mediumText(
                   context: context,
-                  text: "May 2024",
+                  text: hostSince,
                   textColor: AppColor.greyColor500,
                   textSize: 0.016,
                 ),
                 UiSpacer.verticalSpace(context: context, space: 0.006),
                 RatingBar.builder(
-                  initialRating: 3,
+                  initialRating: avgRating,
                   minRating: 1,
                   direction: Axis.horizontal,
                   allowHalfRating: true,
@@ -494,23 +525,13 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 UiSpacer.verticalSpace(context: context, space: 0.006),
                 TextView.mediumText(
                   context: context,
-                  text: AppStrings().dummyText,
+                  text: reviewText,
                   textColor: AppColor.greyColor500,
                   fontWeight: FontWeight.w400,
                   maxLines: 6,
                   textSize: 0.018,
                   textAlign: TextAlign.left,
                 ),
-                UiSpacer.verticalSpace(context: context, space: 0.02),
-                Text(
-                  "Show more",
-                  style: TextStyle(
-                    fontSize: MediaQuery.of(context).size.height * 0.02,
-                    color: AppColor.greyColor600,
-                    fontWeight: FontWeight.w500,
-                    decoration: TextDecoration.underline,
-                  ),
-                )
               ],
             ),
           )
@@ -537,7 +558,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
           children: [
             // image
             CommonImageView.roundNetworkImage(
-              imgUrl: AppImages().dummyImage,
+              imgUrl: model.postDetail?.user?.userDetail?.profilePicture ?? "",
               height: screenHeight * 0.1,
               width: screenHeight * 0.1,
             ),
@@ -550,7 +571,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
                 children: [
                   TextView.headingText(
                     context: context,
-                    text: "Meet your localite, Keria james",
+                    text:
+                        "Meet your localite, ${model.postDetail?.user?.name} ${model.postDetail?.user?.lastName}",
                     color: AppColor.greyColor600,
                     textAlign: TextAlign.left,
                     maxLines: 2,
@@ -562,7 +584,8 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     children: [
                       TextView.mediumText(
                         context: context,
-                        text: "hosted since 2016",
+                        text:
+                            "Host since ${model.calculateYear(y: model.postDetail?.user?.userDetail?.hostSinceYears ?? "0", m: model.postDetail?.user?.userDetail?.hostSinceMonths ?? "0")}",
                         textColor: AppColor.greyColor500,
                         textAlign: TextAlign.left,
                         maxLines: 1,
@@ -577,14 +600,15 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       ),
                       TextView.mediumText(
                         context: context,
-                        text: " 4.9",
+                        text:
+                            " ${double.parse(model.postDetail?.user?.avgRating ?? "0.0").toStringAsFixed(1)}",
                         textColor: AppColor.greyColor500,
                         textAlign: TextAlign.left,
                         maxLines: 1,
                         fontWeight: FontWeight.w400,
                         textSize: 0.017,
                       ),
-                      UiSpacer.horizontalSpace(context: context, space: 0.02),
+                      /* UiSpacer.horizontalSpace(context: context, space: 0.02),
                       Container(
                         width: 5,
                         height: 5,
@@ -597,14 +621,14 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       Expanded(
                         child: TextView.mediumText(
                           context: context,
-                          text: " 4 hour",
+                          text: " ${model.postDetail?.user?.userDetail?.}",
                           textColor: AppColor.greyColor500,
                           textAlign: TextAlign.left,
                           maxLines: 1,
                           fontWeight: FontWeight.w500,
                           textSize: 0.017,
                         ),
-                      ),
+                      ),*/
                     ],
                   ),
                 ],
@@ -617,7 +641,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
         // bio
         TextView.mediumText(
           context: context,
-          text: AppStrings().dummyText,
+          text: model.postDetail?.user?.userDetail?.bio ?? "",
           textColor: AppColor.greyColor500,
           textAlign: TextAlign.left,
           fontWeight: FontWeight.w400,
@@ -631,7 +655,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
           height: screenHeight * 0.06,
           child: CommonButton.commonNormalButton(
             context: context,
-            onPressed: () {},
+            onPressed: () {
+              showRequestInfoSheet(model);
+            },
             text: "Join the Experience",
             borderRadius: 50,
             backColor: AppColor.appthemeColor,
@@ -642,6 +668,185 @@ class _PostDetailPageState extends State<PostDetailPage> {
           color: AppColor.greyColor500,
         )
       ],
+    );
+  }
+
+  Widget similarExperienceView(PostDetailModel model) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        UiSpacer.verticalSpace(context: context, space: 0.04),
+
+        // Similar experience title
+        TextView.headingText(
+          context: context,
+          text: "Similar experience",
+          color: AppColor.greyColor600,
+          fontSize: screenHeight * 0.028,
+        ),
+        UiSpacer.verticalSpace(context: context, space: 0.02),
+
+        // listing
+        ListView.separated(
+          shrinkWrap: true,
+          itemCount: model.similarExperienceList.length,
+          physics: const NeverScrollableScrollPhysics(),
+          // itemBuilder: (context, index) => CustomTravellerExperienceTile(),
+          itemBuilder: (context, index) => Container(),
+          separatorBuilder: (context, index) =>
+              UiSpacer.verticalSpace(context: context, space: 0.02),
+        )
+      ],
+    );
+  }
+
+  void showRequestInfoSheet(PostDetailModel model) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(20),
+        topRight: Radius.circular(20),
+      )),
+      constraints: BoxConstraints(
+        maxHeight: screenHeight * 0.8,
+      ),
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setModelState) {
+            return Padding(
+              padding: EdgeInsets.only(
+                left: screenWidth * 0.04,
+                right: screenWidth * 0.04,
+                top: screenWidth * 0.04,
+                bottom: MediaQuery.of(context).viewInsets.bottom,
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // request info text
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        // request info
+                        TextView.headingText(
+                          context: context,
+                          text: "Request Info",
+                          color: AppColor.greyColor600,
+                        ),
+
+                        InkWell(
+                          onTap: () {
+                            Navigator.pop(context);
+                          },
+                          child: Icon(
+                            Icons.close,
+                            color: AppColor.greyColor600,
+                          ),
+                        )
+                      ],
+                    ),
+                    UiSpacer.verticalSpace(context: context, space: 0.01),
+
+                    // request info desc
+                    TextView.mediumText(
+                      context: context,
+                      text:
+                          "Your Dream Destination Awaits: Join Your Adventure Today!",
+                      textColor: AppColor.greyColor500,
+                      textAlign: TextAlign.start,
+                      textSize: 0.016,
+                    ),
+                    UiSpacer.verticalSpace(context: context, space: 0.02),
+
+                    Row(
+                      children: [
+                        // first and last name
+                        Expanded(
+                          child: CustomTextField(
+                            headingText: "First Name",
+                            readOnly: true,
+                            isFilled: true,
+                            hintText: "Enter first name",
+                          ),
+                        ),
+                        UiSpacer.horizontalSpace(context: context, space: 0.04),
+                        Expanded(
+                          child: CustomTextField(
+                            headingText: "Last Name",
+                            readOnly: true,
+                            isFilled: true,
+                            hintText: "Enter last name",
+                          ),
+                        )
+                      ],
+                    ),
+                    UiSpacer.verticalSpace(context: context, space: 0.02),
+
+                    // location
+                    CustomTextField(
+                      headingText: "Location",
+                      hintText: "Enter location",
+                      readOnly: true,
+                      isFilled: true,
+                    ),
+                    UiSpacer.verticalSpace(context: context, space: 0.02),
+
+                    // date and time
+                    Row(
+                      children: [
+                        // first and last name
+                        Expanded(
+                          child: CustomTextField(
+                            headingText: "Start Date",
+                            hintText: "Pick date",
+                            suffixIconPath: AppImages().svgImages.icCalendar,
+                          ),
+                        ),
+                        UiSpacer.horizontalSpace(context: context, space: 0.04),
+                        Expanded(
+                          child: CustomTextField(
+                            headingText: "Start Time",
+                            hintText: "Pick time",
+                            suffixIconPath: AppImages().svgImages.icClock,
+                          ),
+                        )
+                      ],
+                    ),
+                    UiSpacer.verticalSpace(context: context, space: 0.02),
+
+                    // notes
+                    CustomTextField(
+                      headingText: "Notes",
+                      hintText: "Give description (100 to 180 words)",
+                      minLines: 6,
+                      maxLines: 6,
+                    ),
+                    UiSpacer.verticalSpace(context: context, space: 0.02),
+
+                    // save button
+                    SizedBox(
+                      width: screenWidth,
+                      child: CommonButton.commonNormalButton(
+                        context: context,
+                        borderRadius: 50,
+                        text: "Save",
+                        onPressed: () {},
+                        backColor: AppColor.appthemeColor,
+                      ),
+                    ),
+                    UiSpacer.verticalSpace(context: context, space: 0.02),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 

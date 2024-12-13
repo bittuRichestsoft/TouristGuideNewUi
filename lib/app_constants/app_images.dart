@@ -57,7 +57,9 @@ class PngImages {
   String closeCircle = "assets/pngFiles/closeCircle.png";
   String icAppLogo = "assets/pngFiles/icAppLogo.png";
   String ivGroupImg = "assets/pngFiles/ivGroupImg.png";
+
   String icCustomMainMarker = "assets/pngFiles/icCustomMainMarker.png";
+  String icDefaultMarker = "assets/pngFiles/icDefaultMarker.png";
 }
 
 class SvgImages {
