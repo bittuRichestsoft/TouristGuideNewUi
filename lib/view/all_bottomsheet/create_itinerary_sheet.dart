@@ -8,9 +8,8 @@ import 'package:Siesta/app_constants/textfield_decoration.dart';
 import 'package:Siesta/common_widgets/common_button.dart';
 import 'package:Siesta/common_widgets/common_textview.dart';
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
-import 'package:Siesta/view_models/guide_models/guideReceivedBookingModel.dart';
-import 'package:flutter/material.dart';
 import 'package:Siesta/utility/globalUtility.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:html_editor_enhanced/html_editor.dart';
 
@@ -54,10 +53,11 @@ class _CreateItineraryPageState extends State<CreateItineraryPage> {
           .guideReceievedBooking_Model
           .guideReceivedBookingList[widget.itemSelected]
           .firstName;
-      widget.guideReceievedBooking_Model.emailController.text = widget
-          .guideReceievedBooking_Model
-          .guideReceivedBookingList[widget.itemSelected]
-          .email;
+      widget.guideReceievedBooking_Model.emailController.text = /*widget
+              .guideReceievedBooking_Model
+              .guideReceivedBookingList[widget.itemSelected]
+              .email ??*/
+          "";
       if (widget.guideReceievedBooking_Model
               .guideReceivedBookingList[widget.itemSelected].itinerary !=
           null) {

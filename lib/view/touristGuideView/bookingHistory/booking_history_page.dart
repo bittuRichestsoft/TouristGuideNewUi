@@ -9,9 +9,9 @@ import 'package:Siesta/app_constants/app_strings.dart';
 import 'package:Siesta/common_widgets/common_textview.dart';
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
 import 'package:Siesta/utility/globalUtility.dart';
+import 'package:Siesta/view_models/guide_models/guideReceivedBookingModel.dart';
 import 'package:flutter/material.dart';
 import 'package:stacked/stacked.dart';
-import 'package:Siesta/view_models/guide_models/guideReceivedBookingModel.dart';
 
 class BookingHistoryScreen extends StatefulWidget {
   const BookingHistoryScreen({Key? key}) : super(key: key);
@@ -365,36 +365,26 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                 alignment: WrapAlignment.start,
                 children: [
                   ListTile(
-                      contentPadding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.02,
-                          vertical: screenWidth * 0.02),
-                      leading: profileImage(
-                          model.guideReceivedBookingList[index].travellerDetails != null &&
-                                  model.guideReceivedBookingList.length > 0
-                              ? model.guideReceivedBookingList[index]
-                                          .travellerDetails!.userDetail !=
-                                      null
-                                  ? model
-                                      .guideReceivedBookingList[index]
-                                      .travellerDetails!
-                                      .userDetail!
-                                      .profilePicture
-                                  : ""
-                              : ""),
-                      title: Transform.translate(
-                        offset: Offset(-8, 0),
-                        child: TextView.normalText(
-                            textColor: AppColor.appthemeColor,
-                            textSize: AppSizes().fontSize.simpleFontSize,
-                            fontFamily: AppFonts.nunitoBold,
-                            text: model.guideReceivedBookingList.length > 0
-                                ? GlobalUtility().firstLetterCapital(
-                                    "${model.guideReceivedBookingList[index].firstName} ${model.guideReceivedBookingList[index].lastName}")
-                                : "",
-                            context: context),
-                      ),
-                      isThreeLine: false,
-                      trailing: (model.guideReceivedBookingList[index].isCompleted == 0 &&
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.02,
+                        vertical: screenWidth * 0.02),
+                    leading: profileImage(model.guideReceivedBookingList[index]
+                            .user!.userDetail!.profilePicture ??
+                        ""),
+                    title: Transform.translate(
+                      offset: Offset(-8, 0),
+                      child: TextView.normalText(
+                          textColor: AppColor.appthemeColor,
+                          textSize: AppSizes().fontSize.simpleFontSize,
+                          fontFamily: AppFonts.nunitoBold,
+                          text: model.guideReceivedBookingList.length > 0
+                              ? GlobalUtility().firstLetterCapital(
+                                  "${model.guideReceivedBookingList[index].firstName} ${model.guideReceivedBookingList[index].lastName}")
+                              : "",
+                          context: context),
+                    ),
+                    isThreeLine: false,
+                    /*trailing: (model.guideReceivedBookingList[index].isCompleted == 0 &&
                               model.guideReceivedBookingList[index].finalPaid ==
                                   0 &&
                               model.guideReceivedBookingList[index].initialPaid !=
@@ -412,7 +402,8 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                                       ? buttonContainer(AppColor.completedStatusBGColor, "ongoing", AppColor.completedStatusColor)
                                       : (model.guideReceivedBookingList[index].status == 0 || model.guideReceivedBookingList[index].status == 2 || model.guideReceivedBookingList[index].status == 6 || model.guideReceivedBookingList[index].status == 8)
                                           ? buttonContainer(AppColor.completedStatusBGColor, "ongoing", AppColor.completedStatusColor)
-                                          : buttonContainer(AppColor.completedStatusBGColor, "Completed", AppColor.completedStatusColor)),
+                                          : buttonContainer(AppColor.completedStatusBGColor, "Completed", AppColor.completedStatusColor)*/
+                  ),
                   Divider(
                     color: AppColor.textfieldborderColor,
                     height: 2,
@@ -436,12 +427,9 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                             textColor: AppColor.textfieldColor,
                             textSize: AppSizes().fontSize.mediumFontSize,
                             fontFamily: AppFonts.nunitoMedium,
-                            text: model.guideReceivedBookingList.length > 0 &&
-                                    model.guideReceivedBookingList[index]
-                                            .country !=
-                                        null
-                                ? " ${GlobalUtility().firstLetterCapital(model.guideReceivedBookingList[index].country.toString())} ${GlobalUtility().firstLetterCapital(model.guideReceivedBookingList[index].state.toString())} ${model.guideReceivedBookingList[index].city!.length != 0 ? GlobalUtility().firstLetterCapital(model.guideReceivedBookingList[index].city.toString()) : ""}"
-                                : "",
+                            text: model
+                                    .guideReceivedBookingList[index].location ??
+                                "",
                             context: context)),
                     isThreeLine: false,
                     trailing: TextView.normalText(
@@ -449,7 +437,7 @@ class _BookingHistoryScreenState extends State<BookingHistoryScreen> {
                         textSize: AppSizes().fontSize.mediumFontSize,
                         fontFamily: AppFonts.nunitoMedium,
                         text:
-                            "${model.guideReceivedBookingList.length > 0 ? model.guideReceivedBookingList[index].bookingStart : ""} - ${model.guideReceivedBookingList.length > 0 ? model.guideReceivedBookingList[index].bookingEnd : ""}",
+                            "${model.guideReceivedBookingList.length > 0 ? model.guideReceivedBookingList[index].startDate : ""} - ${model.guideReceivedBookingList.length > 0 ? model.guideReceivedBookingList[index].endDate : ""}",
                         context: context),
                   ),
                   UiSpacer.verticalSpace(

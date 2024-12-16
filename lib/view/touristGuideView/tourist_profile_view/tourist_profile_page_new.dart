@@ -214,11 +214,16 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
           text: "Create Experience",
           iconPath: AppImages().svgImages.icAdd,
           onPressed: () async {
-            var backData = await Navigator.pushNamed(
-                context, AppRoutes.createPostPage,
-                arguments: {"type": "experience", "screenType": "create"});
-            if (backData != null) {
-              model.getExperiencePosts();
+            if (model.isProfileVerified == true) {
+              var backData = await Navigator.pushNamed(
+                  context, AppRoutes.createPostPage,
+                  arguments: {"type": "experience", "screenType": "create"});
+              if (backData != null) {
+                model.getExperiencePosts();
+              }
+            } else {
+              GlobalUtility.showToast(context,
+                  "Verification in progress: Profile not yet verified by admin");
             }
           },
         ),
@@ -231,11 +236,16 @@ class _TouristProfilePageNewState extends State<TouristProfilePageNew> {
             text: "Miscellaneous Services",
             iconPath: AppImages().svgImages.icAdd,
             onPressed: () async {
-              var backData = await Navigator.pushNamed(
-                  context, AppRoutes.createPostPage,
-                  arguments: {"type": "general", "screenType": "create"});
-              if (backData != null) {
-                model.getGeneralPosts();
+              if (model.isProfileVerified == true) {
+                var backData = await Navigator.pushNamed(
+                    context, AppRoutes.createPostPage,
+                    arguments: {"type": "general", "screenType": "create"});
+                if (backData != null) {
+                  model.getGeneralPosts();
+                }
+              } else {
+                GlobalUtility.showToast(context,
+                    "Verification in progress: Profile not yet verified by admin");
               }
             },
           ),

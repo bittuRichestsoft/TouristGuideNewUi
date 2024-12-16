@@ -43,12 +43,10 @@ class LoginViewModel extends BaseViewModel {
   generateRandomNumber() {
     var rng = Random();
     for (var i = 0; i < 1; i++) {
-      firstNumber = rng.nextInt(100);
-      debugPrint("firstNumber --- $firstNumber");
+      firstNumber = rng.nextInt(19) + 1;
     }
     for (var i = 1; i < 2; i++) {
-      secNumber = rng.nextInt(100);
-      debugPrint("secNumber --- $secNumber");
+      secNumber = rng.nextInt(19) + 1;
     }
     notifyListeners();
   }
@@ -56,94 +54,119 @@ class LoginViewModel extends BaseViewModel {
   //LOGIN
   void processLogin(viewContext) async {
     setBusy(true);
-    // generateRandomNumber();
+    generateRandomNumber();
     notifyListeners();
     if (await GlobalUtility.isConnected()) {
-      // captchaDialog(viewContext);
-      loginApi(viewContext);
+      captchaDialog(viewContext);
+      // loginApi(viewContext);
     } else {
       GlobalUtility.showToast(viewContext, AppStrings().INTERNET);
     }
   }
 
   loginApi(viewContext) async {
-    if (isVerified == true) {
-      captchaController.clear();
-      GlobalUtility().showLoader(viewContext);
-      Response apiResponse = await _authRequest.loginApi(
-        email: emailController.text,
-        password: passwordController.text,
-        context: viewContext,
-      );
-      debugPrint("Login Response:- ${apiResponse.body}");
-      Map jsonData = jsonDecode(apiResponse.body);
-      var status = jsonData['statusCode'];
-      var message = jsonData['message'];
-      String dataMap = jsonEncode(jsonData['data']);
-      var datamapValue = jsonDecode(dataMap);
-      Navigator.pop(viewContext);
-      if (status == 200) {
+    try{
+      if (isVerified == true) {
+        setBusy(true);
         captchaController.clear();
-        setBusy(false);
-        notifyListeners();
-        var roleName = jsonData['data']['role_name'];
-        var document = apiResponse.body.toString();
-        if (datamapValue.containsKey('access_token')) {
-          if (roleName == Api.guideRoleName) {
-            GuideLoginResponse loginResponse =
-                guideLoginResponseFromJson(apiResponse.body.toString());
-            PreferenceUtil().setToken(loginResponse.data!.accessToken!);
-            PreferenceUtil().setGuideNotificationSetting(
-                loginResponse.data!.notificationStatus.toString());
-            PreferenceUtil()
-                .setCountryCode(loginResponse.data!.countryCode.toString());
-            PreferenceUtil().setIdProof(document);
-            debugPrint("My Phone : ${loginResponse.data!.phone}");
-            prefs.setString(SharedPreferenceValues.phone,
-                loginResponse.data!.phone.toString());
-            PreferenceUtil().setUserData(
+        // GlobalUtility().showLoader(viewContext);
+        Response apiResponse = await _authRequest.loginApi(
+          email: emailController.text,
+          password: passwordController.text,
+          context: viewContext,
+        );
+        debugPrint("Login Response:- ${apiResponse.body}");
+        Map jsonData = jsonDecode(apiResponse.body);
+        var status = jsonData['statusCode'];
+        var message = jsonData['message'];
+        String dataMap = jsonEncode(jsonData['data']);
+        var datamapValue = jsonDecode(dataMap);
+        // Navigator.pop(viewContext);
+        if (status == 200) {
+          captchaController.clear();
+          setBusy(false);
+          notifyListeners();
+          var roleName = jsonData['data']['role_name'];
+          var document = apiResponse.body.toString();
+          if (datamapValue.containsKey('access_token')) {
+            if (roleName == Api.guideRoleName) {
+              GuideLoginResponse loginResponse =
+              guideLoginResponseFromJson(apiResponse.body.toString());
+              PreferenceUtil().setToken(loginResponse.data!.accessToken!);
+              PreferenceUtil().setGuideNotificationSetting(
+                  loginResponse.data!.notificationStatus.toString());
+              PreferenceUtil()
+                  .setCountryCode(loginResponse.data!.countryCode.toString());
+              PreferenceUtil().setIdProof(document);
+              debugPrint("My Phone : ${loginResponse.data!.phone}");
+              prefs.setString(SharedPreferenceValues.phone,
+                  loginResponse.data!.phone.toString());
+              PreferenceUtil().setUserData(
+                  loginResponse.data!.name.toString(),
+                  loginResponse.data!.lastName.toString(),
+                  loginResponse.data!.id ?? 0,
+                  loginResponse.data!.email.toString(),
+                  loginResponse.data!.roleName.toString(),
+                  loginResponse.data!.phone.toString(),
+                  loginResponse.data!.profilePicture.toString(),
+                  loginResponse.data!.pincode.toString(),
+                  loginResponse.data!.availability.toString(),
+                  false,
+                  "");
+              PreferenceUtil().setWaitingStatus(
+                  loginResponse.data!.waitingList != null
+                      ? loginResponse.data!.waitingList!
+                      : false);
+
+              PreferenceUtil().setGuideLocationDetails(
+                  loginResponse.data!.country.toString(),
+                  loginResponse.data!.state.toString(),
+                  loginResponse.data!.city.toString());
+
+              PreferenceUtil().setGuideBio(
+                loginResponse.data!.bio.toString(),
+              );
+              successDialog("home-guide", viewContext, message,
+                  loginResponse.data!.waitingList!);
+            } else {
+              var accessToken = jsonData['data']['access_token'];
+              var profile_picture = jsonData['data']['profile_picture'];
+              var notificationStatus = jsonData['data']['notification_status'];
+              var pincode = jsonData['data']['pincode'];
+
+              LoginResponse loginResponse =
+              loginResponseFromJson(apiResponse.body.toString());
+              PreferenceUtil().setToken(accessToken);
+              PreferenceUtil().setWaitingStatus(
+                  loginResponse.data!.waitingList != null
+                      ? loginResponse.data!.waitingList!
+                      : false);
+
+              PreferenceUtil()
+                  .setGuideNotificationSetting(notificationStatus.toString());
+              PreferenceUtil().setUserData(
                 loginResponse.data!.name.toString(),
                 loginResponse.data!.lastName.toString(),
-                loginResponse.data!.id ?? 0,
+                loginResponse.data!.id!,
                 loginResponse.data!.email.toString(),
                 loginResponse.data!.roleName.toString(),
                 loginResponse.data!.phone.toString(),
-                loginResponse.data!.profilePicture.toString(),
-                loginResponse.data!.pincode.toString(),
-                loginResponse.data!.availability.toString(),
+                profile_picture ?? "",
+                pincode.toString(),
+                "",
                 false,
-                "");
-            PreferenceUtil().setWaitingStatus(
-                loginResponse.data!.waitingList != null
-                    ? loginResponse.data!.waitingList!
-                    : false);
-
-            PreferenceUtil().setGuideLocationDetails(
-                loginResponse.data!.country.toString(),
-                loginResponse.data!.state.toString(),
-                loginResponse.data!.city.toString());
-
-            PreferenceUtil().setGuideBio(
-              loginResponse.data!.bio.toString(),
-            );
-            successDialog("home-guide", viewContext, message,
-                loginResponse.data!.waitingList!);
+                loginResponse.data!.email.toString(),
+              );
+              PreferenceUtil().setTravelerLocationDetails(
+                  loginResponse.data!.country.toString(),
+                  loginResponse.data!.state.toString(),
+                  loginResponse.data!.city.toString());
+              successDialog("home-traveller", viewContext, message,
+                  loginResponse.data!.waitingList!);
+            }
           } else {
-            var accessToken = jsonData['data']['access_token'];
-            var profile_picture = jsonData['data']['profile_picture'];
-            var notificationStatus = jsonData['data']['notification_status'];
-            var pincode = jsonData['data']['pincode'];
-
             LoginResponse loginResponse =
-                loginResponseFromJson(apiResponse.body.toString());
-            PreferenceUtil().setToken(accessToken);
-            PreferenceUtil().setWaitingStatus(
-                loginResponse.data!.waitingList != null
-                    ? loginResponse.data!.waitingList!
-                    : false);
-
-            PreferenceUtil()
-                .setGuideNotificationSetting(notificationStatus.toString());
+            loginResponseFromJson(apiResponse.body.toString());
             PreferenceUtil().setUserData(
               loginResponse.data!.name.toString(),
               loginResponse.data!.lastName.toString(),
@@ -151,68 +174,48 @@ class LoginViewModel extends BaseViewModel {
               loginResponse.data!.email.toString(),
               loginResponse.data!.roleName.toString(),
               loginResponse.data!.phone.toString(),
-              profile_picture ?? "",
-              pincode.toString(),
+              "",
+              "",
               "",
               false,
               loginResponse.data!.email.toString(),
             );
-            PreferenceUtil().setTravelerLocationDetails(
-                loginResponse.data!.country.toString(),
-                loginResponse.data!.state.toString(),
-                loginResponse.data!.city.toString());
-            successDialog("home-traveller", viewContext, message,
-                loginResponse.data!.waitingList!);
-          }
-        } else {
-          LoginResponse loginResponse =
-              loginResponseFromJson(apiResponse.body.toString());
-          PreferenceUtil().setUserData(
-            loginResponse.data!.name.toString(),
-            loginResponse.data!.lastName.toString(),
-            loginResponse.data!.id!,
-            loginResponse.data!.email.toString(),
-            loginResponse.data!.roleName.toString(),
-            loginResponse.data!.phone.toString(),
-            "",
-            "",
-            "",
-            false,
-            loginResponse.data!.email.toString(),
-          );
 
-          PreferenceUtil().setWaitingStatus(
-              loginResponse.data!.waitingList != null
-                  ? loginResponse.data!.waitingList!
-                  : false);
-          successDialog(
-              loginResponse.data!.roleName == Api.travellerRoleName
-                  ? "login-traveller"
-                  : "login-guide",
-              viewContext,
-              message,
-              loginResponse.data!.waitingList != null
-                  ? loginResponse.data!.waitingList!
-                  : false);
+            PreferenceUtil().setWaitingStatus(
+                loginResponse.data!.waitingList != null
+                    ? loginResponse.data!.waitingList!
+                    : false);
+            successDialog(
+                loginResponse.data!.roleName == Api.travellerRoleName
+                    ? "login-traveller"
+                    : "login-guide",
+                viewContext,
+                message,
+                loginResponse.data!.waitingList != null
+                    ? loginResponse.data!.waitingList!
+                    : false);
+          }
+        } else if (status == 400) {
+          setBusy(false);
+          notifyListeners();
+          GlobalUtility.showToast(viewContext, message);
+        } else if (status == 500) {
+          setBusy(false);
+          notifyListeners();
+          GlobalUtility.showToast(viewContext, message);
+        } else if (status == 503) {
+          setBusy(false);
+          notifyListeners();
+          GlobalUtility.showToast(viewContext, message);
+        } else {
+          setBusy(false);
+          GlobalUtility.showToast(viewContext, message);
         }
-      } else if (status == 400) {
-        setBusy(false);
-        notifyListeners();
-        GlobalUtility.showToast(viewContext, message);
-      } else if (status == 500) {
-        setBusy(false);
-        notifyListeners();
-        GlobalUtility.showToast(viewContext, message);
-      } else if (status == 503) {
-        setBusy(false);
-        notifyListeners();
-        GlobalUtility.showToast(viewContext, message);
       } else {
-        setBusy(false);
-        GlobalUtility.showToast(viewContext, message);
+        GlobalUtility.showToast(viewContext, "Not Verified.");
       }
-    } else {
-      GlobalUtility.showToast(viewContext, "Not Verified.");
+    }catch(e){}finally{
+      setBusy(false);
     }
   }
 

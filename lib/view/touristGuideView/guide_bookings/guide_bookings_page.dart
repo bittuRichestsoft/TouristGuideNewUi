@@ -12,13 +12,13 @@ import 'package:Siesta/common_widgets/common_textview.dart';
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
 import 'package:Siesta/utility/globalUtility.dart';
 import 'package:Siesta/utility/preference_util.dart';
-import 'package:Siesta/view/all_bottomsheet/create_itinerary_sheet.dart';
 import 'package:Siesta/view/all_bottomsheet/range_selector_datesheet.dart';
+import 'package:Siesta/view_models/guide_models/guideReceivedBookingModel.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animated_dialog/flutter_animated_dialog.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:stacked/stacked.dart';
-import 'package:Siesta/view_models/guide_models/guideReceivedBookingModel.dart';
 
 class GuideBookingsPage extends StatefulWidget {
   const GuideBookingsPage({Key? key}) : super(key: key);
@@ -192,14 +192,11 @@ class _GuideBookingsPageState extends State<GuideBookingsPage> {
                               horizontal: screenWidth * 0.02,
                               vertical: screenHeight * 0.01),
                           leading: profileImage(model
-                                      .guideReceivedBookingList[index]
-                                      .travellerDetails!
-                                      .userDetail !=
-                                  null
-                              ? model.guideReceivedBookingList[index]
-                                  .travellerDetails!.userDetail!.profilePicture
-                                  .toString()
-                              : ""),
+                                  .guideReceivedBookingList[index]
+                                  .user!
+                                  .userDetail!
+                                  .profilePicture ??
+                              ""),
                           title: TextView.normalText(
                               textColor: AppColor.appthemeColor,
                               textSize: AppSizes().fontSize.simpleFontSize,
@@ -230,12 +227,9 @@ class _GuideBookingsPageState extends State<GuideBookingsPage> {
                               alignment: Alignment.centerRight,
                               width: screenWidth * 0.35,
                               child: TextView.normalText(
-                                  text: model.guideReceivedBookingList != "" &&
-                                          model.guideReceivedBookingList[index]
-                                                  .country !=
-                                              null
-                                      ? "${model.guideReceivedBookingList[index].country} ${model.guideReceivedBookingList[index].state} ${model.guideReceivedBookingList[index].city}"
-                                      : "",
+                                  text: model.guideReceivedBookingList[index]
+                                          .location ??
+                                      "",
                                   context: context,
                                   fontFamily: AppFonts.nunitoSemiBold,
                                   textSize: AppSizes().fontSize.xsimpleFontSize,
@@ -266,7 +260,7 @@ class _GuideBookingsPageState extends State<GuideBookingsPage> {
                               textSize: AppSizes().fontSize.simpleFontSize,
                               fontFamily: AppFonts.nunitoMedium,
                               text:
-                                  "${model.guideReceivedBookingList.length > 0 ? "From: ${model.guideReceivedBookingList[index].bookingStart}" : ""}   ${model.guideReceivedBookingList.length > 0 ? "To: ${model.guideReceivedBookingList[index].bookingEnd}" : ""}",
+                                  "${model.guideReceivedBookingList.length > 0 ? "From: ${model.guideReceivedBookingList[index].startDate}" : ""}   ${model.guideReceivedBookingList.length > 0 ? "To: ${model.guideReceivedBookingList[index].endDate}" : ""}",
                               context: context),
                           isThreeLine: false,
                         ),
@@ -329,9 +323,8 @@ class _GuideBookingsPageState extends State<GuideBookingsPage> {
             textColor: AppColor.whiteColor,
             text: "Chat",
             onPressed: () async {
-              await PreferenceUtil().setGuideSendMessageUserId(model
-                  .guideReceivedBookingList[ind].travellerUserId
-                  .toString());
+              await PreferenceUtil().setGuideSendMessageUserId(
+                  model.guideReceivedBookingList[ind].travellerId.toString());
               await PreferenceUtil().setGuideSendMessageUserName(
                   model.guideReceivedBookingList[ind].firstName!);
               Navigator.pushNamedAndRemoveUntil(
@@ -348,14 +341,15 @@ class _GuideBookingsPageState extends State<GuideBookingsPage> {
           child: CommonButton.commonButtonRoundedsmallBorderRadius(
             context: context,
             textColor: AppColor.whiteColor,
-            text: "Review Itinerary",
+            text: "Review",
             onPressed: () {
-              GlobalUtility.showItineraryBottomSheet(
+              reviewSheet(model, ind);
+              /*GlobalUtility.showItineraryBottomSheet(
                   context,
                   CreateItineraryPage(
                       guideReceievedBookingModel: model,
                       selIndex: ind,
-                      guideBookinghistoryModel: null));
+                      guideBookinghistoryModel: null));*/
             },
             backColor: AppColor.progressbarColor,
           ),
@@ -373,6 +367,288 @@ class _GuideBookingsPageState extends State<GuideBookingsPage> {
           ),
         ),
       ],
+    );
+  }
+
+  void reviewSheet(GuideReceivedBookingModel model, int index) {
+    showAnimatedDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: ListTile(
+            visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                TextView.normalText(
+                    context: context,
+                    text: "Review Booking",
+                    textColor: AppColor.appthemeColor,
+                    textSize: AppSizes().fontSize.headingTextSize,
+                    fontFamily: AppFonts.nunitoSemiBold),
+                IconButton(
+                    padding: EdgeInsets.zero,
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: Icon(
+                      Icons.clear,
+                      color: AppColor.appthemeColor,
+                    ))
+              ],
+            ),
+            subtitle: ListView(
+              shrinkWrap: true,
+              padding: EdgeInsets.zero,
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                TextView.normalText(
+                    context: context,
+                    text: "Name",
+                    textColor: AppColor.blackColor,
+                    textSize: AppSizes().fontSize.simpleFontSize,
+                    fontFamily: AppFonts.nunitoBold),
+                Container(
+                  padding: EdgeInsets.symmetric(
+                      horizontal: screenWidth * 0.02,
+                      vertical: screenHeight * 0.01),
+                  margin: EdgeInsets.symmetric(vertical: screenHeight * 0.01),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: AppColor.disableColor.withOpacity(0.2)),
+                  child: TextView.normalText(
+                      context: context,
+                      text:
+                          "${model.guideReceivedBookingList[index].firstName ?? ""} ${model.guideReceivedBookingList[index].lastName ?? ""}",
+                      textColor: AppColor.blackColor,
+                      textSize: AppSizes().fontSize.simpleFontSize,
+                      fontFamily: AppFonts.nunitoSemiBold),
+                ),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    TextView.normalText(
+                        context: context,
+                        text: "Location",
+                        textColor: AppColor.blackColor,
+                        textSize: AppSizes().fontSize.simpleFontSize,
+                        fontFamily: AppFonts.nunitoBold),
+                    Container(
+                        width: screenWidth,
+                        padding: EdgeInsets.symmetric(
+                            horizontal: screenWidth * 0.02,
+                            vertical: screenHeight * 0.01),
+                        margin:
+                            EdgeInsets.symmetric(vertical: screenHeight * 0.01),
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(5),
+                            color: AppColor.disableColor.withOpacity(0.2)),
+                        child: Text(
+                          model.guideReceivedBookingList[index].location ?? "",
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 4,
+                          softWrap: true,
+                          style: TextStyle(
+                              fontSize: screenHeight *
+                                  AppSizes().fontSize.simpleFontSize,
+                              fontFamily: AppFonts.nunitoSemiBold,
+                              color: AppColor.blackColor,
+                              fontWeight: FontWeight.w500),
+                        )),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextView.normalText(
+                            context: context,
+                            text: "No. of People",
+                            textColor: AppColor.blackColor,
+                            textSize: AppSizes().fontSize.simpleFontSize,
+                            fontFamily: AppFonts.nunitoBold),
+                        Container(
+                          width: screenWidth * 0.32,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.02,
+                              vertical: screenHeight * 0.01),
+                          margin: EdgeInsets.symmetric(
+                              vertical: screenHeight * 0.01),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: AppColor.disableColor.withOpacity(0.2)),
+                          child: TextView.normalText(
+                              context: context,
+                              text: model.guideReceivedBookingList[index]
+                                      .noOfPeople ??
+                                  "",
+                              textColor: AppColor.blackColor,
+                              textSize: AppSizes().fontSize.simpleFontSize,
+                              fontFamily: AppFonts.nunitoSemiBold),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextView.normalText(
+                            context: context,
+                            text: "No of days",
+                            textColor: AppColor.blackColor,
+                            textSize: AppSizes().fontSize.simpleFontSize,
+                            fontFamily: AppFonts.nunitoBold),
+                        Container(
+                          width: screenWidth * 0.32,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.02,
+                              vertical: screenHeight * 0.01),
+                          margin: EdgeInsets.symmetric(
+                              vertical: screenHeight * 0.01),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: AppColor.disableColor.withOpacity(0.2)),
+                          child: TextView.normalText(
+                              context: context,
+                              text: model.guideReceivedBookingList[index].post
+                                      ?.duration ??
+                                  "",
+                              textColor: AppColor.blackColor,
+                              textSize: AppSizes().fontSize.simpleFontSize,
+                              fontFamily: AppFonts.nunitoSemiBold),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextView.normalText(
+                            context: context,
+                            text: "Start date",
+                            textColor: AppColor.blackColor,
+                            textSize: AppSizes().fontSize.simpleFontSize,
+                            fontFamily: AppFonts.nunitoBold),
+                        Container(
+                          width: screenWidth * 0.32,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.02,
+                              vertical: screenHeight * 0.01),
+                          margin: EdgeInsets.symmetric(
+                              vertical: screenHeight * 0.01),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: AppColor.disableColor.withOpacity(0.2)),
+                          child: TextView.normalText(
+                              context: context,
+                              text: model.guideReceivedBookingList[index]
+                                      .startDate ??
+                                  "",
+                              textColor: AppColor.blackColor,
+                              textSize: AppSizes().fontSize.simpleFontSize,
+                              fontFamily: AppFonts.nunitoSemiBold),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TextView.normalText(
+                            context: context,
+                            text: "End date",
+                            textColor: AppColor.blackColor,
+                            textSize: AppSizes().fontSize.simpleFontSize,
+                            fontFamily: AppFonts.nunitoBold),
+                        Container(
+                          width: screenWidth * 0.32,
+                          padding: EdgeInsets.symmetric(
+                              horizontal: screenWidth * 0.02,
+                              vertical: screenHeight * 0.01),
+                          margin: EdgeInsets.symmetric(
+                              vertical: screenHeight * 0.01),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(5),
+                              color: AppColor.disableColor.withOpacity(0.2)),
+                          child: TextView.normalText(
+                              context: context,
+                              text: model.guideReceivedBookingList[index]
+                                      .endDate ??
+                                  "",
+                              textColor: AppColor.blackColor,
+                              textSize: AppSizes().fontSize.simpleFontSize,
+                              fontFamily: AppFonts.nunitoSemiBold),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                TextView.normalText(
+                    context: context,
+                    text: "Notes",
+                    textColor: AppColor.blackColor,
+                    textSize: AppSizes().fontSize.simpleFontSize,
+                    fontFamily: AppFonts.nunitoBold),
+                Container(
+                    width: screenWidth,
+                    padding: EdgeInsets.symmetric(
+                        horizontal: screenWidth * 0.02,
+                        vertical: screenHeight * 0.01),
+                    margin: EdgeInsets.symmetric(vertical: screenHeight * 0.01),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: AppColor.disableColor.withOpacity(0.2)),
+                    child: Text(
+                      model.guideReceivedBookingList[index].notes ?? "",
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 3,
+                      softWrap: true,
+                      style: TextStyle(
+                          fontSize:
+                              screenHeight * AppSizes().fontSize.simpleFontSize,
+                          fontFamily: AppFonts.nunitoSemiBold,
+                          color: AppColor.blackColor,
+                          fontWeight: FontWeight.w500),
+                    )),
+                UiSpacer.verticalSpace(context: context, space: 0.02),
+
+                // accept booking button
+                CommonButton.commonNormalButton(
+                  context: context,
+                  text: "Accept",
+                  backColor: AppColor.appthemeColor,
+                  onPressed: () {
+                    model.acceptBookingAPI(
+                      bookingId: (model.guideReceivedBookingList[index].id ?? 0)
+                          .toString(),
+                    );
+                  },
+                ),
+
+                SizedBox(
+                  height: screenHeight * 0.03,
+                )
+              ],
+            ),
+          ),
+        );
+      },
+      animationType: DialogTransitionType.slideFromBottom,
+      curve: Curves.fastOutSlowIn,
+      duration: const Duration(milliseconds: 800),
     );
   }
 

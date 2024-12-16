@@ -591,33 +591,285 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
   }
 
   Widget countryCityField(CreateProfileViewModel model) {
-    return ValueListenableBuilder(
-      valueListenable: model.destinationNotifier,
-      builder: (context, value, child) {
-        return Column(
-          mainAxisAlignment: MainAxisAlignment.start,
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // country
+        Column(
+          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // country
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                normalTitleText("Country", AppFonts.nunitoSemiBold),
-                UiSpacer.verticalSpace(space: 0.01, context: context),
-                GestureDetector(
-                  onTap: () {
-                    model
-                        .getLocationApi(
-                            viewContext: context, countryId: "", stateId: "")
-                        .then((value) {
-                      if (value == true) {
-                        List<String> tempCountryList = model.countryList;
+            normalTitleText("Country", AppFonts.nunitoSemiBold),
+            UiSpacer.verticalSpace(space: 0.01, context: context),
+            GestureDetector(
+              onTap: () {
+                model
+                    .getLocationApi(
+                        viewContext: context, countryId: "", stateId: "")
+                    .then((value) {
+                  if (value == true) {
+                    List<String> tempCountryList = model.countryList;
 
-                        showModalBottomSheet(
-                          context: context,
-                          isScrollControlled: true,
-                          builder: (cxt) {
+                    showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      builder: (cxt) {
+                        return StatefulBuilder(
+                            builder: (context, setModelState) {
+                          return Padding(
+                              padding: EdgeInsets.only(
+                                  bottom:
+                                      MediaQuery.of(context).viewInsets.bottom),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Container(
+                                    height: screenHeight * 0.06,
+                                    width: screenWidth,
+                                    alignment: Alignment.bottomLeft,
+                                    decoration: BoxDecoration(
+                                        border: Border.all(
+                                            color: AppColor.disableColor)),
+                                    child: TextFormField(
+                                      maxLines: 1,
+                                      maxLength: 60,
+                                      onChanged: (value) {
+                                        tempCountryList = model.countryList
+                                            .where((element) => element
+                                                .toLowerCase()
+                                                .contains(
+                                                    value.trim().toLowerCase()))
+                                            .toList();
+                                        setModelState(() {});
+                                      },
+                                      textAlign: TextAlign.start,
+                                      decoration: const InputDecoration(
+                                          hintText: "Search country...",
+                                          counterText: "",
+                                          border: InputBorder.none,
+                                          prefixIcon: Icon(Icons.search)),
+                                    ),
+                                  ),
+                                  UiSpacer.verticalSpace(
+                                      context: context, space: 0.02),
+                                  SizedBox(
+                                    height: screenHeight * 0.4,
+                                    child: ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: tempCountryList.length,
+                                      itemBuilder: (context, index) => ListTile(
+                                        onTap: () {
+                                          if (model
+                                                  .countryNameController.text !=
+                                              tempCountryList[index]) {
+                                            model.countryNameController.text =
+                                                tempCountryList[index];
+                                            model.stateNameController.clear();
+                                            model.cityNameController.clear();
+                                          } else {
+                                            model.countryNameController.text =
+                                                tempCountryList[index];
+                                          }
+
+                                          Navigator.pop(cxt);
+                                        },
+                                        title: Text(tempCountryList[index]),
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ));
+                        });
+                      },
+                    ).whenComplete(() {
+                      onCreateProfileValueChanged(model);
+                      setState(() {});
+                    });
+                  }
+                });
+              },
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.06,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                    borderRadius: BorderRadius.circular(10)),
+                child: ListTile(
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+                  visualDensity: VisualDensity(horizontal: -4, vertical: -3),
+                  title: Text(model.countryNameController.text == ""
+                      ? "Select Country"
+                      : model.countryNameController.text),
+                  titleTextStyle: TextStyle(
+                      color: AppColor.lightBlack,
+                      fontFamily: AppFonts.nunitoRegular,
+                      fontSize:
+                          screenHeight * AppSizes().fontSize.simpleFontSize),
+                  trailing: const Icon(Icons.keyboard_arrow_down_outlined),
+                ),
+              ),
+            ),
+          ],
+        ),
+        UiSpacer.verticalSpace(space: 0.02, context: context),
+
+        // state
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            normalTitleText("State", AppFonts.nunitoSemiBold),
+            UiSpacer.verticalSpace(space: 0.01, context: context),
+            GestureDetector(
+              onTap: () {
+                if (model.countryNameController.text.isEmpty) {
+                  GlobalUtility.showToast(context, "Please Select country");
+                } else {
+                  model
+                      .getLocationApi(
+                          viewContext: context,
+                          countryId: model.countryNameController.text,
+                          stateId: "")
+                      .then((value) {
+                    if (value == true) {
+                      List<String> tempStateList = model.stateList;
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        // constraints:
+                        //     BoxConstraints(maxHeight: screenHeight * 0.4),
+                        builder: (cxt) {
+                          return StatefulBuilder(
+                              builder: (context, setModelState) {
+                            return Padding(
+                                padding: EdgeInsets.only(
+                                    bottom: MediaQuery.of(context)
+                                        .viewInsets
+                                        .bottom),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    // search field
+                                    Container(
+                                      height: screenHeight * 0.06,
+                                      width: screenWidth,
+                                      alignment: Alignment.bottomLeft,
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: AppColor.disableColor)),
+                                      child: TextFormField(
+                                        maxLines: 1,
+                                        maxLength: 60,
+                                        textAlign: TextAlign.start,
+                                        onChanged: (value) {
+                                          tempStateList = model.stateList
+                                              .where((element) => element
+                                                  .toLowerCase()
+                                                  .contains(value
+                                                      .trim()
+                                                      .toLowerCase()))
+                                              .toList();
+                                          setModelState(() {});
+                                        },
+                                        decoration: const InputDecoration(
+                                            hintText: "Search state...",
+                                            counterText: "",
+                                            border: InputBorder.none,
+                                            prefixIcon: Icon(Icons.search)),
+                                      ),
+                                    ),
+                                    UiSpacer.verticalSpace(
+                                        context: context, space: 0.02),
+
+                                    SizedBox(
+                                      height: screenHeight * 0.4,
+                                      child: ListView.builder(
+                                        shrinkWrap: true,
+                                        itemCount: tempStateList.length,
+                                        itemBuilder: (context, index) =>
+                                            ListTile(
+                                          onTap: () {
+                                            if (model
+                                                    .stateNameController.text !=
+                                                tempStateList[index]) {
+                                              model.stateNameController.text =
+                                                  tempStateList[index];
+                                              model.cityNameController.clear();
+                                            }
+                                            Navigator.pop(cxt);
+                                          },
+                                          title: Text(tempStateList[index]),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ));
+                          });
+                        },
+                      ).whenComplete(() {
+                        onCreateProfileValueChanged(model);
+                        setState(() {});
+                      });
+                    }
+                  });
+                }
+              },
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.06,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                    borderRadius: BorderRadius.circular(10)),
+                child: ListTile(
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+                  visualDensity: VisualDensity(horizontal: -4, vertical: -3),
+                  title: Text(model.stateNameController.text == ""
+                      ? "Select State"
+                      : model.stateNameController.text),
+                  titleTextStyle: TextStyle(
+                      color: AppColor.lightBlack,
+                      fontFamily: AppFonts.nunitoRegular,
+                      fontSize:
+                          screenHeight * AppSizes().fontSize.simpleFontSize),
+                  trailing: const Icon(Icons.keyboard_arrow_down_outlined),
+                ),
+              ),
+            ),
+          ],
+        ),
+        UiSpacer.verticalSpace(space: 0.02, context: context),
+
+        // city
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            normalTitleText("City", AppFonts.nunitoSemiBold),
+            UiSpacer.verticalSpace(space: 0.01, context: context),
+            GestureDetector(
+              onTap: () {
+                if (model.countryNameController.text.isEmpty) {
+                  GlobalUtility.showToast(context, "Please Select country");
+                } else if (model.stateNameController.text.isEmpty) {
+                  GlobalUtility.showToast(context, "Please Select State");
+                } else {
+                  model
+                      .getLocationApi(
+                          viewContext: context,
+                          countryId: model.countryNameController.text,
+                          stateId: model.stateNameController.text)
+                      .then((value) {
+                    if (value == true) {
+                      List<String> tempCityList = model.cityList;
+
+                      showModalBottomSheet(
+                        context: context,
+                        enableDrag: true,
+                        isScrollControlled: true,
+                        builder: (cxt) {
+                          return StatefulBuilder(
+                              builder: (context, setModelState) {
                             return Padding(
                                 padding: EdgeInsets.only(
                                     bottom: MediaQuery.of(context)
@@ -637,18 +889,18 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                                         maxLines: 1,
                                         maxLength: 60,
                                         onChanged: (value) {
-                                          tempCountryList = model.countryList
+                                          tempCityList = model.cityList
                                               .where((element) => element
                                                   .toLowerCase()
                                                   .contains(value
                                                       .trim()
                                                       .toLowerCase()))
                                               .toList();
-                                          setState(() {});
+                                          setModelState(() {});
                                         },
                                         textAlign: TextAlign.start,
                                         decoration: const InputDecoration(
-                                            hintText: "Search country...",
+                                            hintText: "Search city...",
                                             counterText: "",
                                             border: InputBorder.none,
                                             prefixIcon: Icon(Icons.search)),
@@ -657,317 +909,61 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                                     UiSpacer.verticalSpace(
                                         context: context, space: 0.02),
                                     SizedBox(
-                                      height: screenHeight * 0.5,
+                                      height: screenHeight * 0.4,
                                       child: ListView.builder(
+                                        physics:
+                                            const AlwaysScrollableScrollPhysics(),
                                         shrinkWrap: true,
-                                        itemCount: tempCountryList.length,
+                                        itemCount: tempCityList.length,
                                         itemBuilder: (context, index) =>
                                             ListTile(
                                           onTap: () {
-                                            if (model.countryNameController
-                                                    .text !=
-                                                tempCountryList[index]) {
-                                              model.countryNameController.text =
-                                                  tempCountryList[index];
-                                              model.stateNameController.clear();
-                                              model.cityNameController.clear();
-                                            } else {
-                                              model.countryNameController.text =
-                                                  tempCountryList[index];
-                                            }
-
+                                            model.cityNameController.text =
+                                                tempCityList[index];
                                             Navigator.pop(cxt);
                                           },
-                                          title: Text(tempCountryList[index]),
+                                          title: Text(tempCityList[index]),
                                         ),
                                       ),
                                     )
                                   ],
                                 ));
-                          },
-                        ).whenComplete(() {
-                          onCreateProfileValueChanged(model);
-                          setState(() {});
-                        });
-                      }
-                    });
-                  },
-                  child: Container(
-                    height: MediaQuery.of(context).size.height * 0.06,
-                    decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: ListTile(
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
-                      visualDensity:
-                          VisualDensity(horizontal: -4, vertical: -3),
-                      title: Text(model.countryNameController.text == ""
-                          ? "Select Country"
-                          : model.countryNameController.text),
-                      titleTextStyle: TextStyle(
-                          color: AppColor.lightBlack,
-                          fontFamily: AppFonts.nunitoRegular,
-                          fontSize: screenHeight *
-                              AppSizes().fontSize.simpleFontSize),
-                      trailing: const Icon(Icons.keyboard_arrow_down_outlined),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            UiSpacer.verticalSpace(space: 0.02, context: context),
-
-            // state
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                normalTitleText("State", AppFonts.nunitoSemiBold),
-                UiSpacer.verticalSpace(space: 0.01, context: context),
-                GestureDetector(
-                  onTap: () {
-                    if (model.countryNameController.text.isEmpty) {
-                      GlobalUtility.showToast(context, "Please Select country");
-                    } else {
-                      model
-                          .getLocationApi(
-                              viewContext: context,
-                              countryId: model.countryNameController.text,
-                              stateId: "")
-                          .then((value) {
-                        if (value == true) {
-                          List<String> tempStateList = model.stateList;
-                          showModalBottomSheet(
-                            context: context,
-                            isScrollControlled: true,
-
-                            // constraints:
-                            //     BoxConstraints(maxHeight: screenHeight * 0.5),
-                            builder: (cxt) {
-                              return Padding(
-                                  padding: EdgeInsets.only(
-                                      bottom: MediaQuery.of(context)
-                                          .viewInsets
-                                          .bottom),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      // search field
-                                      Container(
-                                        height: screenHeight * 0.06,
-                                        width: screenWidth,
-                                        alignment: Alignment.bottomLeft,
-                                        decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: AppColor.disableColor)),
-                                        child: TextFormField(
-                                          maxLines: 1,
-                                          maxLength: 60,
-                                          textAlign: TextAlign.start,
-                                          onChanged: (value) {
-                                            tempStateList = model.stateList
-                                                .where((element) => element
-                                                    .toLowerCase()
-                                                    .contains(value
-                                                        .trim()
-                                                        .toLowerCase()))
-                                                .toList();
-                                            setState(() {});
-                                          },
-                                          decoration: const InputDecoration(
-                                              hintText: "Search state...",
-                                              counterText: "",
-                                              border: InputBorder.none,
-                                              prefixIcon: Icon(Icons.search)),
-                                        ),
-                                      ),
-                                      UiSpacer.verticalSpace(
-                                          context: context, space: 0.02),
-
-                                      SizedBox(
-                                        height: screenHeight * 0.5,
-                                        child: ListView.builder(
-                                          shrinkWrap: true,
-                                          itemCount: tempStateList.length,
-                                          itemBuilder: (context, index) =>
-                                              ListTile(
-                                            onTap: () {
-                                              if (model.stateNameController
-                                                      .text !=
-                                                  tempStateList[index]) {
-                                                model.stateNameController.text =
-                                                    tempStateList[index];
-                                                model.cityNameController
-                                                    .clear();
-                                              }
-                                              Navigator.pop(cxt);
-                                            },
-                                            title: Text(tempStateList[index]),
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ));
-                            },
-                          ).whenComplete(() {
-                            onCreateProfileValueChanged(model);
-                            setState(() {});
                           });
-                        }
+                        },
+                      ).whenComplete(() {
+                        onCreateProfileValueChanged(model);
+                        setState(() {});
                       });
                     }
-                  },
-                  child: Container(
-                    height: MediaQuery.of(context).size.height * 0.06,
-                    decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: ListTile(
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
-                      visualDensity:
-                          VisualDensity(horizontal: -4, vertical: -3),
-                      title: Text(model.stateNameController.text == ""
-                          ? "Select State"
-                          : model.stateNameController.text),
-                      titleTextStyle: TextStyle(
-                          color: AppColor.lightBlack,
-                          fontFamily: AppFonts.nunitoRegular,
-                          fontSize: screenHeight *
-                              AppSizes().fontSize.simpleFontSize),
-                      trailing: const Icon(Icons.keyboard_arrow_down_outlined),
-                    ),
-                  ),
+                  });
+                }
+              },
+              child: Container(
+                height: MediaQuery.of(context).size.height * 0.06,
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey.withOpacity(0.2)),
+                    borderRadius: BorderRadius.circular(10)),
+                child: ListTile(
+                  contentPadding:
+                      EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+                  visualDensity: VisualDensity(horizontal: -4, vertical: -3),
+
+                  // contentPadding: EdgeInsets.zero,
+                  title: Text(model.cityNameController.text == ""
+                      ? "Select City"
+                      : model.cityNameController.text),
+                  titleTextStyle: TextStyle(
+                      color: AppColor.lightBlack,
+                      fontFamily: AppFonts.nunitoRegular,
+                      fontSize:
+                          screenHeight * AppSizes().fontSize.simpleFontSize),
+                  trailing: const Icon(Icons.keyboard_arrow_down_outlined),
                 ),
-              ],
-            ),
-            UiSpacer.verticalSpace(space: 0.02, context: context),
-
-            // city
-            Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                normalTitleText("City", AppFonts.nunitoSemiBold),
-                UiSpacer.verticalSpace(space: 0.01, context: context),
-                GestureDetector(
-                  onTap: () {
-                    if (model.countryNameController.text.isEmpty) {
-                      GlobalUtility.showToast(context, "Please Select country");
-                    } else if (model.stateNameController.text.isEmpty) {
-                      GlobalUtility.showToast(context, "Please Select State");
-                    } else {
-                      model
-                          .getLocationApi(
-                              viewContext: context,
-                              countryId: model.countryNameController.text,
-                              stateId: model.stateNameController.text)
-                          .then((value) {
-                        if (value == true) {
-                          List<String> tempCityList = model.cityList;
-
-                          showModalBottomSheet(
-                            context: context,
-                            enableDrag: true,
-                            isScrollControlled: true,
-                            builder: (cxt) {
-                              return Padding(
-                                  padding: EdgeInsets.only(
-                                      bottom: MediaQuery.of(context)
-                                          .viewInsets
-                                          .bottom),
-                                  child: Column(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      Container(
-                                        height: screenHeight * 0.06,
-                                        width: screenWidth,
-                                        alignment: Alignment.bottomLeft,
-                                        decoration: BoxDecoration(
-                                            border: Border.all(
-                                                color: AppColor.disableColor)),
-                                        child: TextFormField(
-                                          maxLines: 1,
-                                          maxLength: 60,
-                                          onChanged: (value) {
-                                            tempCityList = model.cityList
-                                                .where((element) => element
-                                                    .toLowerCase()
-                                                    .contains(value
-                                                        .trim()
-                                                        .toLowerCase()))
-                                                .toList();
-                                            setState(() {});
-                                          },
-                                          textAlign: TextAlign.start,
-                                          decoration: const InputDecoration(
-                                              hintText: "Search city...",
-                                              counterText: "",
-                                              border: InputBorder.none,
-                                              prefixIcon: Icon(Icons.search)),
-                                        ),
-                                      ),
-                                      UiSpacer.verticalSpace(
-                                          context: context, space: 0.02),
-                                      SizedBox(
-                                        height: screenHeight * 0.5,
-                                        child: ListView.builder(
-                                          physics:
-                                              const AlwaysScrollableScrollPhysics(),
-                                          shrinkWrap: true,
-                                          itemCount: tempCityList.length,
-                                          itemBuilder: (context, index) =>
-                                              ListTile(
-                                            onTap: () {
-                                              model.cityNameController.text =
-                                                  tempCityList[index];
-                                              Navigator.pop(cxt);
-                                            },
-                                            title: Text(tempCityList[index]),
-                                          ),
-                                        ),
-                                      )
-                                    ],
-                                  ));
-                            },
-                          ).whenComplete(() {
-                            onCreateProfileValueChanged(model);
-                            setState(() {});
-                          });
-                        }
-                      });
-                    }
-                  },
-                  child: Container(
-                    height: MediaQuery.of(context).size.height * 0.06,
-                    decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.withOpacity(0.2)),
-                        borderRadius: BorderRadius.circular(10)),
-                    child: ListTile(
-                      contentPadding:
-                          EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
-                      visualDensity:
-                          VisualDensity(horizontal: -4, vertical: -3),
-
-                      // contentPadding: EdgeInsets.zero,
-                      title: Text(model.cityNameController.text == ""
-                          ? "Select City"
-                          : model.cityNameController.text),
-                      titleTextStyle: TextStyle(
-                          color: AppColor.lightBlack,
-                          fontFamily: AppFonts.nunitoRegular,
-                          fontSize: screenHeight *
-                              AppSizes().fontSize.simpleFontSize),
-                      trailing: const Icon(Icons.keyboard_arrow_down_outlined),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
           ],
-        );
-      },
+        ),
+      ],
     );
   }
 

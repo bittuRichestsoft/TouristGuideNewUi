@@ -11,13 +11,14 @@ import 'package:Siesta/common_widgets/common_textview.dart';
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
 import 'package:Siesta/utility/globalUtility.dart';
 import 'package:Siesta/view/all_bottomsheet/range_selector_datesheet.dart';
+import 'package:Siesta/view_models/myBookingsModel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../../app_constants/app_images.dart';
-import 'package:Siesta/view_models/myBookingsModel.dart';
 import 'package:stacked/stacked.dart';
+
+import '../../../app_constants/app_images.dart';
 
 class ItineraryPage extends StatefulWidget {
   ItineraryPage({Key? key, required var fromWhere}) : super(key: key) {
@@ -283,9 +284,11 @@ class _ItineraryPageState extends State<ItineraryPage> {
                       width: screenWidth * 0.2,
                       child: Text(
                         model.travellerMybookingList.length > 0 &&
-                                model.travellerMybookingList[index].country !=
+                                model.travellerMybookingList[index].location !=
                                     null
-                            ? "${GlobalUtility().firstLetterCapital(model.travellerMybookingList[index].state.toString())} ${model.travellerMybookingList[index].city!.length != 0 ? GlobalUtility().firstLetterCapital(model.travellerMybookingList[index].city.toString()) : ""}"
+                            ? GlobalUtility().firstLetterCapital(model
+                                .travellerMybookingList[index].location
+                                .toString())
                             : "",
                         overflow: TextOverflow.ellipsis,
                         softWrap: true,

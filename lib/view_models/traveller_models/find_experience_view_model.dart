@@ -29,7 +29,7 @@ class FindExperienceViewModel extends BaseViewModel implements Initialisable {
   var tabVal = CustomTabValue.list;
 
   // RangeValues priceRange = RangeValues(100, 300);
-  SfRangeValues priceRange = SfRangeValues(3000.0, 5000.0);
+  SfRangeValues priceRange = SfRangeValues(0.0, 5000.0);
   DateRangePickerController dateController = DateRangePickerController();
   var locationTEC = TextEditingController();
 

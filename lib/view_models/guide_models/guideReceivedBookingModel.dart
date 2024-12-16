@@ -1,15 +1,20 @@
 import 'dart:convert';
+
 import 'package:Siesta/app_constants/app_images.dart';
+import 'package:Siesta/app_constants/app_routes.dart';
 import 'package:Siesta/response_pojo/guideReceivedBookingResponse.dart';
 import 'package:Siesta/utility/globalUtility.dart';
-import 'package:Siesta/app_constants/app_routes.dart';
 import 'package:flutter/material.dart';
+import 'package:html_editor_enhanced/html_editor.dart';
 import 'package:http/http.dart';
 import 'package:stacked/stacked.dart';
+
+import '../../api_requests/api.dart';
+import '../../api_requests/api_request.dart';
 import '../../api_requests/guideReceivedBooking.dart';
 import '../../app_constants/app_strings.dart';
+import '../../main.dart';
 import '../../view/all_dialogs/api_success_dialog.dart';
-import 'package:html_editor_enhanced/html_editor.dart';
 
 class GuideReceivedBookingModel extends BaseViewModel {
   String? itineraryRe;
@@ -36,7 +41,7 @@ class GuideReceivedBookingModel extends BaseViewModel {
   TextEditingController createItinerary = TextEditingController();
   final HtmlEditorController htmlEditorController = HtmlEditorController();
   GuideReceivedBookingResponse? guideReceivedBookingResponse;
-  List<GuideReceivedBookingData> guideReceivedBookingList = [];
+  List<Rows> guideReceivedBookingList = [];
   int pageNo = 1;
   int lastPage = 1;
   int filterselectedValue = 1;
@@ -278,6 +283,42 @@ class GuideReceivedBookingModel extends BaseViewModel {
       }
     } else {
       GlobalUtility.showToast(viewContext, AppStrings().INTERNET);
+    }
+  }
+
+  Future<void> acceptBookingAPI({required String bookingId}) async {
+    BuildContext context = navigatorKey.currentContext!;
+    try {
+      GlobalUtility().showLoaderDialog(context);
+      if (await GlobalUtility.isConnected()) {
+        Map map = {"booking_id": bookingId};
+
+        final apiResponse = await ApiRequest()
+            .putWithMap(map, Api.acceptBooking)
+            .timeout(Duration(seconds: 20));
+
+        var jsonData = jsonDecode(apiResponse.body);
+
+        int status = jsonData['statusCode'] ?? 404;
+        String message = jsonData['message'] ?? "";
+
+        if (status == 200) {
+          GlobalUtility.showToast(context, message);
+          Navigator.pop(context);
+        } else if (status == 400) {
+          GlobalUtility.showToast(context, message);
+        } else if (status == 401) {
+          GlobalUtility().handleSessionExpire(context);
+        }
+      } else {
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+      debugPrint("$runtimeType error : $e");
+      GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      notifyListeners();
+      GlobalUtility().closeLoaderDialog(context);
     }
   }
 

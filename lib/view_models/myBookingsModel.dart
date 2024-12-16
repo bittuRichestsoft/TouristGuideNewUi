@@ -1,12 +1,14 @@
 import 'dart:convert';
+
 import 'package:Siesta/app_constants/app_images.dart';
+import 'package:Siesta/app_constants/app_routes.dart';
 import 'package:Siesta/response_pojo/traveller_myBooking_responde.dart';
 import 'package:Siesta/utility/globalUtility.dart';
 import 'package:Siesta/utility/preference_util.dart';
-import 'package:Siesta/app_constants/app_routes.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:stacked/stacked.dart';
+
 import '../api_requests/myBookingsRequest.dart';
 import '../app_constants/app_color.dart';
 import '../app_constants/app_fonts.dart';
@@ -39,7 +41,7 @@ class TravellerMyBookingsModel extends BaseViewModel {
   TextEditingController commentController = TextEditingController();
   TextEditingController cancelReasonController = TextEditingController();
   TravellerMyBookingsResponse? travellerMyBookingsResponse;
-  List<TravellerMyBookingList> travellerMybookingList = [];
+  List<Rows> travellerMybookingList = [];
   // int pageNo = 1;
   int lastPage = 1;
   int filterselectedValue = 1;
@@ -55,8 +57,7 @@ class TravellerMyBookingsModel extends BaseViewModel {
 
   getUserDetails(int index) async {
     name = travellerMyBookingsResponse!.data!.rows![index].firstName;
-    email = travellerMybookingList[index].email;
-    debugPrint("NAME---- $name ----email---- $email");
+    email = travellerMybookingList[index].user?.email;
   }
 
   void getMyBookingsFilter(val, int pageNo) {
@@ -161,42 +162,46 @@ class TravellerMyBookingsModel extends BaseViewModel {
 
   void travellerCancelTrip(viewContext, bookingId) async {
     setBusy(true);
-    notifyListeners();
     counterNotifier1.value++;
-    if (await GlobalUtility.isConnected()) {
-      debugPrint("bookingIdbookingIdbookingId$bookingId");
-      Response apiResponse = await _myBookingsRequest.travellerCanceTrip(
-        context: viewContext,
-        booking_id: bookingId,
-        description: cancelReasonController.text,
-      );
-      Map jsonData = jsonDecode(apiResponse.body);
-      var status = jsonData['statusCode'];
-      var message = jsonData['message'];
+    try {
+      if (await GlobalUtility.isConnected()) {
+        debugPrint("bookingIdbookingIdbookingId$bookingId");
+        Response apiResponse = await _myBookingsRequest.travellerCancelTrip(
+          context: viewContext,
+          booking_id: bookingId,
+          description: cancelReasonController.text,
+        );
+        Map jsonData = jsonDecode(apiResponse.body);
+        var status = jsonData['statusCode'];
+        var message = jsonData['message'];
 
-      if (status == 200) {
-        setBusy(false);
-        cancelReasonController.text = "";
-        notifyListeners();
-        counterNotifier1.value++;
-        Navigator.pushNamedAndRemoveUntil(
-            viewContext, AppRoutes.travellerHomePageTab2, (route) => false);
-        GlobalUtility.showToast(viewContext, message);
-      } else if (status == 400) {
-        setBusy(false);
-        Navigator.pop(viewContext);
-        notifyListeners();
-        counterNotifier1.value++;
-        GlobalUtility.showToast(viewContext, message);
-      } else if (status == 401) {
-        setBusy(false);
-        notifyListeners();
-        counterNotifier1.value++;
-        GlobalUtility.showToast(viewContext, message);
-        GlobalUtility().handleSessionExpire(viewContext);
+        if (status == 200) {
+          setBusy(false);
+          cancelReasonController.text = "";
+          notifyListeners();
+          counterNotifier1.value++;
+          Navigator.pushNamedAndRemoveUntil(
+              viewContext, AppRoutes.travellerHomePageTab2, (route) => false);
+          GlobalUtility.showToast(viewContext, message);
+        } else if (status == 400) {
+          setBusy(false);
+          Navigator.pop(viewContext);
+          notifyListeners();
+          counterNotifier1.value++;
+          GlobalUtility.showToast(viewContext, message);
+        } else if (status == 401) {
+          setBusy(false);
+          notifyListeners();
+          counterNotifier1.value++;
+          GlobalUtility.showToast(viewContext, message);
+          GlobalUtility().handleSessionExpire(viewContext);
+        }
+      } else {
+        GlobalUtility.showToast(viewContext, AppStrings().INTERNET);
       }
-    } else {
-      GlobalUtility.showToast(viewContext, AppStrings().INTERNET);
+    } catch (e) {
+    } finally {
+      setBusy(false);
     }
   }
 

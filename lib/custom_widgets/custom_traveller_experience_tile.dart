@@ -1,5 +1,4 @@
 import 'package:Siesta/app_constants/app_routes.dart';
-import 'package:Siesta/response_pojo/get_search_experience_resp.dart';
 import 'package:flutter/material.dart';
 
 import '../app_constants/app_color.dart';
@@ -8,8 +7,21 @@ import '../common_widgets/common_textview.dart';
 import '../common_widgets/vertical_size_box.dart';
 
 class CustomTravellerExperienceTile extends StatefulWidget {
-  const CustomTravellerExperienceTile({super.key, required this.tileData});
-  final Rows tileData;
+  const CustomTravellerExperienceTile(
+      {super.key,
+      required this.id,
+      required this.heroImage,
+      required this.title,
+      required this.price,
+      required this.avgRating,
+      required this.duration});
+
+  final String id;
+  final String heroImage;
+  final String title;
+  final String price;
+  final String avgRating;
+  final String duration;
 
   @override
   State<CustomTravellerExperienceTile> createState() =>
@@ -28,7 +40,7 @@ class _CustomTravellerExperienceTileState
     return InkWell(
       onTap: () {
         Navigator.pushNamed(context, AppRoutes.postDetailPage, arguments: {
-          "postId": (widget.tileData.id ?? 0).toString(),
+          "postId": widget.id,
           "type": "experience",
           "otherPersonProfile": true
         });
@@ -44,7 +56,7 @@ class _CustomTravellerExperienceTileState
             child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: CommonImageView.rectangleNetworkImage(
-                imgUrl: widget.tileData.heroImage ?? "",
+                imgUrl: widget.heroImage,
                 height: screenHeight * 0.35,
                 width: screenWidth,
               ),
@@ -55,7 +67,7 @@ class _CustomTravellerExperienceTileState
           // title
           TextView.mediumText(
             context: context,
-            text: widget.tileData.title ?? "",
+            text: widget.title,
             textAlign: TextAlign.start,
             fontWeight: FontWeight.w500,
             textColor: AppColor.greyColor,
@@ -76,7 +88,7 @@ class _CustomTravellerExperienceTileState
               ),
               TextView.mediumText(
                 context: context,
-                text: "  \$${widget.tileData.price ?? 0}",
+                text: "  \$${widget.price}",
                 fontWeight: FontWeight.w500,
                 textColor: AppColor.greyColor,
                 textSize: 0.018,
@@ -99,8 +111,7 @@ class _CustomTravellerExperienceTileState
                   UiSpacer.horizontalSpace(context: context, space: 0.02),
                   TextView.mediumText(
                     context: context,
-                    text: double.parse(widget.tileData.user?.avgRating ?? "0.0")
-                        .toStringAsFixed(1),
+                    text: double.parse(widget.avgRating).toStringAsFixed(1),
                     textAlign: TextAlign.start,
                     fontWeight: FontWeight.w400,
                     textColor: AppColor.greyColor500,
@@ -121,7 +132,7 @@ class _CustomTravellerExperienceTileState
               UiSpacer.horizontalSpace(context: context, space: 0.04),
               TextView.mediumText(
                 context: context,
-                text: widget.tileData.duration ?? "",
+                text: widget.duration,
                 fontWeight: FontWeight.w400,
                 textColor: AppColor.greyColor500,
                 textSize: 0.016,

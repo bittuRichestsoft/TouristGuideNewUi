@@ -1,10 +1,13 @@
+import 'package:Siesta/app_constants/shared_preferences.dart';
 import 'package:Siesta/common_widgets/common_button.dart';
 import 'package:Siesta/custom_widgets/custom_textfield.dart';
+import 'package:Siesta/utility/globalUtility.dart';
 import 'package:Siesta/view_models/gallery_general_experience_models/post_detail_model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:intl/intl.dart';
 import 'package:stacked/stacked.dart';
 
 import '../../../../app_constants/app_color.dart';
@@ -16,7 +19,9 @@ import '../../../../common_widgets/common_imageview.dart';
 import '../../../../common_widgets/common_textview.dart';
 import '../../../../common_widgets/vertical_size_box.dart';
 import '../../../../custom_widgets/common_widgets.dart';
+import '../../../../custom_widgets/custom_traveller_experience_tile.dart';
 import '../../../../custom_widgets/custom_video_thumbnail.dart';
+import '../../../../main.dart';
 
 class PostDetailPage extends StatefulWidget {
   const PostDetailPage({super.key, required this.argData});
@@ -128,13 +133,20 @@ class _PostDetailPageState extends State<PostDetailPage> {
                             descriptionView(model),
 
                             // Meet your localite view
-                            meetLocaliteView(model),
+                            if (model.userType == "TRAVELLER")
+                              meetLocaliteView(model),
 
                             // rating and review
-                            reviewAndRating(model),
+                            if ((model.postDetail?.user?.ratingAndReviews
+                                        ?.length ??
+                                    0) >
+                                0)
+                              reviewAndRating(model),
 
                             // similar experience
-                            similarExperienceView(model),
+                            if (model.userType == "TRAVELLER" &&
+                                model.similarExperienceList.isNotEmpty)
+                              similarExperienceView(model),
                           ],
                         ));
         });
@@ -690,10 +702,22 @@ class _PostDetailPageState extends State<PostDetailPage> {
         // listing
         ListView.separated(
           shrinkWrap: true,
-          itemCount: model.similarExperienceList.length,
+
+          // only show max 4 similar experience
+          itemCount: model.similarExperienceList.length > 4
+              ? 4
+              : model.similarExperienceList.length,
           physics: const NeverScrollableScrollPhysics(),
-          // itemBuilder: (context, index) => CustomTravellerExperienceTile(),
-          itemBuilder: (context, index) => Container(),
+          itemBuilder: (context, index) => CustomTravellerExperienceTile(
+            id: (model.similarExperienceList[index].id ?? 0).toString(),
+            heroImage: model.similarExperienceList[index].heroImage ?? "",
+            title: model.similarExperienceList[index].title ?? "",
+            avgRating:
+                model.similarExperienceList[index].user!.avgRating ?? "0",
+            price: (model.similarExperienceList[index].price ?? "0").toString(),
+            duration: model.similarExperienceList[index].duration ?? "",
+          ),
+          // itemBuilder: (context, index) => Container(),
           separatorBuilder: (context, index) =>
               UiSpacer.verticalSpace(context: context, space: 0.02),
         )
@@ -702,16 +726,32 @@ class _PostDetailPageState extends State<PostDetailPage> {
   }
 
   void showRequestInfoSheet(PostDetailModel model) {
+    var firstNameTEC = TextEditingController(
+        text: prefs.getString(SharedPreferenceValues.firstName) ?? "");
+    var lastNameTEC = TextEditingController(
+        text: prefs.getString(SharedPreferenceValues.lastName) ?? "");
+    var locationTEC =
+        TextEditingController(text: model.postDetail?.location ?? "");
+    var startDateTEC = TextEditingController();
+    var endDateTEC = TextEditingController();
+    var startTimeTEC = TextEditingController(
+        text: CommonDateTimeFormats.timeFormatLocal(
+            model.postDetail?.startingTime ?? ""));
+    var notesTEC = TextEditingController();
+    var noOfPeopleTEC = TextEditingController();
+    String startDateVal = "";
+    String endDateVal = "";
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.only(
         topLeft: Radius.circular(20),
         topRight: Radius.circular(20),
       )),
       constraints: BoxConstraints(
-        maxHeight: screenHeight * 0.8,
+        maxHeight: screenHeight * 0.9,
       ),
       builder: (context) {
         return StatefulBuilder(
@@ -768,18 +808,22 @@ class _PostDetailPageState extends State<PostDetailPage> {
                         // first and last name
                         Expanded(
                           child: CustomTextField(
+                            textEditingController: firstNameTEC,
                             headingText: "First Name",
                             readOnly: true,
                             isFilled: true,
+                            fillColor: AppColor.fieldBorderColor,
                             hintText: "Enter first name",
                           ),
                         ),
                         UiSpacer.horizontalSpace(context: context, space: 0.04),
                         Expanded(
                           child: CustomTextField(
+                            textEditingController: lastNameTEC,
                             headingText: "Last Name",
                             readOnly: true,
                             isFilled: true,
+                            fillColor: AppColor.fieldBorderColor,
                             hintText: "Enter last name",
                           ),
                         )
@@ -789,10 +833,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
 
                     // location
                     CustomTextField(
+                      textEditingController: locationTEC,
                       headingText: "Location",
                       hintText: "Enter location",
                       readOnly: true,
                       isFilled: true,
+                      fillColor: AppColor.fieldBorderColor,
                     ),
                     UiSpacer.verticalSpace(context: context, space: 0.02),
 
@@ -802,29 +848,106 @@ class _PostDetailPageState extends State<PostDetailPage> {
                         // first and last name
                         Expanded(
                           child: CustomTextField(
+                            readOnly: true,
+                            textEditingController: startDateTEC,
                             headingText: "Start Date",
                             hintText: "Pick date",
                             suffixIconPath: AppImages().svgImages.icCalendar,
+                            onTap: () async {
+                              final DateTime? picked = await showDatePicker(
+                                context: context,
+                                initialDate: DateTime.now(),
+                                initialDatePickerMode: DatePickerMode.day,
+                                firstDate: DateTime.now()
+                                    .subtract(const Duration(days: 0)),
+                                lastDate: DateTime(2100),
+                              );
+                              if (picked != null) {
+                                String formattedDate =
+                                    DateFormat('dd-MM-yyyy').format(picked);
+
+                                String formattedEndDate =
+                                    DateFormat('dd-MM-yyyy').format(picked.add(
+                                        Duration(
+                                            days: int.parse(model
+                                                    .postDetail?.duration
+                                                    ?.split(" ")[0] ??
+                                                "0"))));
+
+                                startDateVal = picked.toString();
+                                endDateVal = picked
+                                    .add(Duration(
+                                        days: int.parse(model
+                                                .postDetail?.duration
+                                                ?.split(" ")[0] ??
+                                            "0")))
+                                    .toString();
+
+                                startDateTEC.text = formattedDate;
+                                endDateTEC.text = formattedEndDate;
+
+                                setModelState(() {});
+                              }
+                            },
                           ),
                         ),
                         UiSpacer.horizontalSpace(context: context, space: 0.04),
                         Expanded(
                           child: CustomTextField(
-                            headingText: "Start Time",
-                            hintText: "Pick time",
-                            suffixIconPath: AppImages().svgImages.icClock,
+                            readOnly: true,
+                            isFilled: true,
+                            fillColor: AppColor.fieldBorderColor,
+                            textEditingController: endDateTEC,
+                            headingText: "End Date",
+                            hintText: "End date",
+                            suffixIconPath: AppImages().svgImages.icCalendar,
                           ),
                         )
                       ],
                     ),
                     UiSpacer.verticalSpace(context: context, space: 0.02),
 
+                    // start time & no. of people
+                    Row(
+                      children: [
+                        Expanded(
+                          child: CustomTextField(
+                            textEditingController: startTimeTEC,
+                            headingText: "Start Time",
+                            hintText: "Pick time",
+                            suffixIconPath: AppImages().svgImages.icClock,
+                            readOnly: true,
+                            isFilled: true,
+                            fillColor: AppColor.fieldBorderColor,
+                          ),
+                        ),
+                        UiSpacer.horizontalSpace(context: context, space: 0.04),
+                        Expanded(
+                          child: CustomTextField(
+                            keyboardType: TextInputType.number,
+                            textEditingController: noOfPeopleTEC,
+                            headingText: "No. of People",
+                            hintText: "Enter no. of people",
+                            maxLength: 5,
+                            showCounterText: false,
+                            inputFormatter: [
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
+                    UiSpacer.verticalSpace(context: context, space: 0.02),
+
+                    // no. of people
+
                     // notes
                     CustomTextField(
+                      textEditingController: notesTEC,
                       headingText: "Notes",
                       hintText: "Give description (100 to 180 words)",
-                      minLines: 6,
-                      maxLines: 6,
+                      minLines: 5,
+                      maxLines: 5,
                     ),
                     UiSpacer.verticalSpace(context: context, space: 0.02),
 
@@ -835,7 +958,40 @@ class _PostDetailPageState extends State<PostDetailPage> {
                         context: context,
                         borderRadius: 50,
                         text: "Save",
-                        onPressed: () {},
+                        onPressed: () {
+                          if (startDateTEC.text.isEmpty) {
+                            GlobalUtility.showToast(
+                                context, "Please select start date");
+                          } else if (noOfPeopleTEC.text.trim().isEmpty) {
+                            GlobalUtility.showToast(
+                                context, "Please enter no. of people");
+                          } else if (int.parse(noOfPeopleTEC.text) <
+                              (model.postDetail?.minPeople ?? 0)) {
+                            GlobalUtility.showToast(context,
+                                "The minimum no. of people is ${model.postDetail?.minPeople ?? 0}");
+                          } else if (int.parse(noOfPeopleTEC.text) >
+                              (model.postDetail?.maxPeople ?? 0)) {
+                            GlobalUtility.showToast(context,
+                                "The maximum no. of people is ${model.postDetail?.maxPeople ?? 0}");
+                          } else if (notesTEC.text.trim().isEmpty) {
+                            GlobalUtility.showToast(
+                                context, "Please enter the notes");
+                          } else {
+                            // call the API
+                            model.bookExperienceAPI(
+                              localiteId:
+                                  (model.postDetail?.user?.id ?? 0).toString(),
+                              firstName: firstNameTEC.text,
+                              lastName: lastNameTEC.text,
+                              location: locationTEC.text,
+                              startDate: startDateVal,
+                              endDate: endDateVal,
+                              startTime: startTimeTEC.text,
+                              notes: notesTEC.text.trim(),
+                              noOfPeople: noOfPeopleTEC.text,
+                            );
+                          }
+                        },
                         backColor: AppColor.appthemeColor,
                       ),
                     ),

@@ -347,7 +347,11 @@ class _CreatePostPageState extends State<CreatePostPage> {
                               CustomTextField(
                                 textEditingController: model.durationTEC,
                                 hintText: "Enter duration",
-                                headingText: "Duration",
+                                headingText: "Duration (in days)",
+                                keyboardType: TextInputType.number,
+                                inputFormatter: [
+                                  FilteringTextInputFormatter.digitsOnly,
+                                ],
                               ),
                             if (widget.argData["type"] == "experience")
                               UiSpacer.verticalSpace(

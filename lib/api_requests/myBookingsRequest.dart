@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:Siesta/api_requests/api.dart';
 import 'package:Siesta/app_services/http.service.dart';
+import 'package:Siesta/utility/preference_util.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart';
-import 'package:Siesta/utility/preference_util.dart';
 
 class MyBookingsRequest extends HttpService {
   Future<Response> myBooking({
@@ -48,16 +48,16 @@ class MyBookingsRequest extends HttpService {
     return apiResult;
   }
 
-  Future<Response> travellerCanceTrip({
+  Future<Response> travellerCancelTrip({
     required BuildContext context,
     required String booking_id,
     required String description,
   }) async {
     Map map = {
       "booking_id": booking_id,
-      "description": description,
+      "cancel_notes": description,
     };
-    final apiResult = await post(
+    final apiResult = await put(
       Uri.parse(Api.baseUrl + Api.cancelTrip),
       body: jsonEncode(map),
       headers: {

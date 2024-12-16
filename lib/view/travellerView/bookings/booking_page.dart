@@ -9,13 +9,14 @@ import 'package:Siesta/common_widgets/common_textview.dart';
 import 'package:Siesta/common_widgets/vertical_size_box.dart';
 import 'package:Siesta/utility/globalUtility.dart';
 import 'package:Siesta/view/travellerView/write_review_page/review_screen.dart';
+import 'package:Siesta/view_models/myBookingsModel.dart';
 import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_animated_dialog/flutter_animated_dialog.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:Siesta/view_models/myBookingsModel.dart';
-import '../../../app_constants/app_strings.dart';
 import 'package:stacked/stacked.dart';
+
+import '../../../app_constants/app_strings.dart';
 
 class BookingPage extends StatefulWidget {
   const BookingPage({Key? key}) : super(key: key);
@@ -163,7 +164,7 @@ class _BookingPageState extends State<BookingPage> {
             fontFamily: AppFonts.nunitoRegular,
             fontSize: screenHeight * AppSizes().fontSize.simpleFontSize),
         decoration: InputDecoration(
-          hintText: "Search by country, state, city",
+          hintText: "Search by location",
           prefixIcon: IconButton(
               padding: EdgeInsets.zero,
               onPressed: null,
@@ -456,7 +457,7 @@ class _BookingPageState extends State<BookingPage> {
                                       AppStrings().completedStatus,
                                       AppColor.completedStatusColor,
                                       model.travellerMybookingList[index]
-                                          .touristGuideUserId,
+                                          .localiteId,
                                       index)
                                   : buttonContainer(
                                       AppColor.buttonDisableColor,
@@ -503,10 +504,8 @@ class _BookingPageState extends State<BookingPage> {
                                   textSize: AppSizes().fontSize.mediumFontSize,
                                   fontFamily: AppFonts.nunitoSemiBold,
                                   text: model.travellerMybookingList[index]
-                                              .country !=
-                                          null
-                                      ? "${GlobalUtility().firstLetterCapital(model.travellerMybookingList[index].country.toString())}, ${GlobalUtility().firstLetterCapital(model.travellerMybookingList[index].state.toString())}, ${model.travellerMybookingList[index].city!.length != 0 ? GlobalUtility().firstLetterCapital(model.travellerMybookingList[index].city.toString()) : ""}"
-                                      : "",
+                                          .location ??
+                                      "",
                                   context: context),
                             ),
                           ),
@@ -518,9 +517,10 @@ class _BookingPageState extends State<BookingPage> {
                               text:
                                   "${model.travellerMybookingList[index].bookingStart} - ${model.travellerMybookingList[index].bookingEnd}",
                               context: context)),
-                      UiSpacer.verticalSpace(
-                          space: AppSizes().widgetSize.smallPadding,
-                          context: context),
+                      if (model.travellerMybookingList[index].status == 4)
+                        UiSpacer.verticalSpace(
+                            space: AppSizes().widgetSize.smallPadding,
+                            context: context),
                       model.travellerMybookingList[index].status == 4
                           ? DottedLine(
                               direction: Axis.horizontal,
@@ -562,7 +562,7 @@ class _BookingPageState extends State<BookingPage> {
                                             model,
                                             index,
                                             model.travellerMybookingList[index]
-                                                .touristGuideUserId)),
+                                                .localiteId)),
                                   ],
                                 )
                               : (model.travellerMybookingList[index].status ==
@@ -995,6 +995,9 @@ class _BookingPageState extends State<BookingPage> {
 
   detailsDialog(int index, TravellerMyBookingsModel model) {
     return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: ListTile(
         visualDensity: const VisualDensity(horizontal: -4, vertical: -4),
         title: Row(
@@ -1038,73 +1041,11 @@ class _BookingPageState extends State<BookingPage> {
                   color: AppColor.disableColor.withOpacity(0.2)),
               child: TextView.normalText(
                   context: context,
-                  text: model.travellerMybookingList[index].user!.name,
+                  text:
+                      "${model.travellerMybookingList[index].user?.name ?? ""} ${model.travellerMybookingList[index].user?.lastName ?? ""}",
                   textColor: AppColor.blackColor,
                   textSize: AppSizes().fontSize.simpleFontSize,
                   fontFamily: AppFonts.nunitoSemiBold),
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextView.normalText(
-                        context: context,
-                        text: "Country",
-                        textColor: AppColor.blackColor,
-                        textSize: AppSizes().fontSize.simpleFontSize,
-                        fontFamily: AppFonts.nunitoBold),
-                    Container(
-                      width: screenWidth * 0.32,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.02,
-                          vertical: screenHeight * 0.01),
-                      margin:
-                          EdgeInsets.symmetric(vertical: screenHeight * 0.01),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: AppColor.disableColor.withOpacity(0.2)),
-                      child: TextView.normalText(
-                          context: context,
-                          text: model.travellerMybookingList[index].country,
-                          textColor: AppColor.blackColor,
-                          textSize: AppSizes().fontSize.simpleFontSize,
-                          fontFamily: AppFonts.nunitoSemiBold),
-                    ),
-                  ],
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    TextView.normalText(
-                        context: context,
-                        text: "State",
-                        textColor: AppColor.blackColor,
-                        textSize: AppSizes().fontSize.simpleFontSize,
-                        fontFamily: AppFonts.nunitoBold),
-                    Container(
-                      width: screenWidth * 0.32,
-                      padding: EdgeInsets.symmetric(
-                          horizontal: screenWidth * 0.02,
-                          vertical: screenHeight * 0.01),
-                      margin:
-                          EdgeInsets.symmetric(vertical: screenHeight * 0.01),
-                      decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(5),
-                          color: AppColor.disableColor.withOpacity(0.2)),
-                      child: TextView.normalText(
-                          context: context,
-                          text: model.travellerMybookingList[index].state,
-                          textColor: AppColor.blackColor,
-                          textSize: AppSizes().fontSize.simpleFontSize,
-                          fontFamily: AppFonts.nunitoSemiBold),
-                    ),
-                  ],
-                ),
-              ],
             ),
             Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -1112,7 +1053,7 @@ class _BookingPageState extends State<BookingPage> {
               children: [
                 TextView.normalText(
                     context: context,
-                    text: "City",
+                    text: "Location",
                     textColor: AppColor.blackColor,
                     textSize: AppSizes().fontSize.simpleFontSize,
                     fontFamily: AppFonts.nunitoBold),
@@ -1126,9 +1067,9 @@ class _BookingPageState extends State<BookingPage> {
                         borderRadius: BorderRadius.circular(5),
                         color: AppColor.disableColor.withOpacity(0.2)),
                     child: Text(
-                      model.travellerMybookingList[index].city!,
+                      model.travellerMybookingList[index].location ?? "",
                       overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
+                      maxLines: 4,
                       softWrap: true,
                       style: TextStyle(
                           fontSize:
@@ -1148,7 +1089,7 @@ class _BookingPageState extends State<BookingPage> {
                   children: [
                     TextView.normalText(
                         context: context,
-                        text: "Type",
+                        text: "No. of People",
                         textColor: AppColor.blackColor,
                         textSize: AppSizes().fontSize.simpleFontSize,
                         fontFamily: AppFonts.nunitoBold),
@@ -1164,7 +1105,9 @@ class _BookingPageState extends State<BookingPage> {
                           color: AppColor.disableColor.withOpacity(0.2)),
                       child: TextView.normalText(
                           context: context,
-                          text: model.travellerMybookingList[index].familyType,
+                          text:
+                              model.travellerMybookingList[index].noOfPeople ??
+                                  "",
                           textColor: AppColor.blackColor,
                           textSize: AppSizes().fontSize.simpleFontSize,
                           fontFamily: AppFonts.nunitoSemiBold),
@@ -1193,7 +1136,8 @@ class _BookingPageState extends State<BookingPage> {
                           color: AppColor.disableColor.withOpacity(0.2)),
                       child: TextView.normalText(
                           context: context,
-                          text: model.travellerMybookingList[index].noOfDays,
+                          text: model.travellerMybookingList[index].noOfDays ??
+                              "",
                           textColor: AppColor.blackColor,
                           textSize: AppSizes().fontSize.simpleFontSize,
                           fontFamily: AppFonts.nunitoSemiBold),
@@ -1201,27 +1145,6 @@ class _BookingPageState extends State<BookingPage> {
                   ],
                 ),
               ],
-            ),
-            TextView.normalText(
-                context: context,
-                text: "Activities",
-                textColor: AppColor.blackColor,
-                textSize: AppSizes().fontSize.simpleFontSize,
-                fontFamily: AppFonts.nunitoBold),
-            Container(
-              padding: EdgeInsets.symmetric(
-                  horizontal: screenWidth * 0.02,
-                  vertical: screenHeight * 0.01),
-              margin: EdgeInsets.symmetric(vertical: screenHeight * 0.01),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(5),
-                  color: AppColor.disableColor.withOpacity(0.2)),
-              child: TextView.normalText(
-                  context: context,
-                  text: model.travellerMybookingList[index].activities,
-                  textColor: AppColor.blackColor,
-                  textSize: AppSizes().fontSize.simpleFontSize,
-                  fontFamily: AppFonts.nunitoSemiBold),
             ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1287,6 +1210,33 @@ class _BookingPageState extends State<BookingPage> {
                 ),
               ],
             ),
+            TextView.normalText(
+                context: context,
+                text: "Notes",
+                textColor: AppColor.blackColor,
+                textSize: AppSizes().fontSize.simpleFontSize,
+                fontFamily: AppFonts.nunitoBold),
+            Container(
+                width: screenWidth,
+                padding: EdgeInsets.symmetric(
+                    horizontal: screenWidth * 0.02,
+                    vertical: screenHeight * 0.01),
+                margin: EdgeInsets.symmetric(vertical: screenHeight * 0.01),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(5),
+                    color: AppColor.disableColor.withOpacity(0.2)),
+                child: Text(
+                  model.travellerMybookingList[index].notes ?? "",
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 3,
+                  softWrap: true,
+                  style: TextStyle(
+                      fontSize:
+                          screenHeight * AppSizes().fontSize.simpleFontSize,
+                      fontFamily: AppFonts.nunitoSemiBold,
+                      color: AppColor.blackColor,
+                      fontWeight: FontWeight.w500),
+                )),
             SizedBox(
               height: screenHeight * 0.03,
             )

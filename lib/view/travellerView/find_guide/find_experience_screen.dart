@@ -105,6 +105,7 @@ class _FindExperienceScreenState extends State<FindExperienceScreen> {
                   textEditingController: model.locationTEC,
                   hintText: "Search by location",
                   borderRadius: 50,
+                  maxLines: 1,
                   suffixWidget: Icon(
                     Icons.search,
                     color: AppColor.blackColor,
@@ -195,7 +196,8 @@ class _FindExperienceScreenState extends State<FindExperienceScreen> {
                     } else {
                       model.activitiesList[index].isSelect = true;
                     }
-                    model.notifyListeners();
+                    model.pageNo = 1;
+                    model.getSearchExperienceAPI();
                   },
                   child: activityChip(model.activitiesList[index].title,
                       model.activitiesList[index].isSelect),
@@ -321,7 +323,12 @@ class _FindExperienceScreenState extends State<FindExperienceScreen> {
             // physics: const NeverScrollableScrollPhysics(),
             itemBuilder: (context, index) {
               return CustomTravellerExperienceTile(
-                tileData: model.experienceList[index],
+                id: (model.experienceList[index].id ?? "0").toString(),
+                heroImage: model.experienceList[index].heroImage ?? "",
+                title: model.experienceList[index].title ?? "",
+                avgRating: model.experienceList[index].user!.avgRating ?? "0",
+                price: (model.experienceList[index].price ?? "0").toString(),
+                duration: model.experienceList[index].duration ?? "",
               );
             },
             separatorBuilder: (context, index) {

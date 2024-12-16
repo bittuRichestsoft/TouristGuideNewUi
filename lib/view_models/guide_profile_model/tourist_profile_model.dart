@@ -29,6 +29,7 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
   String? hostSinceMonth;
   String? avgRating;
   String? profileUrl;
+  bool? isProfileVerified = false;
 
   bool showCreateGeneral = false;
 
@@ -96,6 +97,10 @@ class TouristProfileModel extends BaseViewModel implements Initialisable {
               .data!.guideDetails!.userDetail!.hostSinceMonths;
           avgRating = getGuideProfileResponse.data!.avgRatings ?? "0";
           profileUrl = getGuideProfileResponse.data!.url ?? "";
+          isProfileVerified =
+              getGuideProfileResponse.data!.guideDetails?.isVerified == 1
+                  ? true
+                  : false;
         } else if (status == 400) {
           errorMsg = "Some error occurred";
           _status = Status.error;

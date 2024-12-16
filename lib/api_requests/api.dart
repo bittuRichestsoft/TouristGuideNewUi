@@ -4,9 +4,9 @@
 
 class Api {
   static String get baseUrl {
-    // return "https://indeedtraining.in:5006/";
+    return "https://indeedtraining.in:5006/";
     //  return "https://indeedtraining.in:2223/"; // FOR CHANGES
-    return "http://192.168.1.11:3003/";
+    // return "http://192.168.1.16:3003/";
     // return "https://imerzn.com:2525/"; // LIVE BASE URL
   }
 
@@ -152,6 +152,12 @@ class Api {
 
   // User search experience
   static String searchExperience = "user/search-experience";
+
+  // Traveller book experience
+  static String bookExperience = "traveller/book-experience";
+
+  // Accept the booking
+  static String acceptBooking = "guide/update-booking";
 }
 
 /// -- ---- --- ---- --- STATUS MEAN --- ---- - - - -- ---- - -- ---

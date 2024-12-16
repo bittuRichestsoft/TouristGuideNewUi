@@ -36,6 +36,20 @@ class PostDetailModel extends BaseViewModel implements Initialisable {
     getPostDetailAPI(postid);
   }
 
+  int calculateYear({required String y, required String m}) {
+    int years = int.parse(y);
+    int months = int.parse(m);
+    // Get the current date
+    DateTime now = DateTime.now();
+
+    // Subtract the years and months
+    DateTime updatedDate =
+        DateTime(now.year - years, now.month - months, now.day);
+
+    // Return the year
+    return updatedDate.year;
+  }
+
   Future<void> getPostDetailAPI(String postId) async {
     BuildContext context = navigatorKey.currentContext!;
     try {
@@ -99,17 +113,67 @@ class PostDetailModel extends BaseViewModel implements Initialisable {
     }
   }
 
-  int calculateYear({required String y, required String m}) {
-    int years = int.parse(y);
-    int months = int.parse(m);
-    // Get the current date
-    DateTime now = DateTime.now();
+  Future<void> bookExperienceAPI({
+    required String localiteId,
+    required String firstName,
+    required String lastName,
+    required String location,
+    required String startDate,
+    required String endDate,
+    required String startTime,
+    required String notes,
+    required String noOfPeople,
+  }) async {
+    BuildContext context = navigatorKey.currentContext!;
 
-    // Subtract the years and months
-    DateTime updatedDate =
-        DateTime(now.year - years, now.month - months, now.day);
+    try {
+      GlobalUtility().showLoader(context);
+      if (await GlobalUtility.isConnected()) {
+        Map map = {
+          "traveller_id": prefs.getString(SharedPreferenceValues.id) ?? "",
+          "localite_id": localiteId,
+          "experience_id": postid,
+          "price":
+              ((postDetail?.price ?? 1) * int.parse(noOfPeople)).toString(),
+          "booking_title": postDetail?.title ?? "",
+          "first_name": firstName,
+          "last_name": lastName,
+          "location": location,
+          "start_date": startDate,
+          "end_date": endDate,
+          "start_time": startTime,
+          "notes": notes,
+          "no_of_people": noOfPeople
+        };
 
-    // Return the year
-    return updatedDate.year;
+        final apiResponse = await ApiRequest()
+            .postWithMap(map, Api.bookExperience)
+            .timeout(Duration(seconds: 20));
+
+        var jsonData = jsonDecode(apiResponse.body);
+
+        int status = jsonData['statusCode'] ?? 404;
+        String message = jsonData['message'] ?? "";
+
+        if (status == 200) {
+          GlobalUtility.showToast(context, message);
+          Navigator.pop(context);
+        } else if (status == 400) {
+          GlobalUtility.showToast(context, message);
+        } else if (status == 401) {
+          GlobalUtility().handleSessionExpire(context);
+        } else {
+          GlobalUtility.showToast(context, message);
+        }
+      } else {
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+      debugPrint("$runtimeType error : $e");
+      GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      notifyListeners();
+      GlobalUtility().closeLoaderDialog(context);
+    }
   }
 }
