@@ -30,7 +30,8 @@ class CustomTextField extends StatefulWidget {
       this.inputFormatter,
       this.prefixWidget,
       this.obscureText = false,
-      this.showCounterText = false});
+      this.showCounterText = false,
+      this.enabled = true});
   final TextEditingController? textEditingController;
   final Function(String)? onChange;
   final Function()? onTap;
@@ -51,6 +52,7 @@ class CustomTextField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatter;
   final bool obscureText;
   final bool showCounterText;
+  final bool enabled;
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -86,6 +88,7 @@ class _CustomTextFieldState extends State<CustomTextField> {
           onTap: widget.onTap,
           maxLength: widget.maxLength,
           obscureText: (widget.obscureText) ? !makePasswordVisible : false,
+          enabled: widget.enabled,
           style: TextStyle(
               color: AppColor.lightBlack,
               fontFamily: AppFonts.nunitoRegular,

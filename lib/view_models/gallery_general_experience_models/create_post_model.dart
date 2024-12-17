@@ -54,6 +54,8 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
   List<dynamic> placeList = [];
   bool isPlaceListShow = false;
 
+  bool isValidLocation = false;
+
   PostDetails? postDetail; // for general and experience data
   GalleryDetails? galleryDetail; // for gallery data
 
@@ -99,6 +101,9 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
     dropOffPointTEC.text = postDetail!.dropOffPoint ?? "";
     descriptionTEC.text = postDetail!.description ?? "";
 
+    latitude = postDetail!.latitude;
+    longitude = postDetail!.longitude;
+
     heroImageUrl = postDetail!.heroImage;
 
     documentsList = postDetail!.postImages!
@@ -127,6 +132,9 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
   void getInitialGalleryData() {
     titleTEC.text = galleryDetail!.title ?? "";
     locationTEC.text = galleryDetail!.location ?? "";
+    latitude = galleryDetail!.latitude;
+    longitude = galleryDetail!.longitude;
+    isValidLocation = true;
 
     descriptionTEC.text = galleryDetail!.description ?? "";
 
@@ -242,7 +250,7 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
     } else if (locationTEC.text.trim().isEmpty) {
       GlobalUtility.showToast(context, "Please enter the location");
       return false;
-    } else if (latitude == null || longitude == null) {
+    } else if (isValidLocation == false) {
       GlobalUtility.showToast(
           context, "Please select the location from suggestions");
       return false;
@@ -266,6 +274,7 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
     locationTEC.clear();
     placeList.clear();
     isPlaceListShow = false;
+    isValidLocation = false;
     notifyListeners();
   }
 
@@ -293,6 +302,8 @@ class CreatePostModel extends BaseViewModel implements Initialisable {
     country = latLngData["country"] ?? "";
     state = latLngData["state"] ?? "";
     city = latLngData["city"] ?? "";
+
+    isValidLocation = true;
 
     debugPrint(
         "Location lat long is: $latitude $longitude $country $state $city");

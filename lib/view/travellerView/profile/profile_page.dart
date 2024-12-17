@@ -21,7 +21,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:stacked/stacked.dart';
 
-import '../../../app_constants/app_routes.dart';
 import '../delete_account.dart';
 
 class ProfilePage extends StatefulWidget {
@@ -50,7 +49,7 @@ class _ProfilePageState extends State<ProfilePage> {
           initializedModel = model;
           return Scaffold(
             backgroundColor: AppColor.whiteColor,
-            appBar: AppBar(
+            /* appBar: AppBar(
               systemOverlayStyle:
                   SystemUiOverlayStyle(statusBarColor: AppColor.appthemeColor),
               centerTitle: true,
@@ -64,7 +63,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               title: TextView.headingWhiteText(
                   text: AppStrings().profile, context: context),
-            ),
+            ),*/
             body: ListView(
               shrinkWrap: true,
               padding: EdgeInsets.all(screenWidth * 0.03),
@@ -72,7 +71,7 @@ class _ProfilePageState extends State<ProfilePage> {
               children: [
                 SizedBox(
                   width: screenWidth,
-                  height: screenHeight * 0.3,
+                  height: screenHeight * 0.2,
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [

@@ -53,29 +53,42 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                   }, context: context)
                 : model.initialised == false
                     ? CommonWidgets().inPageLoader()
-                    : ListView(
-                        shrinkWrap: true,
-                        physics: const AlwaysScrollableScrollPhysics(),
+                    : Padding(
                         padding: EdgeInsets.symmetric(
                             horizontal: screenWidth *
                                 AppSizes().widgetSize.horizontalPadding),
-                        children: [
-                          UiSpacer.verticalSpace(space: 0.06, context: context),
-                          firstTextView(),
-                          enrollmentAndNote(model),
-                          UiSpacer.verticalSpace(
-                              space: 0.015, context: context),
-                          profilePic(model),
-                          UiSpacer.verticalSpace(space: 0.01, context: context),
-                          Center(
-                              child: normalTitleText(
-                                  "${AppStrings().uploadProfile}  ",
-                                  AppFonts.nunitoSemiBold)),
-                          UiSpacer.verticalSpace(space: 0.03, context: context),
-                          detailFields(model),
-                          UiSpacer.verticalSpace(space: 0.04, context: context),
-                          buttonContainer(model),
-                        ],
+                        child: Column(
+                          children: [
+                            UiSpacer.verticalSpace(
+                                space: 0.06, context: context),
+                            firstTextView(),
+                            Expanded(
+                              child: ListView(
+                                shrinkWrap: true,
+                                physics: const AlwaysScrollableScrollPhysics(),
+                                padding: EdgeInsets.zero,
+                                children: [
+                                  enrollmentAndNote(model),
+                                  UiSpacer.verticalSpace(
+                                      space: 0.015, context: context),
+                                  profilePic(model),
+                                  UiSpacer.verticalSpace(
+                                      space: 0.01, context: context),
+                                  Center(
+                                      child: normalTitleText(
+                                          "${AppStrings().uploadProfile}  ",
+                                          AppFonts.nunitoSemiBold)),
+                                  UiSpacer.verticalSpace(
+                                      space: 0.03, context: context),
+                                  detailFields(model),
+                                  UiSpacer.verticalSpace(
+                                      space: 0.04, context: context),
+                                  buttonContainer(model),
+                                ],
+                              ),
+                            )
+                          ],
+                        ),
                       ),
           );
         });
@@ -158,19 +171,22 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
             bottom: screenHeight * 0.02,
             child: GestureDetector(
                 onTap: () {
-                  showModalBottomSheet<void>(
-                    useSafeArea: false,
-                    context: context,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.vertical(
-                        top: Radius.circular(MediaQuery.of(context).size.width *
-                            AppSizes().widgetSize.largeBorderRadius),
+                  if (model.isBusy == false) {
+                    showModalBottomSheet<void>(
+                      useSafeArea: false,
+                      context: context,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.vertical(
+                          top: Radius.circular(
+                              MediaQuery.of(context).size.width *
+                                  AppSizes().widgetSize.largeBorderRadius),
+                        ),
                       ),
-                    ),
-                    builder: (BuildContext context) {
-                      return showImagePicker(model, "profile");
-                    },
-                  );
+                      builder: (BuildContext context) {
+                        return showImagePicker(model, "profile");
+                      },
+                    );
+                  }
                 },
                 child: Image.asset(AppImages().pngImages.icCamera))),
       ],
@@ -604,90 +620,95 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
             UiSpacer.verticalSpace(space: 0.01, context: context),
             GestureDetector(
               onTap: () {
-                model
-                    .getLocationApi(
-                        viewContext: context, countryId: "", stateId: "")
-                    .then((value) {
-                  if (value == true) {
-                    List<String> tempCountryList = model.countryList;
+                if (model.isBusy == false) {
+                  model
+                      .getLocationApi(
+                          viewContext: context, countryId: "", stateId: "")
+                      .then((value) {
+                    if (value == true) {
+                      List<String> tempCountryList = model.countryList;
 
-                    showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      builder: (cxt) {
-                        return StatefulBuilder(
-                            builder: (context, setModelState) {
-                          return Padding(
-                              padding: EdgeInsets.only(
-                                  bottom:
-                                      MediaQuery.of(context).viewInsets.bottom),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Container(
-                                    height: screenHeight * 0.06,
-                                    width: screenWidth,
-                                    alignment: Alignment.bottomLeft,
-                                    decoration: BoxDecoration(
-                                        border: Border.all(
-                                            color: AppColor.disableColor)),
-                                    child: TextFormField(
-                                      maxLines: 1,
-                                      maxLength: 60,
-                                      onChanged: (value) {
-                                        tempCountryList = model.countryList
-                                            .where((element) => element
-                                                .toLowerCase()
-                                                .contains(
-                                                    value.trim().toLowerCase()))
-                                            .toList();
-                                        setModelState(() {});
-                                      },
-                                      textAlign: TextAlign.start,
-                                      decoration: const InputDecoration(
-                                          hintText: "Search country...",
-                                          counterText: "",
-                                          border: InputBorder.none,
-                                          prefixIcon: Icon(Icons.search)),
-                                    ),
-                                  ),
-                                  UiSpacer.verticalSpace(
-                                      context: context, space: 0.02),
-                                  SizedBox(
-                                    height: screenHeight * 0.4,
-                                    child: ListView.builder(
-                                      shrinkWrap: true,
-                                      itemCount: tempCountryList.length,
-                                      itemBuilder: (context, index) => ListTile(
-                                        onTap: () {
-                                          if (model
-                                                  .countryNameController.text !=
-                                              tempCountryList[index]) {
-                                            model.countryNameController.text =
-                                                tempCountryList[index];
-                                            model.stateNameController.clear();
-                                            model.cityNameController.clear();
-                                          } else {
-                                            model.countryNameController.text =
-                                                tempCountryList[index];
-                                          }
-
-                                          Navigator.pop(cxt);
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (cxt) {
+                          return StatefulBuilder(
+                              builder: (context, setModelState) {
+                            return Padding(
+                                padding: EdgeInsets.only(
+                                    bottom: MediaQuery.of(context)
+                                        .viewInsets
+                                        .bottom),
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      height: screenHeight * 0.06,
+                                      width: screenWidth,
+                                      alignment: Alignment.bottomLeft,
+                                      decoration: BoxDecoration(
+                                          border: Border.all(
+                                              color: AppColor.disableColor)),
+                                      child: TextFormField(
+                                        maxLines: 1,
+                                        maxLength: 60,
+                                        onChanged: (value) {
+                                          tempCountryList = model.countryList
+                                              .where((element) => element
+                                                  .toLowerCase()
+                                                  .contains(value
+                                                      .trim()
+                                                      .toLowerCase()))
+                                              .toList();
+                                          setModelState(() {});
                                         },
-                                        title: Text(tempCountryList[index]),
+                                        textAlign: TextAlign.start,
+                                        decoration: const InputDecoration(
+                                            hintText: "Search country...",
+                                            counterText: "",
+                                            border: InputBorder.none,
+                                            prefixIcon: Icon(Icons.search)),
                                       ),
                                     ),
-                                  )
-                                ],
-                              ));
-                        });
-                      },
-                    ).whenComplete(() {
-                      onCreateProfileValueChanged(model);
-                      setState(() {});
-                    });
-                  }
-                });
+                                    UiSpacer.verticalSpace(
+                                        context: context, space: 0.02),
+                                    SizedBox(
+                                      height: screenHeight * 0.4,
+                                      child: ListView.builder(
+                                        shrinkWrap: true,
+                                        itemCount: tempCountryList.length,
+                                        itemBuilder: (context, index) =>
+                                            ListTile(
+                                          onTap: () {
+                                            if (model.countryNameController
+                                                    .text !=
+                                                tempCountryList[index]) {
+                                              model.countryNameController.text =
+                                                  tempCountryList[index];
+                                              model.stateNameController.clear();
+                                              model.cityNameController.clear();
+                                            } else {
+                                              model.countryNameController.text =
+                                                  tempCountryList[index];
+                                            }
+
+                                            Navigator.pop(cxt);
+                                          },
+                                          title: Text(tempCountryList[index]),
+                                        ),
+                                      ),
+                                    )
+                                  ],
+                                ));
+                          });
+                        },
+                      ).whenComplete(() {
+                        onCreateProfileValueChanged(model);
+                        setState(() {});
+                      });
+                    }
+                  });
+                }
               },
               child: Container(
                 height: MediaQuery.of(context).size.height * 0.06,
@@ -723,96 +744,99 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
             UiSpacer.verticalSpace(space: 0.01, context: context),
             GestureDetector(
               onTap: () {
-                if (model.countryNameController.text.isEmpty) {
-                  GlobalUtility.showToast(context, "Please Select country");
-                } else {
-                  model
-                      .getLocationApi(
-                          viewContext: context,
-                          countryId: model.countryNameController.text,
-                          stateId: "")
-                      .then((value) {
-                    if (value == true) {
-                      List<String> tempStateList = model.stateList;
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        // constraints:
-                        //     BoxConstraints(maxHeight: screenHeight * 0.4),
-                        builder: (cxt) {
-                          return StatefulBuilder(
-                              builder: (context, setModelState) {
-                            return Padding(
-                                padding: EdgeInsets.only(
-                                    bottom: MediaQuery.of(context)
-                                        .viewInsets
-                                        .bottom),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    // search field
-                                    Container(
-                                      height: screenHeight * 0.06,
-                                      width: screenWidth,
-                                      alignment: Alignment.bottomLeft,
-                                      decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: AppColor.disableColor)),
-                                      child: TextFormField(
-                                        maxLines: 1,
-                                        maxLength: 60,
-                                        textAlign: TextAlign.start,
-                                        onChanged: (value) {
-                                          tempStateList = model.stateList
-                                              .where((element) => element
-                                                  .toLowerCase()
-                                                  .contains(value
-                                                      .trim()
-                                                      .toLowerCase()))
-                                              .toList();
-                                          setModelState(() {});
-                                        },
-                                        decoration: const InputDecoration(
-                                            hintText: "Search state...",
-                                            counterText: "",
-                                            border: InputBorder.none,
-                                            prefixIcon: Icon(Icons.search)),
-                                      ),
-                                    ),
-                                    UiSpacer.verticalSpace(
-                                        context: context, space: 0.02),
-
-                                    SizedBox(
-                                      height: screenHeight * 0.4,
-                                      child: ListView.builder(
-                                        shrinkWrap: true,
-                                        itemCount: tempStateList.length,
-                                        itemBuilder: (context, index) =>
-                                            ListTile(
-                                          onTap: () {
-                                            if (model
-                                                    .stateNameController.text !=
-                                                tempStateList[index]) {
-                                              model.stateNameController.text =
-                                                  tempStateList[index];
-                                              model.cityNameController.clear();
-                                            }
-                                            Navigator.pop(cxt);
+                if (model.isBusy == false) {
+                  if (model.countryNameController.text.isEmpty) {
+                    GlobalUtility.showToast(context, "Please Select country");
+                  } else {
+                    model
+                        .getLocationApi(
+                            viewContext: context,
+                            countryId: model.countryNameController.text,
+                            stateId: "")
+                        .then((value) {
+                      if (value == true) {
+                        List<String> tempStateList = model.stateList;
+                        showModalBottomSheet(
+                          context: context,
+                          isScrollControlled: true,
+                          // constraints:
+                          //     BoxConstraints(maxHeight: screenHeight * 0.4),
+                          builder: (cxt) {
+                            return StatefulBuilder(
+                                builder: (context, setModelState) {
+                              return Padding(
+                                  padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(context)
+                                          .viewInsets
+                                          .bottom),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      // search field
+                                      Container(
+                                        height: screenHeight * 0.06,
+                                        width: screenWidth,
+                                        alignment: Alignment.bottomLeft,
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: AppColor.disableColor)),
+                                        child: TextFormField(
+                                          maxLines: 1,
+                                          maxLength: 60,
+                                          textAlign: TextAlign.start,
+                                          onChanged: (value) {
+                                            tempStateList = model.stateList
+                                                .where((element) => element
+                                                    .toLowerCase()
+                                                    .contains(value
+                                                        .trim()
+                                                        .toLowerCase()))
+                                                .toList();
+                                            setModelState(() {});
                                           },
-                                          title: Text(tempStateList[index]),
+                                          decoration: const InputDecoration(
+                                              hintText: "Search state...",
+                                              counterText: "",
+                                              border: InputBorder.none,
+                                              prefixIcon: Icon(Icons.search)),
                                         ),
                                       ),
-                                    )
-                                  ],
-                                ));
-                          });
-                        },
-                      ).whenComplete(() {
-                        onCreateProfileValueChanged(model);
-                        setState(() {});
-                      });
-                    }
-                  });
+                                      UiSpacer.verticalSpace(
+                                          context: context, space: 0.02),
+
+                                      SizedBox(
+                                        height: screenHeight * 0.4,
+                                        child: ListView.builder(
+                                          shrinkWrap: true,
+                                          itemCount: tempStateList.length,
+                                          itemBuilder: (context, index) =>
+                                              ListTile(
+                                            onTap: () {
+                                              if (model.stateNameController
+                                                      .text !=
+                                                  tempStateList[index]) {
+                                                model.stateNameController.text =
+                                                    tempStateList[index];
+                                                model.cityNameController
+                                                    .clear();
+                                              }
+                                              Navigator.pop(cxt);
+                                            },
+                                            title: Text(tempStateList[index]),
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ));
+                            });
+                          },
+                        ).whenComplete(() {
+                          onCreateProfileValueChanged(model);
+                          setState(() {});
+                        });
+                      }
+                    });
+                  }
                 }
               },
               child: Container(
@@ -849,93 +873,95 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
             UiSpacer.verticalSpace(space: 0.01, context: context),
             GestureDetector(
               onTap: () {
-                if (model.countryNameController.text.isEmpty) {
-                  GlobalUtility.showToast(context, "Please Select country");
-                } else if (model.stateNameController.text.isEmpty) {
-                  GlobalUtility.showToast(context, "Please Select State");
-                } else {
-                  model
-                      .getLocationApi(
-                          viewContext: context,
-                          countryId: model.countryNameController.text,
-                          stateId: model.stateNameController.text)
-                      .then((value) {
-                    if (value == true) {
-                      List<String> tempCityList = model.cityList;
+                if (model.isBusy == false) {
+                  if (model.countryNameController.text.isEmpty) {
+                    GlobalUtility.showToast(context, "Please Select country");
+                  } else if (model.stateNameController.text.isEmpty) {
+                    GlobalUtility.showToast(context, "Please Select State");
+                  } else {
+                    model
+                        .getLocationApi(
+                            viewContext: context,
+                            countryId: model.countryNameController.text,
+                            stateId: model.stateNameController.text)
+                        .then((value) {
+                      if (value == true) {
+                        List<String> tempCityList = model.cityList;
 
-                      showModalBottomSheet(
-                        context: context,
-                        enableDrag: true,
-                        isScrollControlled: true,
-                        builder: (cxt) {
-                          return StatefulBuilder(
-                              builder: (context, setModelState) {
-                            return Padding(
-                                padding: EdgeInsets.only(
-                                    bottom: MediaQuery.of(context)
-                                        .viewInsets
-                                        .bottom),
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Container(
-                                      height: screenHeight * 0.06,
-                                      width: screenWidth,
-                                      alignment: Alignment.bottomLeft,
-                                      decoration: BoxDecoration(
-                                          border: Border.all(
-                                              color: AppColor.disableColor)),
-                                      child: TextFormField(
-                                        maxLines: 1,
-                                        maxLength: 60,
-                                        onChanged: (value) {
-                                          tempCityList = model.cityList
-                                              .where((element) => element
-                                                  .toLowerCase()
-                                                  .contains(value
-                                                      .trim()
-                                                      .toLowerCase()))
-                                              .toList();
-                                          setModelState(() {});
-                                        },
-                                        textAlign: TextAlign.start,
-                                        decoration: const InputDecoration(
-                                            hintText: "Search city...",
-                                            counterText: "",
-                                            border: InputBorder.none,
-                                            prefixIcon: Icon(Icons.search)),
-                                      ),
-                                    ),
-                                    UiSpacer.verticalSpace(
-                                        context: context, space: 0.02),
-                                    SizedBox(
-                                      height: screenHeight * 0.4,
-                                      child: ListView.builder(
-                                        physics:
-                                            const AlwaysScrollableScrollPhysics(),
-                                        shrinkWrap: true,
-                                        itemCount: tempCityList.length,
-                                        itemBuilder: (context, index) =>
-                                            ListTile(
-                                          onTap: () {
-                                            model.cityNameController.text =
-                                                tempCityList[index];
-                                            Navigator.pop(cxt);
+                        showModalBottomSheet(
+                          context: context,
+                          enableDrag: true,
+                          isScrollControlled: true,
+                          builder: (cxt) {
+                            return StatefulBuilder(
+                                builder: (context, setModelState) {
+                              return Padding(
+                                  padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(context)
+                                          .viewInsets
+                                          .bottom),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Container(
+                                        height: screenHeight * 0.06,
+                                        width: screenWidth,
+                                        alignment: Alignment.bottomLeft,
+                                        decoration: BoxDecoration(
+                                            border: Border.all(
+                                                color: AppColor.disableColor)),
+                                        child: TextFormField(
+                                          maxLines: 1,
+                                          maxLength: 60,
+                                          onChanged: (value) {
+                                            tempCityList = model.cityList
+                                                .where((element) => element
+                                                    .toLowerCase()
+                                                    .contains(value
+                                                        .trim()
+                                                        .toLowerCase()))
+                                                .toList();
+                                            setModelState(() {});
                                           },
-                                          title: Text(tempCityList[index]),
+                                          textAlign: TextAlign.start,
+                                          decoration: const InputDecoration(
+                                              hintText: "Search city...",
+                                              counterText: "",
+                                              border: InputBorder.none,
+                                              prefixIcon: Icon(Icons.search)),
                                         ),
                                       ),
-                                    )
-                                  ],
-                                ));
-                          });
-                        },
-                      ).whenComplete(() {
-                        onCreateProfileValueChanged(model);
-                        setState(() {});
-                      });
-                    }
-                  });
+                                      UiSpacer.verticalSpace(
+                                          context: context, space: 0.02),
+                                      SizedBox(
+                                        height: screenHeight * 0.4,
+                                        child: ListView.builder(
+                                          physics:
+                                              const AlwaysScrollableScrollPhysics(),
+                                          shrinkWrap: true,
+                                          itemCount: tempCityList.length,
+                                          itemBuilder: (context, index) =>
+                                              ListTile(
+                                            onTap: () {
+                                              model.cityNameController.text =
+                                                  tempCityList[index];
+                                              Navigator.pop(cxt);
+                                            },
+                                            title: Text(tempCityList[index]),
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ));
+                            });
+                          },
+                        ).whenComplete(() {
+                          onCreateProfileValueChanged(model);
+                          setState(() {});
+                        });
+                      }
+                    });
+                  }
                 }
               },
               child: Container(
@@ -1005,7 +1031,9 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                       ),
                       InkWell(
                           onTap: () {
-                            model.decreaseHostValue("year");
+                            if (model.isBusy == false) {
+                              model.decreaseHostValue("year");
+                            }
                           },
                           child: SizedBox(
                             height: screenHeight * 0.04,
@@ -1018,7 +1046,9 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                           )),
                       InkWell(
                           onTap: () {
-                            model.increaseHostValue("year");
+                            if (model.isBusy == false) {
+                              model.increaseHostValue("year");
+                            }
                           },
                           child: SizedBox(
                             height: screenHeight * 0.04,
@@ -1096,7 +1126,9 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                       ),
                       InkWell(
                           onTap: () {
-                            model.decreaseHostValue("month");
+                            if (model.isBusy == false) {
+                              model.decreaseHostValue("month");
+                            }
                           },
                           child: SizedBox(
                             height: screenHeight * 0.04,
@@ -1109,7 +1141,9 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                           )),
                       InkWell(
                           onTap: () {
-                            model.increaseHostValue("month");
+                            if (model.isBusy == false) {
+                              model.increaseHostValue("month");
+                            }
                           },
                           child: SizedBox(
                             height: screenHeight * 0.04,
@@ -1189,10 +1223,12 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                       AppSizes().fontSize.simpleFontSize),
             ),
             value: model.selectedPronounValue,
-            onChanged: (value) {
-              model.selectedPronounValue = value;
-              model.notifyListeners();
-            },
+            onChanged: model.isBusy == true
+                ? null
+                : (value) {
+                    model.selectedPronounValue = value;
+                    model.notifyListeners();
+                  },
             style: TextStyle(
                 color: AppColor.lightBlack,
                 fontFamily: AppFonts.nunitoRegular,
@@ -1249,7 +1285,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
                 : model.activitiesList.any((activity) => activity.isSelect)
                     ? model.activitiesList.last.id.toString()
                     : null,
-            onChanged: (value) {},
+            onChanged: model.isBusy == true ? null : (value) {},
             style: TextStyle(
                 color: AppColor.lightBlack,
                 fontFamily: AppFonts.nunitoRegular,
@@ -1359,6 +1395,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
             onChanged: (value) {
               onCreateProfileValueChanged(model);
             },
+            enabled: model.isBusy == false ? true : false,
             textAlignVertical: TextAlignVertical.center,
             textAlign: TextAlign.start,
             style: TextStyle(
@@ -1488,6 +1525,7 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
           onChanged: (value) {
             onCreateProfileValueChanged(model);
           },
+          enabled: model.isBusy == false ? true : false,
           textAlignVertical: TextAlignVertical.center,
           textAlign: TextAlign.start,
           controller: model.bioController,
@@ -1682,8 +1720,10 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
               child: Checkbox(
                 value: model.checkBoxVal,
                 onChanged: (v) {
-                  model.checkBoxVal = v!;
-                  model.notifyListeners();
+                  if (model.isBusy == false) {
+                    model.checkBoxVal = v!;
+                    model.notifyListeners();
+                  }
                 },
                 side: BorderSide(color: AppColor.hintTextColor),
                 shape: RoundedRectangleBorder(
@@ -1711,25 +1751,27 @@ class _CreateProfileScreenState extends State<CreateTouristProfileScreen> {
 
   /// submit button
   Widget buttonContainer(CreateProfileViewModel model) {
-    return model.isBusy == false
-        ? Container(
-            padding: EdgeInsets.only(bottom: screenHeight * 0.02),
-            child: CommonButton.commonBoldTextButton(
-                context: context,
-                text: AppStrings().submit,
-                onPressed: () {
-                  if (validate(model)) {
-                    model.createGuideProfile(context);
-                  }
-                },
-                isButtonEnable: model.isSubmitProfileButtonEnable),
-          )
-        : SizedBox(
+    return Container(
+      padding: EdgeInsets.only(bottom: screenHeight * 0.02),
+      child: model.isBusy == false
+          ? CommonButton.commonBoldTextButton(
+              context: context,
+              text: AppStrings().submit,
+              onPressed: () {
+                if (validate(model)) {
+                  model.createGuideProfile(context);
+                }
+              },
+              isButtonEnable: model.isSubmitProfileButtonEnable)
+          : CommonButton.commonLoadingButton(context: context),
+    )
+        /*SizedBox(
             width: screenWidth * 0.1,
             child: Center(
               child: CircularProgressIndicator(color: AppColor.appthemeColor),
             ),
-          );
+          )*/
+        ;
   }
 
   onCreateProfileValueChanged(CreateProfileViewModel model) {

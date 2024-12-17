@@ -8,12 +8,11 @@ import 'package:Siesta/view/notification_screen/notification_page.dart';
 import 'package:Siesta/view/travellerView/bookings/booking_page.dart';
 import 'package:Siesta/view/travellerView/home/drawer_page.dart';
 import 'package:Siesta/view/travellerView/message_screen/message_page.dart';
+import 'package:Siesta/view/travellerView/profile/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../find_guide/find_experience_screen.dart';
-import '../find_guide/find_guide_page.dart';
-import '../itinerary/itineary_page.dart';
 
 // ignore: must_be_immutable
 class TravellerHomePage extends StatefulWidget {
@@ -38,7 +37,8 @@ List<Widget> _widgetOptions = <Widget>[
   const FindExperienceScreen(),
   const BookingPage(),
   MessagePage(fromWhere: fromWhere),
-  ItineraryPage(fromWhere: ""),
+  // ItineraryPage(fromWhere: ""),
+  ProfilePage(),
 ];
 setWidgetOptions() {
   if (fromWhere == "chat_with_guide") {
@@ -48,7 +48,8 @@ setWidgetOptions() {
       const FindExperienceScreen(),
       const BookingPage(),
       MessagePage(fromWhere: fromWhere),
-      ItineraryPage(fromWhere: ""),
+      // ItineraryPage(fromWhere: ""),
+      ProfilePage(),
     ];
   } else {
     _widgetOptions.clear();
@@ -57,7 +58,8 @@ setWidgetOptions() {
       const FindExperienceScreen(),
       const BookingPage(),
       MessagePage(fromWhere: ""),
-      ItineraryPage(fromWhere: ""),
+      // ItineraryPage(fromWhere: ""),
+      ProfilePage(),
     ];
   }
 }
@@ -80,7 +82,7 @@ class _TravellerHomePageState extends State<TravellerHomePage> {
       } else if (selectedTab == 2) {
         titleText = AppStrings().messages;
       } else if (selectedTab == 3) {
-        titleText = AppStrings().itineraryText;
+        titleText = AppStrings().profile;
       }
     });
   }
@@ -198,13 +200,13 @@ class _TravellerHomePageState extends State<TravellerHomePage> {
         BottomNavigationBarItem(
           icon: Image.asset(
             selectedTab == 3
-                ? AppImages().pngImages.icitinary
-                : AppImages().pngImages.icItineraryUnselected,
+                ? AppImages().pngImages.icSelectedProfile
+                : AppImages().pngImages.icProfile,
             width: screenWidth * AppSizes().widgetSize.bottomBarIconHeight,
             height: screenWidth * AppSizes().widgetSize.bottomBarIconHeight,
             fit: BoxFit.fill,
           ),
-          label: AppStrings().itineraryText,
+          label: AppStrings().profile,
         ),
       ],
       selectedIconTheme: IconThemeData(color: AppColor.appthemeColor),
@@ -234,7 +236,7 @@ class _TravellerHomePageState extends State<TravellerHomePage> {
           } else if (selectedTab == 2) {
             titleText = AppStrings().messages;
           } else if (selectedTab == 3) {
-            titleText = AppStrings().itineraryText;
+            titleText = AppStrings().profile;
           }
         });
       },

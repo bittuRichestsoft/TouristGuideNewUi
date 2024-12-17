@@ -137,47 +137,72 @@ class GuideUpdateProfileModel extends BaseViewModel implements Initialisable {
         notifyListeners();
 
         PreferenceUtil().updateUserDataGuide(
-            getTravellerProfileResponse!.data!.name!,
-            getTravellerProfileResponse!.data!.lastName!,
-            getTravellerProfileResponse!.data!.phone.toString(),
-            getTravellerProfileResponse!.data!.userDetail!.profilePicture!,
-            getTravellerProfileResponse!.data!.pincode.toString(),
-            getTravellerProfileResponse!.data!.userDetail!.price.toString(),
-            getTravellerProfileResponse!.data!.country.toString(),
-            getTravellerProfileResponse!.data!.state.toString(),
-            getTravellerProfileResponse!.data!.city.toString(),
-            getTravellerProfileResponse!.data!.userDetail!.bio.toString());
-        countryCode = getTravellerProfileResponse!.data!.countryCode!;
+            getTravellerProfileResponse!.data!.travellerDetails!.name!,
+            getTravellerProfileResponse!.data!.travellerDetails!.lastName!,
+            getTravellerProfileResponse!.data!.travellerDetails!.phone
+                .toString(),
+            getTravellerProfileResponse!
+                .data!.travellerDetails!.userDetail!.profilePicture!,
+            getTravellerProfileResponse!.data!.travellerDetails!.pincode
+                .toString(),
+            getTravellerProfileResponse!
+                .data!.travellerDetails!.userDetail!.price
+                .toString(),
+            getTravellerProfileResponse!.data!.travellerDetails!.country
+                .toString(),
+            getTravellerProfileResponse!.data!.travellerDetails!.state
+                .toString(),
+            getTravellerProfileResponse!.data!.travellerDetails!.city
+                .toString(),
+            getTravellerProfileResponse!.data!.travellerDetails!.userDetail!.bio
+                .toString());
+        countryCode =
+            getTravellerProfileResponse!.data!.travellerDetails!.countryCode!;
         notifyListeners();
 
         await PreferenceUtil().setGuideNotificationSetting(
-            getTravellerProfileResponse!.data!.notificationStatus.toString());
+            getTravellerProfileResponse!
+                .data!.travellerDetails!.notificationStatus
+                .toString());
         // await  PreferenceUtil().setIdProof(document);
 
         await PreferenceUtil().setGuideAvailability(
-            getTravellerProfileResponse!.data!.availability == 1 ? "1" : "0");
+            getTravellerProfileResponse!.data!.travellerDetails!.availability ==
+                    1
+                ? "1"
+                : "0");
 
-        username = getTravellerProfileResponse!.data!.name!;
-        profileImage =
-            getTravellerProfileResponse!.data!.userDetail!.profilePicture!;
-        firstNameController.text = getTravellerProfileResponse!.data!.name!;
-        lastNameController.text = getTravellerProfileResponse!.data!.lastName!;
-        contactController.text =
-            getTravellerProfileResponse!.data!.phone.toString();
-        pincodeController.text =
-            getTravellerProfileResponse!.data!.pincode.toString();
+        username = getTravellerProfileResponse!.data!.travellerDetails!.name!;
+        profileImage = getTravellerProfileResponse!
+            .data!.travellerDetails!.userDetail!.profilePicture!;
+        firstNameController.text =
+            getTravellerProfileResponse!.data!.travellerDetails!.name!;
+        lastNameController.text =
+            getTravellerProfileResponse!.data!.travellerDetails!.lastName!;
+        contactController.text = getTravellerProfileResponse!
+            .data!.travellerDetails!.phone
+            .toString();
+        pincodeController.text = getTravellerProfileResponse!
+            .data!.travellerDetails!.pincode
+            .toString();
 
-        priceController.text =
-            getTravellerProfileResponse!.data!.userDetail!.price.toString();
-        bioController.text =
-            getTravellerProfileResponse!.data!.userDetail!.bio.toString();
+        priceController.text = getTravellerProfileResponse!
+            .data!.travellerDetails!.userDetail!.price
+            .toString();
+        bioController.text = getTravellerProfileResponse!
+            .data!.travellerDetails!.userDetail!.bio
+            .toString();
 
         isEnableAvailbility =
-            getTravellerProfileResponse!.data!.availability == 1 ? true : false;
-        isEnableNotification =
-            getTravellerProfileResponse!.data!.notificationStatus == 1
+            getTravellerProfileResponse!.data!.travellerDetails!.availability ==
+                    1
                 ? true
                 : false;
+        isEnableNotification = getTravellerProfileResponse!
+                    .data!.travellerDetails!.notificationStatus ==
+                1
+            ? true
+            : false;
 
         notifyListeners();
       } else if (status == 400) {

@@ -62,6 +62,8 @@ class GalleryDetails {
   String? location;
   int? likesCount;
   String? createdAt;
+  double? latitude;
+  double? longitude;
   List<GalleryMedia>? galleryMedia;
 
   GalleryDetails(
@@ -72,6 +74,8 @@ class GalleryDetails {
       this.location,
       this.likesCount,
       this.createdAt,
+      this.latitude,
+      this.longitude,
       this.galleryMedia});
 
   GalleryDetails.fromJson(Map<String, dynamic> json) {
@@ -82,6 +86,12 @@ class GalleryDetails {
     location = json['location'];
     likesCount = json['likesCount'];
     createdAt = json['createdAt'];
+    latitude = json['latitude'] != null
+        ? double.parse(json['latitude'].toString())
+        : null;
+    longitude = json['longitude'] != null
+        ? double.parse(json['longitude'].toString())
+        : null;
     if (json['gallery_media'] != null) {
       galleryMedia = <GalleryMedia>[];
       json['gallery_media'].forEach((v) {

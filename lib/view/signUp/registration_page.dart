@@ -122,9 +122,11 @@ class _SignUpPageState extends State<SignUpPage> {
         thumbColor: selectedThumbColor[model.selectedSegment]!,
         groupValue: model.selectedSegment,
         onValueChanged: (Sky? value) {
-          setState(() {
-            model.selectedSegment = value;
-          });
+          if (model.isBusy == false) {
+            setState(() {
+              model.selectedSegment = value;
+            });
+          }
         },
         children: <Sky, Widget>{
           Sky.traveller: Padding(
@@ -153,6 +155,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget emailField(RegisterViewModel model) {
     return TextFormField(
       controller: model.emailController,
+      enabled: model.isBusy ? false : true,
       onTap: () {
         model.isPwValShow = false;
         model.notifyListeners();
@@ -193,6 +196,7 @@ class _SignUpPageState extends State<SignUpPage> {
         model.isPwValShow = false;
         model.notifyListeners();
       },
+      enabled: model.isBusy ? false : true,
       textCapitalization: TextCapitalization.words,
       // onChanged: onTextFieldValueChanged(model),
       textAlignVertical: TextAlignVertical.center,
@@ -230,6 +234,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget lastNameField(RegisterViewModel model) {
     return TextFormField(
       controller: model.lastNameController,
+      enabled: model.isBusy ? false : true,
       onTap: () {
         model.isPwValShow = false;
         model.notifyListeners();
@@ -301,6 +306,7 @@ class _SignUpPageState extends State<SignUpPage> {
               model.isPwValShow = true;
               model.notifyListeners();
             },
+            enabled: model.isBusy ? false : true,
             obscureText: passwordSuffixVisibility,
             textAlignVertical: TextAlignVertical.center,
             textAlign: TextAlign.start,
@@ -382,6 +388,7 @@ class _SignUpPageState extends State<SignUpPage> {
     return TextFormField(
       controller: model.confirmPasswordController,
       obscureText: rePasswordSuffixVisibility,
+      enabled: model.isBusy ? false : true,
       onTap: () {
         model.isPwValShow = false;
         model.notifyListeners();
@@ -470,13 +477,15 @@ class _SignUpPageState extends State<SignUpPage> {
           child: Checkbox(
             value: model.checkBoxVal,
             onChanged: (v) {
-              setState(() {
-                model.checkBoxVal = v!;
-                model.notifyListeners();
-              });
+              if (model.isBusy == false) {
+                setState(() {
+                  model.checkBoxVal = v!;
+                  model.notifyListeners();
+                });
 
-              model.isPwValShow = false;
-              model.notifyListeners();
+                model.isPwValShow = false;
+                model.notifyListeners();
+              }
             },
             side: BorderSide(color: AppColor.hintTextColor),
             shape:
@@ -525,10 +534,12 @@ class _SignUpPageState extends State<SignUpPage> {
           child: Checkbox(
             value: model.checkPhoneSms,
             onChanged: (v) {
-              setState(() {
-                model.checkPhoneSms = v!;
-                model.notifyListeners();
-              });
+              if (model.isBusy == false) {
+                setState(() {
+                  model.checkPhoneSms = v!;
+                  model.notifyListeners();
+                });
+              }
             },
             side: BorderSide(color: AppColor.hintTextColor),
             shape:
@@ -550,28 +561,31 @@ class _SignUpPageState extends State<SignUpPage> {
 
   Widget signUpButton(RegisterViewModel model) {
     return model.isBusy == false
-        ? CommonButton.commonBoldTextButton(
-            context: context,
-            text: AppStrings().continueText,
-            onPressed: () async {
-              if (validate(model)) {
-                model.generateRandomNumber();
-                if (model.checkBoxVal) {
-                  captchaDialog(model);
-                } else {
-                  GlobalUtility.showToast(context,
-                      "By continuing, you agree to our terms of service and privacy policy");
-                }
-              }
-            },
-            isButtonEnable: true,
-          )
-        : SizedBox(
+            ? CommonButton.commonBoldTextButton(
+                context: context,
+                text: AppStrings().continueText,
+                onPressed: () async {
+                  if (validate(model)) {
+                    model.generateRandomNumber();
+                    if (model.checkBoxVal) {
+                      captchaDialog(model);
+                    } else {
+                      GlobalUtility.showToast(context,
+                          "By continuing, you agree to our terms of service and privacy policy");
+                    }
+                  }
+                },
+                isButtonEnable: true,
+              )
+            : CommonButton.commonLoadingButton(
+                context: context,
+              ) /*SizedBox(
             width: screenWidth * 0.1,
             child: Center(
               child: CircularProgressIndicator(color: AppColor.appthemeColor),
             ),
-          );
+          )*/
+        ;
   }
 
   captchaDialog(RegisterViewModel model) {
@@ -680,6 +694,7 @@ class _SignUpPageState extends State<SignUpPage> {
                               GlobalUtility.showDialogFunction(
                                   context,
                                   confirmationDialog(roleName, () {
+                                    Navigator.pop(context);
                                     model.processSignUp(
                                         context, roleName, model);
                                   }, model));
@@ -895,6 +910,7 @@ class _SignUpPageState extends State<SignUpPage> {
   Widget contactField(RegisterViewModel model) {
     return TextFormField(
       controller: model.userPhoneController,
+      enabled: model.isBusy ? false : true,
       autovalidateMode: AutovalidateMode.onUserInteraction,
       validator: (value) {
         if (value == "" || value == null) {
@@ -937,40 +953,42 @@ class _SignUpPageState extends State<SignUpPage> {
             children: [
               InkWell(
                 onTap: () {
-                  showCountryPicker(
-                    context: context,
-                    showPhoneCode: true,
-                    countryListTheme: CountryListThemeData(
-                      flagSize: 25,
-                      backgroundColor: Colors.white,
-                      textStyle:
-                          const TextStyle(fontSize: 16, color: Colors.blueGrey),
-                      bottomSheetHeight: 500,
-                      borderRadius: const BorderRadius.only(
-                        topLeft: Radius.circular(20.0),
-                        topRight: Radius.circular(20.0),
-                      ),
-                      inputDecoration: InputDecoration(
-                        labelText: 'Search',
-                        hintText: 'Start typing to search',
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide(
-                            color: const Color(0xFF8C98A8).withOpacity(0.2),
+                  if (model.isBusy == false) {
+                    showCountryPicker(
+                      context: context,
+                      showPhoneCode: true,
+                      countryListTheme: CountryListThemeData(
+                        flagSize: 25,
+                        backgroundColor: Colors.white,
+                        textStyle: const TextStyle(
+                            fontSize: 16, color: Colors.blueGrey),
+                        bottomSheetHeight: 500,
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(20.0),
+                          topRight: Radius.circular(20.0),
+                        ),
+                        inputDecoration: InputDecoration(
+                          labelText: 'Search',
+                          hintText: 'Start typing to search',
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderSide: BorderSide(
+                              color: const Color(0xFF8C98A8).withOpacity(0.2),
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                    onSelect: (Country country) {
-                      model.countryCode = '+${country.phoneCode}';
+                      onSelect: (Country country) {
+                        model.countryCode = '+${country.phoneCode}';
 
-                      model.countryCodeIso = country.countryCode;
+                        model.countryCodeIso = country.countryCode;
 
-                      model.notifyListeners();
-                      debugPrint(
-                          "country.phoneCode --- ${country.phoneCode}-- ${country.countryCode}");
-                    },
-                  );
+                        model.notifyListeners();
+                        debugPrint(
+                            "country.phoneCode --- ${country.phoneCode}-- ${country.countryCode}");
+                      },
+                    );
+                  }
                 },
                 child: Row(
                   children: [

@@ -71,6 +71,8 @@ class PostDetails {
   bool? accessibility;
   int? maxPeople;
   int? minPeople;
+  double? latitude;
+  double? longitude;
   String? location;
   String? startingTime;
   String? duration;
@@ -90,34 +92,37 @@ class PostDetails {
   List<PostsLikes>? postsLikes;
   List<PostsActivities>? postsActivities;
 
-  PostDetails(
-      {this.id,
-      this.postType,
-      this.title,
-      this.activities,
-      this.schedule,
-      this.transportType,
-      this.accessibility,
-      this.maxPeople,
-      this.minPeople,
-      this.location,
-      this.startingTime,
-      this.duration,
-      this.meetingPoint,
-      this.dropOffPoint,
-      this.price,
-      this.heroImage,
-      this.description,
-      this.country,
-      this.state,
-      this.city,
-      this.overview,
-      this.createdAt,
-      this.likesCount,
-      this.user,
-      this.postImages,
-      this.postsLikes,
-      this.postsActivities});
+  PostDetails({
+    this.id,
+    this.postType,
+    this.title,
+    this.activities,
+    this.schedule,
+    this.transportType,
+    this.accessibility,
+    this.maxPeople,
+    this.minPeople,
+    this.location,
+    this.startingTime,
+    this.duration,
+    this.meetingPoint,
+    this.dropOffPoint,
+    this.price,
+    this.heroImage,
+    this.description,
+    this.country,
+    this.state,
+    this.city,
+    this.overview,
+    this.createdAt,
+    this.likesCount,
+    this.user,
+    this.postImages,
+    this.postsLikes,
+    this.postsActivities,
+    this.latitude,
+    this.longitude,
+  });
 
   PostDetails.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -143,6 +148,12 @@ class PostDetails {
     overview = json['overview'];
     createdAt = json['createdAt'];
     likesCount = json['likesCount'];
+    latitude = json['latitude'] != null
+        ? double.parse(json['latitude'].toString())
+        : null;
+    longitude = json['longitude'] != null
+        ? double.parse(json['longitude'].toString())
+        : null;
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
     if (json['post_images'] != null) {
       postImages = <PostImages>[];

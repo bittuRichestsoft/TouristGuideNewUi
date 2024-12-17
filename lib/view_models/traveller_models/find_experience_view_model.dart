@@ -298,6 +298,8 @@ class FindExperienceViewModel extends BaseViewModel implements Initialisable {
       }
     } catch (e) {
       debugPrint("$runtimeType error : $e");
+      _status = Status.error;
+      errorMsg = AppStrings.someErrorOccurred;
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
     } finally {
       notifyListeners();

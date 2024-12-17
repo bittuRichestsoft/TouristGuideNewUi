@@ -59,42 +59,48 @@ class RegisterViewModel extends BaseViewModel {
 
   processSignUp(
       BuildContext context, String roleName, RegisterViewModel model) async {
-    if (isVerified == true) {
-      GlobalUtility().showLoader(context);
-      Response? signupResponse =
-          await finishAccountRegistration(context, roleName, model);
-      if (signupResponse != null) {
-        var jsonData = jsonDecode(signupResponse.body);
-        var status = jsonData['statusCode'];
-        var message = jsonData['message'];
-        Navigator.pop(context);
-        if (jsonData != null) {
-          if (status == 200) {
-            model.setBusy(false);
-            GlobalUtility.showDialogFunction(
-                context,
-                WillPopScope(
-                    onWillPop: () async {
-                      return false;
-                    },
-                    child: ApiSuccessDialog(
-                        imagepath: AppImages().pngImages.ivRegisterVerified,
-                        titletext: AppStrings().registerSuccessIns,
-                        buttonheading: AppStrings().Okay,
-                        isPng: true,
-                        fromWhere: 'signUp')));
-          } else if (status == 400) {
-            model.setBusy(false);
-            GlobalUtility.showToast(context, message);
-          } else if (status == 500) {
-            model.setBusy(false);
-            GlobalUtility.showToast(context, message);
+    try {
+      if (isVerified == true) {
+        // GlobalUtility().showLoader(context);
+        setBusy(true);
+        Response? signupResponse =
+            await finishAccountRegistration(context, roleName, model);
+        if (signupResponse != null) {
+          var jsonData = jsonDecode(signupResponse.body);
+          var status = jsonData['statusCode'];
+          var message = jsonData['message'];
+          // Navigator.pop(context);
+          if (jsonData != null) {
+            if (status == 200) {
+              setBusy(false);
+              GlobalUtility.showDialogFunction(
+                  context,
+                  WillPopScope(
+                      onWillPop: () async {
+                        return false;
+                      },
+                      child: ApiSuccessDialog(
+                          imagepath: AppImages().pngImages.ivRegisterVerified,
+                          titletext: AppStrings().registerSuccessIns,
+                          buttonheading: AppStrings().Okay,
+                          isPng: true,
+                          fromWhere: 'signUp')));
+            } else if (status == 400) {
+              model.setBusy(false);
+              GlobalUtility.showToast(context, message);
+            } else if (status == 500) {
+              model.setBusy(false);
+              GlobalUtility.showToast(context, message);
+            }
           }
-          notifyListeners();
+        } else {
+          GlobalUtility.showToast(context, "Not Verified.");
         }
-      } else {
-        GlobalUtility.showToast(context, "Not Verified.");
       }
+    } catch (e) {
+    } finally {
+      notifyListeners();
+      setBusy(false);
     }
   }
 

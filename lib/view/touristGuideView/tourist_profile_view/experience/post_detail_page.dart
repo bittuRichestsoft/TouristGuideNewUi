@@ -713,7 +713,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
             heroImage: model.similarExperienceList[index].heroImage ?? "",
             title: model.similarExperienceList[index].title ?? "",
             avgRating:
-                model.similarExperienceList[index].user!.avgRating ?? "0",
+                model.similarExperienceList[index].user?.avgRating ?? "0",
             price: (model.similarExperienceList[index].price ?? "0").toString(),
             duration: model.similarExperienceList[index].duration ?? "",
           ),

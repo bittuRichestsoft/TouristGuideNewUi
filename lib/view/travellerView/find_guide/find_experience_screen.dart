@@ -45,43 +45,51 @@ class _FindExperienceScreenState extends State<FindExperienceScreen> {
               model.isPlaceListShow = false;
               model.notifyListeners();
             },
-            child: Scaffold(
-              backgroundColor: AppColor.whiteColor,
-              body: model.hasError
-                  ? CommonWidgets()
-                      .inAppErrorWidget(model.modelError.toString(), () {
-                      model.initialise();
-                    }, context: context)
-                  : model.initialised == false
-                      ? CommonWidgets().inPageLoader()
-                      : Column(
-                          children: [
-                            // filter view
-                            filterView(model),
+            child: RefreshIndicator(
+              color: AppColor.appthemeColor,
+              onRefresh: () async {
+                model.pageNo = 1;
+                model.initialise();
+              },
+              child: Scaffold(
+                backgroundColor: AppColor.whiteColor,
+                body: model.hasError
+                    ? CommonWidgets()
+                        .inAppErrorWidget(model.modelError.toString(), () {
+                        model.initialise();
+                      }, context: context)
+                    : model.initialised == false
+                        ? CommonWidgets().inPageLoader()
+                        : Column(
+                            children: [
+                              // filter view
+                              filterView(model),
 
-                            // tab view
-                            tabBarView(model),
-                            UiSpacer.verticalSpace(
-                                context: context, space: 0.02),
+                              // tab view
+                              tabBarView(model),
+                              UiSpacer.verticalSpace(
+                                  context: context, space: 0.02),
 
-                            // listing or map
-                            model.status == Status.loading
-                                ? Expanded(
-                                    child: CommonWidgets().inPageLoader())
-                                : model.status == Status.error
-                                    ? Expanded(
-                                        child: CommonWidgets().inAppErrorWidget(
-                                            context: context,
-                                            model.errorMsg, () {
-                                          model.pageNo = 1;
-                                          model.getSearchExperienceAPI();
-                                        }),
-                                      )
-                                    : model.tabVal == CustomTabValue.list
-                                        ? Expanded(child: listView(model))
-                                        : Expanded(child: mapView(model)),
-                          ],
-                        ),
+                              // listing or map
+                              model.status == Status.loading
+                                  ? Expanded(
+                                      child: CommonWidgets().inPageLoader())
+                                  : model.status == Status.error
+                                      ? Expanded(
+                                          child: CommonWidgets()
+                                              .inAppErrorWidget(
+                                                  context: context,
+                                                  model.errorMsg, () {
+                                            model.pageNo = 1;
+                                            model.getSearchExperienceAPI();
+                                          }),
+                                        )
+                                      : model.tabVal == CustomTabValue.list
+                                          ? Expanded(child: listView(model))
+                                          : Expanded(child: mapView(model)),
+                            ],
+                          ),
+              ),
             ),
           );
         });
@@ -326,7 +334,7 @@ class _FindExperienceScreenState extends State<FindExperienceScreen> {
                 id: (model.experienceList[index].id ?? "0").toString(),
                 heroImage: model.experienceList[index].heroImage ?? "",
                 title: model.experienceList[index].title ?? "",
-                avgRating: model.experienceList[index].user!.avgRating ?? "0",
+                avgRating: model.experienceList[index].user?.avgRating ?? "0",
                 price: (model.experienceList[index].price ?? "0").toString(),
                 duration: model.experienceList[index].duration ?? "",
               );
@@ -728,7 +736,7 @@ class _FindExperienceScreenState extends State<FindExperienceScreen> {
                             ),
                             RatingBar.builder(
                               initialRating: tempRatingValue,
-                              minRating: 1,
+                              minRating: 0,
                               direction: Axis.horizontal,
                               allowHalfRating: true,
                               itemCount: 5,

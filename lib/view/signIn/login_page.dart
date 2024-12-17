@@ -260,12 +260,12 @@ class _LoginPageState extends State<LoginPage> {
               }
             },
             isButtonEnable: model.isLoginButtonEnable)
-        : SizedBox(
+        : CommonButton.commonLoadingButton(context: context)/*SizedBox(
             width: screenWidth * 0.1,
             child: Center(
               child: CircularProgressIndicator(color: AppColor.appthemeColor),
             ),
-          );
+          )*/;
   }
 
   Widget donotHaveAccount() {

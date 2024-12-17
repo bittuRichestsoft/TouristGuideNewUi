@@ -160,53 +160,57 @@ class CreateProfileViewModel extends BaseViewModel implements Initialisable {
   }
 
   // TO create Profile - Guide/localite
-  createGuideProfile(BuildContext context) async {
-    if (await GlobalUtility.isConnected()) {
-      setBusy(true);
-      notifyListeners();
+  Future<void> createGuideProfile(BuildContext context) async {
+    try {
+      if (await GlobalUtility.isConnected()) {
+        setBusy(true);
 
-      List<int> selectedActivitiesId =
-          activitiesList.where((e) => e.isSelect).map((e) => e.id).toList();
+        List<int> selectedActivitiesId =
+            activitiesList.where((e) => e.isSelect).map((e) => e.id).toList();
 
-      StreamedResponse apiResponse = await _profileRequest.createGuideProfile(
-        idProof: idProofFile,
-        phone: phoneNumController.text,
-        country: countryNameController.text,
-        state: stateNameController.text,
-        city: cityNameController.text,
-        pincode: pincodeController.text,
-        bio: bioController.text,
-        hostSinceYear: yearValue.toString(),
-        hostSinceMonth: monthValue.toString(),
-        pronounValue: selectedPronounValue,
-        activitiesId: selectedActivitiesId,
-      );
+        StreamedResponse apiResponse = await _profileRequest.createGuideProfile(
+          idProof: idProofFile,
+          phone: phoneNumController.text,
+          country: countryNameController.text,
+          state: stateNameController.text,
+          city: cityNameController.text,
+          pincode: pincodeController.text,
+          bio: bioController.text,
+          hostSinceYear: yearValue.toString(),
+          hostSinceMonth: monthValue.toString(),
+          pronounValue: selectedPronounValue,
+          activitiesId: selectedActivitiesId,
+        );
 
-      apiResponse.stream.transform(utf8.decoder).listen((value) {
-        var jsonData = json.decode(value);
-        String message = jsonData['message'];
-        int status = jsonData['statusCode'];
-        setBusy(false);
-        debugPrint("API RES:-- ${value.toString()}");
-
-        notifyListeners();
-        if (status == 200) {
-          GlobalUtility.showToast(context, message);
-          Navigator.pushNamedAndRemoveUntil(
-              context, AppRoutes.loginPage, (route) => false);
-        } else if (status == 400) {
-          GlobalUtility.showToast(context, message);
-        } else if (apiResponse.statusCode == 403 || status == 403) {
-          GlobalUtility.showToast(context, message);
-        } else if (status == 401) {
+        apiResponse.stream.transform(utf8.decoder).listen((value) {
+          var jsonData = json.decode(value);
+          String message = jsonData['message'];
+          int status = jsonData['statusCode'];
           setBusy(false);
+          debugPrint("API RES:-- ${value.toString()}");
+
           notifyListeners();
-          GlobalUtility.showToast(context, message);
-          GlobalUtility().handleSessionExpire(context);
-        }
-      });
-    } else {
-      GlobalUtility.showToast(context, AppStrings().INTERNET);
+          if (status == 200) {
+            GlobalUtility.showToast(context, message);
+            Navigator.pushNamedAndRemoveUntil(
+                context, AppRoutes.loginPage, (route) => false);
+          } else if (status == 400) {
+            GlobalUtility.showToast(context, message);
+          } else if (apiResponse.statusCode == 403 || status == 403) {
+            GlobalUtility.showToast(context, message);
+          } else if (status == 401) {
+            setBusy(false);
+            notifyListeners();
+            GlobalUtility.showToast(context, message);
+            GlobalUtility().handleSessionExpire(context);
+          }
+        });
+      } else {
+        GlobalUtility.showToast(context, AppStrings().INTERNET);
+      }
+    } catch (e) {
+    } finally {
+      setBusy(false);
     }
   }
 

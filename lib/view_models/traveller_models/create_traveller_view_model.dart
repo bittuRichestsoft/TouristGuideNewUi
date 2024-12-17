@@ -173,6 +173,8 @@ class CreateTravellerViewModel extends BaseViewModel implements Initialisable {
     } catch (e) {
       debugPrint("$runtimeType error : $e");
       GlobalUtility.showToast(context, AppStrings.someErrorOccurred);
+    } finally {
+      setBusy(false);
     }
   }
 

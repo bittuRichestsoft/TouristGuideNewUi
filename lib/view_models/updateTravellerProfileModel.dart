@@ -2,14 +2,15 @@
 
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:Siesta/api_requests/travellerUpdateProfileRequest.dart';
 import 'package:Siesta/app_constants/app_strings.dart';
+import 'package:Siesta/response_pojo/getTravellerProfileResponse.dart';
 import 'package:Siesta/utility/globalUtility.dart';
+import 'package:Siesta/utility/preference_util.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart';
 import 'package:stacked/stacked.dart';
-import 'package:Siesta/utility/preference_util.dart';
-import 'package:Siesta/response_pojo/getTravellerProfileResponse.dart';
 
 import '../api_requests/traveller_find_guide.dart';
 import '../response_pojo/county_pojo.dart';
@@ -113,45 +114,58 @@ class UpdateTravellerProfileViewModel extends BaseViewModel
         PreferenceUtil()
             .setGuideNotificationSetting(notificationStatus.toString());
         PreferenceUtil().updateUserData(
-          getTravellerProfileResponse!.data!.name.toString(),
-          getTravellerProfileResponse!.data!.lastName.toString(),
-          getTravellerProfileResponse!.data!.phone.toString(),
-          getTravellerProfileResponse!.data!.userDetail != null &&
+          getTravellerProfileResponse!.data!.travellerDetails!.name.toString(),
+          getTravellerProfileResponse!.data!.travellerDetails!.lastName
+              .toString(),
+          getTravellerProfileResponse!.data!.travellerDetails!.phone.toString(),
+          getTravellerProfileResponse!.data!.travellerDetails!.userDetail !=
+                      null &&
                   getTravellerProfileResponse!
-                          .data!.userDetail!.profilePicture !=
+                          .data!.travellerDetails!.userDetail!.profilePicture !=
                       null
-              ? getTravellerProfileResponse!.data!.userDetail!.profilePicture!
+              ? getTravellerProfileResponse!
+                  .data!.travellerDetails!.userDetail!.profilePicture!
               : "",
-          getTravellerProfileResponse!.data!.country.toString(),
-          getTravellerProfileResponse!.data!.state.toString(),
-          getTravellerProfileResponse!.data!.city.toString(),
-          getTravellerProfileResponse!.data!.email.toString(),
+          getTravellerProfileResponse!.data!.travellerDetails!.country
+              .toString(),
+          getTravellerProfileResponse!.data!.travellerDetails!.state.toString(),
+          getTravellerProfileResponse!.data!.travellerDetails!.city.toString(),
+          getTravellerProfileResponse!.data!.travellerDetails!.email.toString(),
         );
 
-        countryCode = getTravellerProfileResponse!.data!.countryCode!;
+        countryCode =
+            getTravellerProfileResponse!.data!.travellerDetails!.countryCode!;
         PreferenceUtil().setCountryCode(countryCode);
 
-        username = getTravellerProfileResponse!.data!.name!;
+        username = getTravellerProfileResponse!.data!.travellerDetails!.name!;
 
-        if (getTravellerProfileResponse!.data!.userDetail != null) {
+        if (getTravellerProfileResponse!.data!.travellerDetails!.userDetail !=
+            null) {
           profileImage = getTravellerProfileResponse!
-                      .data!.userDetail!.profilePicture !=
+                      .data!.travellerDetails!.userDetail!.profilePicture !=
                   null
-              ? getTravellerProfileResponse!.data!.userDetail!.profilePicture!
+              ? getTravellerProfileResponse!
+                  .data!.travellerDetails!.userDetail!.profilePicture!
               : "";
         }
-        firstNameController.text =
-            getTravellerProfileResponse!.data!.name.toString();
-        lastNameController.text =
-            getTravellerProfileResponse!.data!.lastName.toString();
-        countryNameController.text =
-            getTravellerProfileResponse!.data!.country.toString();
-        stateNameController.text =
-            getTravellerProfileResponse!.data!.state.toString();
-        cityNameController.text =
-            getTravellerProfileResponse!.data!.city.toString();
-        contactController.text =
-            getTravellerProfileResponse!.data!.phone.toString();
+        firstNameController.text = getTravellerProfileResponse!
+            .data!.travellerDetails!.name
+            .toString();
+        lastNameController.text = getTravellerProfileResponse!
+            .data!.travellerDetails!.lastName
+            .toString();
+        countryNameController.text = getTravellerProfileResponse!
+            .data!.travellerDetails!.country
+            .toString();
+        stateNameController.text = getTravellerProfileResponse!
+            .data!.travellerDetails!.state
+            .toString();
+        cityNameController.text = getTravellerProfileResponse!
+            .data!.travellerDetails!.city
+            .toString();
+        contactController.text = getTravellerProfileResponse!
+            .data!.travellerDetails!.phone
+            .toString();
         isEnableNotification = notificationStatus == 1 ? true : false;
         notifyListeners();
       } else if (status == 400) {

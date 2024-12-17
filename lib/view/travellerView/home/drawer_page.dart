@@ -23,12 +23,13 @@ class DrawerPage extends StatefulWidget {
 class _DrawerPageState extends State<DrawerPage> {
   double screenWidth = 0.0, screenHeight = 0.0;
   List<String> titleString = [
-    AppStrings().findGuide,
+    // AppStrings().findGuide,
+    AppStrings().findExperience,
     AppStrings().bookings,
     AppStrings().messages,
     AppStrings().transactionHistory,
-    AppStrings().itineraries,
-    AppStrings().profile,
+    // AppStrings().itineraries,
+    // AppStrings().profile,
     AppStrings().notification,
     AppStrings().aboutUs,
     AppStrings().logout,
@@ -39,8 +40,8 @@ class _DrawerPageState extends State<DrawerPage> {
     AppImages().pngImages.icBookings,
     AppImages().pngImages.icMessage,
     AppImages().pngImages.icTransaction,
-    AppImages().pngImages.icitinary,
-    AppImages().pngImages.icProfile,
+    // AppImages().pngImages.icitinary,
+    // AppImages().pngImages.icProfile,
     AppImages().pngImages.icNotification,
     AppImages().pngImages.icAbout,
     AppImages().pngImages.icLogout,
@@ -219,26 +220,26 @@ class _DrawerPageState extends State<DrawerPage> {
         Navigator.pushNamed(context, AppRoutes.transactionHistory);
         break;
 
-      case 4:
+      /*case 4:
         Navigator.pushNamed(context, AppRoutes.itineraryPage,
             arguments: "drawer");
         break;
 
       case 5:
         Navigator.pushReplacementNamed(context, AppRoutes.profilePage);
-        break;
+        break;*/
 
-      case 6:
+      case 4:
         Navigator.pushNamed(context, AppRoutes.notificationPage);
         break;
 
-      case 7:
+      case 5:
         Map map = {"from": "drawer", "role": "TRAVELLER"};
         Navigator.pushNamed(context, AppRoutes.commonWebViewPage,
             arguments: map);
         break;
 
-      case 8:
+      case 6:
         GlobalUtility.showDialogFunction(
             context,
             DialogWithTwoButton(

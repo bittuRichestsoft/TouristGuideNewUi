@@ -168,6 +168,7 @@ class _CreatePostPageState extends State<CreatePostPage> {
                               onChange: (value) async {
                                 model.latitude = null;
                                 model.longitude = null;
+                                model.isValidLocation = false;
                                 await model.searchLocation(value);
                               },
                             ),
